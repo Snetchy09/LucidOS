@@ -54,9 +54,731 @@ console.log(
 
 await loadFileSystem();
 
-/* =========================
-   START MENU
-========================= */
+/* ==================================================
+   LUCID APP REGISTRY
+================================================== */
+
+const lucidApps = [
+
+    {
+        id: "files",
+        name: "Files",
+        icon: "📁",
+        launcher: createFilesApp
+    },
+
+    {
+        id: "calculator",
+        name: "Calculator",
+        icon: "🧮",
+        launcher: createCalculator
+    },
+
+    {
+        id: "media",
+        name: "Lucid Media",
+        icon: "🎵",
+        launcher: createMediaApp
+    },
+
+    {
+        id: "notes",
+        name: "Notes",
+        icon: "📝",
+        launcher: createNotes
+    },
+
+    {
+        id: "calendar",
+        name: "Calendar",
+        icon: "📅",
+        launcher: createCalendar
+    },
+
+    {
+        id: "text-editor",
+        name: "Text Editor",
+        icon: "📄",
+        launcher: createTextEditor
+    },
+
+    {
+        id: "terminal",
+        name: "Terminal",
+        icon: "⌘",
+        launcher: createTerminal
+    },
+
+    {
+        id: "browser",
+        name: "Browser",
+        icon: "🌐",
+        launcher: createBrowser
+    },
+
+    {
+        id: "settings",
+        name: "Settings",
+        icon: "⚙️",
+        launcher: createSettingsApp
+    },
+
+    {
+        id: "store",
+        name: "Lucid Store",
+        icon: "🛍️",
+        launcher: createStoreApp
+    }
+
+];
+
+/* ==================================================
+   LUCID DESKTOP
+================================================== */
+
+const DESKTOP_POSITIONS_KEY =
+    "lucid-desktop-positions";
+
+
+let launcherOpen = false;
+
+
+/* ==================================================
+   POSITION STORAGE
+================================================== */
+
+function loadDesktopPositions() {
+
+    try {
+
+        return JSON.parse(
+            localStorage.getItem(
+                DESKTOP_POSITIONS_KEY
+            )
+        ) || {};
+
+    } catch {
+
+        return {};
+
+    }
+
+}
+
+
+function saveDesktopPosition(
+    appId,
+    x,
+    y
+) {
+
+    const positions =
+        loadDesktopPositions();
+
+
+    positions[appId] = {
+        x,
+        y
+    };
+
+
+    localStorage.setItem(
+        DESKTOP_POSITIONS_KEY,
+        JSON.stringify(
+            positions
+        )
+    );
+
+}
+
+
+/* ==================================================
+   ESCAPE HTML
+================================================== */
+
+function escapeHTML(text) {
+
+    return String(text)
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+/* ==================================================
+   LAUNCH APP
+================================================== */
+
+function launchLucidApp(app) {
+
+    closeLucidLauncher();
+
+    app.launcher();
+
+}
+
+
+/* ==================================================
+   DEFAULT POSITIONS
+================================================== */
+
+const defaultPositions = [
+
+    { x: 50, y: 20 },
+
+    { x: 30, y: 26 },
+
+    { x: 70, y: 26 },
+
+    { x: 23, y: 45 },
+
+    { x: 77, y: 45 },
+
+    { x: 28, y: 67 },
+
+    { x: 72, y: 67 },
+
+    { x: 50, y: 76 },
+
+    { x: 38, y: 38 },
+
+    { x: 62, y: 38 }
+
+];
+
+
+/* ==================================================
+   BUILD DESKTOP APPS
+================================================== */
+
+function buildDesktopApps() {
+
+    const container =
+        document.getElementById(
+            "desktop-apps"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    const positions =
+        loadDesktopPositions();
+
+
+    lucidApps.forEach(
+        (app, index) => {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.className =
+                "desktop-app";
+
+
+            button.innerHTML = `
+
+                <span
+                    class="desktop-app-icon"
+                >
+                    ${app.icon}
+                </span>
+
+                <span
+                    class="desktop-app-name"
+                >
+                    ${escapeHTML(
+                        app.name
+                    )}
+                </span>
+
+            `;
+
+
+            const saved =
+                positions[app.id];
+
+
+            const position =
+                saved ||
+                defaultPositions[
+                    index %
+                    defaultPositions.length
+                ];
+
+
+            /*
+                The app starts visually
+                at the Orb.
+
+                The actual destination
+                is stored as left/top.
+            */
+
+            button.style.left =
+                `${position.x}%`;
+
+            button.style.top =
+                `${position.y}%`;
+
+
+            button.style.setProperty(
+                "--origin-x",
+                "0px"
+            );
+
+            button.style.setProperty(
+                "--origin-y",
+                "0px"
+            );
+
+
+            /*
+                Start at the center of
+                the screen before the
+                launcher is opened.
+            */
+
+            button.style.left =
+                "50%";
+
+            button.style.top =
+                "50%";
+
+
+            button.dataset.targetX =
+                position.x;
+
+            button.dataset.targetY =
+                position.y;
+
+
+            setupDesktopApp(
+                button,
+                app
+            );
+
+
+            container.appendChild(
+                button
+            );
+
+        }
+    );
+
+}
+
+
+/* ==================================================
+   POSITION APPS
+================================================== */
+
+function moveAppsToSavedPositions() {
+
+    const apps =
+        document.querySelectorAll(
+            ".desktop-app"
+        );
+
+
+    apps.forEach(
+        app => {
+
+            app.style.left =
+                `${app.dataset.targetX}%`;
+
+
+            app.style.top =
+                `${app.dataset.targetY}%`;
+
+        }
+    );
+
+}
+
+
+/* ==================================================
+   MOVE APPS BACK TO ORB
+================================================== */
+
+function moveAppsToOrb() {
+
+    const apps =
+        document.querySelectorAll(
+            ".desktop-app"
+        );
+
+
+    apps.forEach(
+        app => {
+
+            app.style.left =
+                "50%";
+
+            app.style.top =
+                "50%";
+
+        }
+    );
+
+}
+
+
+/* ==================================================
+   OPEN LAUNCHER
+================================================== */
+
+function openLucidLauncher() {
+
+    if (launcherOpen) {
+        return;
+    }
+
+
+    const desktop =
+        document.getElementById(
+            "desktop"
+        );
+
+
+    launcherOpen = true;
+
+
+    desktop.classList.add(
+        "lucid-launcher-open"
+    );
+
+
+    /*
+        Give the CSS a frame to
+        register the open state,
+        then release the apps
+        from the Orb.
+    */
+
+    requestAnimationFrame(
+        () => {
+
+            requestAnimationFrame(
+                () => {
+
+                    moveAppsToSavedPositions();
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* ==================================================
+   CLOSE LAUNCHER
+================================================== */
+
+function closeLucidLauncher() {
+
+    if (!launcherOpen) {
+        return;
+    }
+
+
+    const desktop =
+        document.getElementById(
+            "desktop"
+        );
+
+
+    launcherOpen = false;
+
+
+    /*
+        Pull everything back
+        into the Orb.
+    */
+
+    moveAppsToOrb();
+
+
+    setTimeout(
+        () => {
+
+            desktop.classList.remove(
+                "lucid-launcher-open"
+            );
+
+        },
+        550
+    );
+
+}
+
+
+/* ==================================================
+   DESKTOP APP INTERACTION
+================================================== */
+
+function setupDesktopApp(
+    element,
+    app
+) {
+
+    let dragging = false;
+
+    let moved = false;
+
+    let startPointerX = 0;
+
+    let startPointerY = 0;
+
+    let startLeft = 0;
+
+    let startTop = 0;
+
+
+    element.addEventListener(
+        "pointerdown",
+        event => {
+
+            if (!launcherOpen) {
+                return;
+            }
+
+
+            if (
+                event.button !== 0
+            ) {
+
+                return;
+
+            }
+
+
+            dragging = true;
+
+            moved = false;
+
+
+            startPointerX =
+                event.clientX;
+
+            startPointerY =
+                event.clientY;
+
+
+            startLeft =
+                parseFloat(
+                    element.dataset.targetX
+                );
+
+
+            startTop =
+                parseFloat(
+                    element.dataset.targetY
+                );
+
+
+            element.setPointerCapture(
+                event.pointerId
+            );
+
+
+            event.preventDefault();
+
+        }
+    );
+
+
+    element.addEventListener(
+        "pointermove",
+        event => {
+
+            if (!dragging) {
+                return;
+            }
+
+
+            const desktop =
+                document.getElementById(
+                    "desktop-apps"
+                );
+
+
+            const rect =
+                desktop.getBoundingClientRect();
+
+
+            const dx =
+                event.clientX -
+                startPointerX;
+
+
+            const dy =
+                event.clientY -
+                startPointerY;
+
+
+            if (
+                Math.abs(dx) > 5 ||
+                Math.abs(dy) > 5
+            ) {
+
+                moved = true;
+
+            }
+
+
+            let x =
+                startLeft +
+                (
+                    dx /
+                    rect.width
+                ) *
+                100;
+
+
+            let y =
+                startTop +
+                (
+                    dy /
+                    rect.height
+                ) *
+                100;
+
+
+            x =
+                Math.max(
+                    8,
+                    Math.min(
+                        92,
+                        x
+                    )
+                );
+
+
+            y =
+                Math.max(
+                    10,
+                    Math.min(
+                        88,
+                        y
+                    )
+                );
+
+
+            element.dataset.targetX =
+                x;
+
+            element.dataset.targetY =
+                y;
+
+
+            element.style.left =
+                `${x}%`;
+
+            element.style.top =
+                `${y}%`;
+
+        }
+    );
+
+
+    element.addEventListener(
+        "pointerup",
+        event => {
+
+            if (!dragging) {
+                return;
+            }
+
+
+            dragging = false;
+
+
+            if (moved) {
+
+                saveDesktopPosition(
+                    app.id,
+                    Number(
+                        element.dataset.targetX
+                    ),
+                    Number(
+                        element.dataset.targetY
+                    )
+                );
+
+            }
+
+        }
+    );
+
+
+    element.addEventListener(
+        "click",
+        event => {
+
+            /*
+                Clicking opens the app.
+                Dragging does not.
+            */
+
+            if (moved) {
+
+                event.preventDefault();
+
+                moved = false;
+
+                return;
+
+            }
+
+
+            launchLucidApp(
+                app
+            );
+
+        }
+    );
+
+}
+
+/* ==================================================
+   INITIALIZE DESKTOP
+================================================== */
+
+buildDesktopApps();
+
+
+/* ==================================================
+   ORB BUTTON
+================================================== */
 
 const startButton =
     document.getElementById(
@@ -64,285 +786,26 @@ const startButton =
     );
 
 
-const startMenu =
-    document.getElementById(
-        "start-menu"
-    );
+if (startButton) {
+
+    startButton.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
 
 
-startButton.addEventListener(
-    "click",
-    function () {
+            if (launcherOpen) {
 
-        if (
-            startMenu.style.display ===
-            "block"
-        ) {
+                closeLucidLauncher();
 
-            startMenu.style.display =
-                "none";
+            } else {
 
-        } else {
+                openLucidLauncher();
 
-            startMenu.style.display =
-                "block";
+            }
 
         }
-
-    }
-);
-
-const settingsButton =
-    document.getElementById(
-        "settings-button"
     );
 
-/* =========================
-   SETTINGS
-========================= */
-
-settingsButton.addEventListener(
-    "click",
-    function () {
-
-        startMenu.style.display =
-            "none";
-
-        createSettingsApp();
-
-    }
-);
-
-/* =========================
-   FILES
-========================= */
-
-const filesButton =
-    document.getElementById(
-        "files-button"
-    );
-
-
-filesButton.addEventListener(
-    "click",
-    function () {
-
-        startMenu.style.display =
-            "none";
-
-        createFilesApp();
-
-    }
-);
-
-
-/* =========================
-   TEXT EDITOR
-========================= */
-
-const editorButton =
-    document.getElementById(
-        "editor-button"
-    );
-
-
-editorButton.addEventListener(
-    "click",
-    function () {
-
-        startMenu.style.display =
-            "none";
-
-        createTextEditor();
-
-    }
-);
-
-
-/* =========================
-   CLOCK
-========================= */
-
-function updateClock() {
-
-    const now =
-        new Date();
-
-
-    const hours =
-        String(
-            now.getHours()
-        ).padStart(2, "0");
-
-
-    const minutes =
-        String(
-            now.getMinutes()
-        ).padStart(2, "0");
-
-
-    document.getElementById(
-        "clock"
-    ).textContent =
-        hours + ":" + minutes;
 }
-
-
-updateClock();
-
-
-setInterval(
-    updateClock,
-    1000
-);
-
-/* =========================
-   TERMINAL
-========================= */
-
-const terminalButton =
-    document.getElementById(
-        "terminal-button"
-    );
-
-
-terminalButton.addEventListener(
-    "click",
-    function () {
-
-        startMenu.style.display =
-            "none";
-
-        createTerminal();
-
-    }
-);
-
-/* =========================
-   BROWSER
-========================= */
-
-const browserButton =
-    document.getElementById(
-        "browser-button"
-    );
-
-
-browserButton.addEventListener(
-    "click",
-    function () {
-
-        startMenu.style.display =
-            "none";
-
-        createBrowser();
-
-    }
-);
-
-/* =========================
-   CALENDAR
-========================= */
-
-const calendarButton =
-    document.getElementById(
-        "calendar-button"
-    );
-
-
-calendarButton.addEventListener(
-    "click",
-    function () {
-
-        startMenu.style.display =
-            "none";
-
-        createCalendar();
-
-    }
-);
-
-/* =========================
-   CALCULATOR
-========================= */
-
-const calculatorButton =
-    document.getElementById(
-        "calculator-button"
-    );
-
-calculatorButton.addEventListener(
-    "click",
-    function () {
-
-        startMenu.style.display =
-            "none";
-
-        createCalculator();
-
-    }
-);
-
-/* =========================
-   NOTES
-========================= */
-
-const notesButton =
-    document.getElementById(
-        "notes-button"
-    );
-
-notesButton.addEventListener(
-    "click",
-    function () {
-
-        startMenu.style.display =
-            "none";
-
-        createNotes();
-
-    }
-);
-
-/* =========================
-   MEDIA
-========================= */
-
-const mediaButton =
-    document.getElementById(
-        "media-button"
-    );
-
-mediaButton.addEventListener(
-    "click",
-    function () {
-
-        startMenu.style.display =
-            "none";
-
-        createMediaApp();
-
-    }
-);
-
-/* =========================
-   LUCID STORE
-========================= */
-
-const storeButton =
-    document.getElementById(
-        "store-button"
-    );
-
-
-storeButton.addEventListener(
-    "click",
-    function () {
-
-        startMenu.style.display =
-            "none";
-
-        createStoreApp();
-
-    }
-);
