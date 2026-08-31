@@ -3,6 +3,26 @@ import {
 } from "../apps/files.js";
 
 import {
+    createStoreApp
+} from "../apps/lucid-store.js";
+
+import {
+  createMediaApp
+} from "../apps/media.js";
+
+import {
+  createCalculator
+} from "../apps/calculator.js";
+
+import {
+  createNotes
+} from "../apps/notes.js";
+
+import {
+    createCalendar
+} from "../apps/calendar.js";
+
+import {
     createTextEditor
 } from "../apps/text-editor.js";
 
@@ -13,6 +33,24 @@ import {
 import {
     loadFileSystem
 } from "./filesystem.js";
+
+import {
+  createSettingsApp
+} from "../apps/settings.js";
+
+import {
+  createBrowser
+} from "../apps/browser.js";
+
+import {
+  getLucidLevel,
+  setLucidLevel
+} from "./lucid-state.js";
+
+console.log(
+  "Lucid level:",
+  getLucidLevel()
+)
 
 await loadFileSystem();
 
@@ -54,6 +92,26 @@ startButton.addEventListener(
     }
 );
 
+const settingsButton =
+    document.getElementById(
+        "settings-button"
+    );
+
+/* =========================
+   SETTINGS
+========================= */
+
+settingsButton.addEventListener(
+    "click",
+    function () {
+
+        startMenu.style.display =
+            "none";
+
+        createSettingsApp();
+
+    }
+);
 
 /* =========================
    FILES
@@ -156,6 +214,135 @@ terminalButton.addEventListener(
             "none";
 
         createTerminal();
+
+    }
+);
+
+/* =========================
+   BROWSER
+========================= */
+
+const browserButton =
+    document.getElementById(
+        "browser-button"
+    );
+
+
+browserButton.addEventListener(
+    "click",
+    function () {
+
+        startMenu.style.display =
+            "none";
+
+        createBrowser();
+
+    }
+);
+
+/* =========================
+   CALENDAR
+========================= */
+
+const calendarButton =
+    document.getElementById(
+        "calendar-button"
+    );
+
+
+calendarButton.addEventListener(
+    "click",
+    function () {
+
+        startMenu.style.display =
+            "none";
+
+        createCalendar();
+
+    }
+);
+
+/* =========================
+   CALCULATOR
+========================= */
+
+const calculatorButton =
+    document.getElementById(
+        "calculator-button"
+    );
+
+calculatorButton.addEventListener(
+    "click",
+    function () {
+
+        startMenu.style.display =
+            "none";
+
+        createCalculator();
+
+    }
+);
+
+/* =========================
+   NOTES
+========================= */
+
+const notesButton =
+    document.getElementById(
+        "notes-button"
+    );
+
+notesButton.addEventListener(
+    "click",
+    function () {
+
+        startMenu.style.display =
+            "none";
+
+        createNotes();
+
+    }
+);
+
+/* =========================
+   MEDIA
+========================= */
+
+const mediaButton =
+    document.getElementById(
+        "media-button"
+    );
+
+mediaButton.addEventListener(
+    "click",
+    function () {
+
+        startMenu.style.display =
+            "none";
+
+        createMediaApp();
+
+    }
+);
+
+/* =========================
+   LUCID STORE
+========================= */
+
+const storeButton =
+    document.getElementById(
+        "store-button"
+    );
+
+
+storeButton.addEventListener(
+    "click",
+    function () {
+
+        startMenu.style.display =
+            "none";
+
+        createStoreApp();
 
     }
 );
