@@ -1,0 +1,522 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    background-color: #3f4652;
+
+    font-family: Arial, sans-serif;
+
+    overflow: hidden;
+}
+
+
+/* =========================
+   DESKTOP
+========================= */
+
+#desktop {
+    width: 100%;
+    height: 100%;
+
+    position: relative;
+}
+
+
+/* =========================
+   TASKBAR
+========================= */
+
+#taskbar {
+    position: absolute;
+
+    bottom: 0;
+    left: 0;
+
+    width: 100%;
+    height: 50px;
+
+    background-color: #20242b;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 10px;
+
+    z-index: 1000;
+}
+
+
+#start-button {
+    height: 36px;
+
+    padding: 0 18px;
+
+    border: none;
+    border-radius: 6px;
+
+    background-color: #3a404a;
+
+    color: white;
+
+    font-size: 15px;
+
+    cursor: pointer;
+}
+
+
+#start-button:hover {
+    background-color: #4a5260;
+}
+
+
+#taskbar-apps {
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    margin-left: 10px;
+}
+
+
+.taskbar-app {
+    height: 36px;
+
+    padding: 0 14px;
+
+    border: none;
+    border-radius: 6px;
+
+    background-color: #343a44;
+
+    color: white;
+
+    cursor: pointer;
+}
+
+
+.taskbar-app:hover {
+    background-color: #454d5a;
+}
+
+
+#clock {
+    margin-left: auto;
+
+    color: white;
+
+    font-size: 14px;
+
+    padding-right: 10px;
+}
+
+
+/* =========================
+   START MENU
+========================= */
+
+#start-menu {
+    position: absolute;
+
+    left: 10px;
+    bottom: 60px;
+
+    width: 280px;
+    height: 400px;
+
+    background-color: #252a32;
+
+    border: 1px solid #454c58;
+
+    border-radius: 10px;
+
+    padding: 15px;
+
+    color: white;
+
+    display: none;
+
+    z-index: 900;
+}
+
+
+#start-menu h2 {
+    margin-top: 0;
+
+    font-size: 20px;
+}
+
+
+.app-button {
+    width: 100%;
+    height: 45px;
+
+    margin-bottom: 8px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background-color: #343a44;
+
+    color: white;
+
+    text-align: left;
+
+    padding-left: 15px;
+
+    font-size: 15px;
+
+    cursor: pointer;
+}
+
+
+.app-button:hover {
+    background-color: #454d5a;
+}
+
+
+/* =========================
+   WINDOWS
+========================= */
+
+.window {
+    position: absolute;
+
+    width: 600px;
+    height: 400px;
+
+    left: 200px;
+    top: 100px;
+
+    background-color: #eeeeee;
+
+    border: 1px solid #777;
+
+    border-radius: 8px;
+
+    box-shadow:
+        0 10px 30px
+        rgba(0, 0, 0, 0.35);
+
+    overflow: hidden;
+
+    z-index: 10;
+}
+
+
+/* TITLE BAR */
+
+.title-bar {
+    height: 40px;
+
+    background-color: #303640;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    padding-left: 12px;
+
+    cursor: move;
+
+    user-select: none;
+}
+
+
+.window-title {
+    flex: 1;
+}
+
+
+.window-controls {
+    display: flex;
+
+    height: 100%;
+}
+
+
+.window-control {
+    width: 45px;
+    height: 100%;
+
+    border: none;
+
+    background: transparent;
+
+    color: white;
+
+    font-size: 16px;
+
+    cursor: pointer;
+}
+
+
+.window-control:hover {
+    background-color: #454d5a;
+}
+
+
+.close-button:hover {
+    background-color: #c42b2b;
+}
+
+
+/* CONTENT */
+
+.window-content {
+    height: calc(100% - 40px);
+
+    padding: 20px;
+
+    color: #222;
+}
+
+
+.editor {
+    width: 100%;
+    height: 100%;
+
+    border: 1px solid #bbb;
+
+    resize: none;
+
+    padding: 10px;
+
+    font-family: monospace;
+
+    font-size: 14px;
+}
+
+
+/* MAXIMIZED */
+
+.maximized {
+    left: 0 !important;
+    top: 0 !important;
+
+    width: 100% !important;
+
+    height: calc(100% - 50px) !important;
+
+    border-radius: 0;
+}
+
+
+/* MINIMIZED */
+
+.minimized {
+    display: none;
+}
+
+
+/* =========================
+   FILES
+========================= */
+
+.file-toolbar {
+    height: 45px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-bottom: 10px;
+}
+
+
+.file-tool {
+    height: 34px;
+
+    padding: 0 10px;
+
+    border: 1px solid #bbb;
+
+    border-radius: 5px;
+
+    background-color: #f5f5f5;
+
+    cursor: pointer;
+}
+
+
+.file-tool:hover {
+    background-color: #e5e5e5;
+}
+
+
+.file-path {
+    flex: 1;
+
+    padding-left: 10px;
+
+    color: #555;
+}
+
+
+.file-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.file-item {
+    padding: 10px;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+
+    user-select: none;
+}
+
+
+.file-item:hover {
+    background-color: #e8e8e8;
+}
+
+
+.file-item.selected {
+    background-color: #cfd8e3;
+}
+
+/* Terminal */
+.terminal {
+    width: 100%;
+    height: 100%;
+
+    background-color: #11151a;
+
+    color: #e6e6e6;
+
+    font-family: monospace;
+
+    font-size: 14px;
+
+    padding: 12px;
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+.terminal-output {
+    flex: 1;
+
+    overflow-y: auto;
+
+    white-space: pre-wrap;
+
+    margin-bottom: 8px;
+}
+
+
+.terminal-input-line {
+    display: flex;
+
+    align-items: center;
+}
+
+
+.terminal-prompt {
+    margin-right: 8px;
+
+    white-space: nowrap;
+}
+
+
+.terminal-input {
+    flex: 1;
+
+    background: transparent;
+
+    border: none;
+
+    outline: none;
+
+    color: inherit;
+
+    font-family: inherit;
+
+    font-size: inherit;
+}
+/* Text Editor */
+.text-editor {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.editor-toolbar {
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+}
+
+
+.editor-save {
+    border: 1px solid #aaa;
+
+    border-radius: 5px;
+
+    background: #f5f5f5;
+
+    padding: 7px 12px;
+
+    cursor: pointer;
+}
+
+
+.editor-save:hover {
+    background: #e5e5e5;
+}
+
+
+.editor-status {
+    color: #777;
+
+    font-size: 13px;
+}
+
+
+.text-editor .editor {
+    flex: 1;
+
+    width: 100%;
+    height: auto;
+
+    resize: none;
+
+    border: 1px solid #bbb;
+
+    padding: 12px;
+
+    font-family: monospace;
+
+    font-size: 14px;
+
+    outline: none;
+}
