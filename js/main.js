@@ -132,6 +132,59 @@ const lucidApps = [
 
 ];
 
+/* =========================
+   CLOCK
+========================= */
+
+function updateClock() {
+
+    const clock =
+        document.getElementById(
+            "clock"
+        );
+
+
+    if (!clock) {
+        return;
+    }
+
+
+    const now =
+        new Date();
+
+
+    const hours =
+        String(
+            now.getHours()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const minutes =
+        String(
+            now.getMinutes()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    clock.textContent =
+        `${hours}:${minutes}`;
+
+}
+
+
+updateClock();
+
+
+setInterval(
+    updateClock,
+    1000
+);
+
 /* ==================================================
    LUCID DESKTOP
 ================================================== */
@@ -141,7 +194,6 @@ const DESKTOP_POSITIONS_KEY =
 
 
 let launcherOpen = false;
-
 
 /* ==================================================
    POSITION STORAGE
@@ -408,14 +460,103 @@ function moveAppsToSavedPositions() {
 
 
     apps.forEach(
-        app => {
+        (app, index) => {
 
-            app.style.left =
-                `${app.dataset.targetX}%`;
+            const targetX =
+                Number(
+                    app.dataset.targetX
+                );
+
+            const targetY =
+                Number(
+                    app.dataset.targetY
+                );
 
 
-            app.style.top =
-                `${app.dataset.targetY}%`;
+            const angle =
+                Math.atan2(
+                    targetY - 50,
+                    targetX - 50
+                );
+
+
+            const distance =
+                Math.hypot(
+                    targetX - 50,
+                    targetY - 50
+                );
+
+
+            /*
+                The intermediate point sits
+                slightly to the side of the
+                direct line, producing the
+                "orbiting outward" motion.
+            */
+
+            const bend =
+                Math.min(
+                    7,
+                    distance * 0.12
+                );
+
+
+            const controlX =
+                50 +
+                Math.cos(angle) * distance * 0.48 -
+                Math.sin(angle) * bend;
+
+
+            const controlY =
+                50 +
+                Math.sin(angle) * distance * 0.48 +
+                Math.cos(angle) * bend;
+
+
+            const delay =
+                index * 35;
+
+
+            app.animate(
+                [
+                    {
+                        left: "50%",
+                        top: "50%",
+                        transform:
+                            "translate(-50%, -50%) scale(0.15) rotate(0deg)",
+                        opacity: 0
+                    },
+
+                    {
+                        left:
+                            `${controlX}%`,
+                        top:
+                            `${controlY}%`,
+                        transform:
+                            "translate(-50%, -50%) scale(0.72) rotate(18deg)",
+                        opacity: 0.65,
+                        offset: 0.48
+                    },
+
+                    {
+                        left:
+                            `${targetX}%`,
+                        top:
+                            `${targetY}%`,
+                        transform:
+                            "translate(-50%, -50%) scale(1) rotate(0deg)",
+                        opacity: 1
+                    }
+
+                ],
+                {
+                    duration: 780,
+                    delay,
+                    easing:
+                        "cubic-bezier(0.16, 1, 0.3, 1)",
+                    fill: "forwards"
+                }
+            );
 
         }
     );
@@ -436,13 +577,92 @@ function moveAppsToOrb() {
 
 
     apps.forEach(
-        app => {
+        (app, index) => {
 
-            app.style.left =
-                "50%";
+            const currentX =
+                parseFloat(
+                    app.dataset.targetX
+                );
 
-            app.style.top =
-                "50%";
+            const currentY =
+                parseFloat(
+                    app.dataset.targetY
+                );
+
+
+            const angle =
+                Math.atan2(
+                    currentY - 50,
+                    currentX - 50
+                );
+
+
+            const distance =
+                Math.hypot(
+                    currentX - 50,
+                    currentY - 50
+                );
+
+
+            const bend =
+                Math.min(
+                    7,
+                    distance * 0.12
+                );
+
+
+            const controlX =
+                50 +
+                Math.cos(angle) * distance * 0.48 -
+                Math.sin(angle) * bend;
+
+
+            const controlY =
+                50 +
+                Math.sin(angle) * distance * 0.48 +
+                Math.cos(angle) * bend;
+
+
+            app.animate(
+                [
+                    {
+                        left:
+                            `${currentX}%`,
+                        top:
+                            `${currentY}%`,
+                        transform:
+                            "translate(-50%, -50%) scale(1) rotate(0deg)",
+                        opacity: 1
+                    },
+
+                    {
+                        left:
+                            `${controlX}%`,
+                        top:
+                            `${controlY}%`,
+                        transform:
+                            "translate(-50%, -50%) scale(0.72) rotate(-18deg)",
+                        opacity: 0.65,
+                        offset: 0.42
+                    },
+
+                    {
+                        left: "50%",
+                        top: "50%",
+                        transform:
+                            "translate(-50%, -50%) scale(0.1) rotate(0deg)",
+                        opacity: 0
+                    }
+
+                ],
+                {
+                    duration: 650,
+                    delay: index * 20,
+                    easing:
+                        "cubic-bezier(0.7, 0, 0.84, 0)",
+                    fill: "forwards"
+                }
+            );
 
         }
     );
