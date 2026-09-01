@@ -353,7 +353,6 @@ function buildDesktopApps() {
             button.className =
                 "desktop-app";
 
-
             button.innerHTML = `
 
                 <span
@@ -385,14 +384,6 @@ function buildDesktopApps() {
                 ];
 
 
-            /*
-                The app starts visually
-                at the Orb.
-
-                The actual destination
-                is stored as left/top.
-            */
-
             button.style.left =
                 `${position.x}%`;
 
@@ -409,13 +400,6 @@ function buildDesktopApps() {
                 "--origin-y",
                 "0px"
             );
-
-
-            /*
-                Start at the center of
-                the screen before the
-                launcher is opened.
-            */
 
             button.style.left =
                 "50%";
@@ -453,8 +437,29 @@ function buildDesktopApps() {
 
 function moveAppsToSavedPositions() {
 
+    const container =
+        document.getElementById(
+            "desktop-apps"
+        );
+
+    if (!container) {
+        return;
+    }
+
+
+    const rect =
+        container.getBoundingClientRect();
+
+
+    const centerX =
+        rect.width / 2;
+
+    const centerY =
+        rect.height / 2;
+
+
     const apps =
-        document.querySelectorAll(
+        container.querySelectorAll(
             ".desktop-app"
         );
 
@@ -473,89 +478,185 @@ function moveAppsToSavedPositions() {
                 );
 
 
-            const angle =
-                Math.atan2(
-                    targetY - 50,
-                    targetX - 50
-                );
+            const targetPX =
+                targetX / 100 *
+                rect.width;
+
+
+            const targetPY =
+                targetY / 100 *
+                rect.height;
+
+
+            const dx =
+                targetPX -
+                centerX;
+
+
+            const dy =
+                targetPY -
+                centerY;
 
 
             const distance =
                 Math.hypot(
-                    targetX - 50,
-                    targetY - 50
+                    dx,
+                    dy
                 );
 
 
-            /*
-                The intermediate point sits
-                slightly to the side of the
-                direct line, producing the
-                "orbiting outward" motion.
-            */
-
-            const bend =
-                Math.min(
-                    7,
-                    distance * 0.12
+            const finalAngle =
+                Math.atan2(
+                    dy,
+                    dx
                 );
 
 
-            const controlX =
-                50 +
-                Math.cos(angle) * distance * 0.48 -
-                Math.sin(angle) * bend;
+            const direction =
+                index % 2 === 0
+                    ? 1
+                    : -1;
 
-
-            const controlY =
-                50 +
-                Math.sin(angle) * distance * 0.48 +
-                Math.cos(angle) * bend;
+            const orbitAngle =
+                direction * 0.9;
 
 
             const delay =
                 index * 35;
 
 
+            app.style.left =
+                `${targetX}%`;
+
+
+            app.style.top =
+                `${targetY}%`;
+
+
+            const startX =
+                centerX -
+                targetPX;
+
+
+            const startY =
+                centerY -
+                targetPY;
+
+
+            const midAngle =
+                finalAngle -
+                orbitAngle;
+
+
+            const midRadius =
+                distance * 0.55;
+
+
+            const midX =
+                centerX +
+                Math.cos(midAngle) *
+                midRadius;
+
+
+            const midY =
+                centerY +
+                Math.sin(midAngle) *
+                midRadius;
+
+
+            const midTranslateX =
+                midX -
+                targetPX;
+
+
+            const midTranslateY =
+                midY -
+                targetPY;
+
+
             app.animate(
                 [
+
                     {
-                        left: "50%",
-                        top: "50%",
                         transform:
-                            "translate(-50%, -50%) scale(0.15) rotate(0deg)",
+                            `
+                            translate3d(
+                                -50%,
+                                -50%,
+                                0
+                            )
+                            translate3d(
+                                ${startX}px,
+                                ${startY}px,
+                                0
+                            )
+                            scale(0.08)
+                            rotate(
+                                ${direction * -30}deg
+                            )
+                            `,
+
                         opacity: 0
                     },
 
-                    {
-                        left:
-                            `${controlX}%`,
-                        top:
-                            `${controlY}%`,
-                        transform:
-                            "translate(-50%, -50%) scale(0.72) rotate(18deg)",
-                        opacity: 0.65,
-                        offset: 0.48
-                    },
 
                     {
-                        left:
-                            `${targetX}%`,
-                        top:
-                            `${targetY}%`,
                         transform:
-                            "translate(-50%, -50%) scale(1) rotate(0deg)",
+                            `
+                            translate3d(
+                                -50%,
+                                -50%,
+                                0
+                            )
+                            translate3d(
+                                ${midTranslateX}px,
+                                ${midTranslateY}px,
+                                0
+                            )
+                            scale(0.68)
+                            rotate(
+                                ${direction * 22}deg
+                            )
+                            `,
+
+                        opacity: 0.8,
+
+                        offset: 0.52
+                    },
+
+
+                    {
+                        transform:
+                            `
+                            translate3d(
+                                -50%,
+                                -50%,
+                                0
+                            )
+                            translate3d(
+                                0,
+                                0,
+                                0
+                            )
+                            scale(1)
+                            rotate(0deg)
+                            `,
+
                         opacity: 1
                     }
 
                 ],
+
                 {
-                    duration: 780,
+                    duration: 820,
+
                     delay,
-                    easing:
-                        "cubic-bezier(0.16, 1, 0.3, 1)",
+
+                    easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+
                     fill: "forwards"
                 }
+
             );
 
         }
@@ -579,96 +680,196 @@ function moveAppsToOrb() {
     apps.forEach(
         (app, index) => {
 
-            const currentX =
-                parseFloat(
+            const targetX =
+                Number(
                     app.dataset.targetX
                 );
 
-            const currentY =
-                parseFloat(
+            const targetY =
+                Number(
                     app.dataset.targetY
                 );
 
 
-            const angle =
-                Math.atan2(
-                    currentY - 50,
-                    currentX - 50
+            const container =
+                document.getElementById(
+                    "desktop-apps"
                 );
+
+
+            const rect =
+                container.getBoundingClientRect();
+
+
+            const targetPX =
+                targetX / 100 *
+                rect.width;
+
+
+            const targetPY =
+                targetY / 100 *
+                rect.height;
+
+
+            const centerX =
+                rect.width / 2;
+
+
+            const centerY =
+                rect.height / 2;
+
+
+            const dx =
+                centerX -
+                targetPX;
+
+
+            const dy =
+                centerY -
+                targetPY;
 
 
             const distance =
-                Math.hypot(
-                    currentX - 50,
-                    currentY - 50
+                Math.hypot(dx, dy);
+
+
+            const angle =
+                Math.atan2(
+                    dy,
+                    dx
                 );
 
 
-            const bend =
-                Math.min(
-                    7,
-                    distance * 0.12
-                );
+            const direction =
+                index % 2 === 0
+                    ? 1
+                    : -1;
 
 
-            const controlX =
-                50 +
-                Math.cos(angle) * distance * 0.48 -
-                Math.sin(angle) * bend;
+            const orbitAngle =
+                angle +
+                direction * 0.9;
 
 
-            const controlY =
-                50 +
-                Math.sin(angle) * distance * 0.48 +
-                Math.cos(angle) * bend;
+            const midRadius =
+                distance * 0.55;
+
+
+            const midX =
+                centerX +
+                Math.cos(
+                    orbitAngle
+                ) *
+                midRadius;
+
+
+            const midY =
+                centerY +
+                Math.sin(
+                    orbitAngle
+                ) *
+                midRadius;
+
+
+            const midTranslateX =
+                midX -
+                targetPX;
+
+
+            const midTranslateY =
+                midY -
+                targetPY;
 
 
             app.animate(
                 [
+
                     {
-                        left:
-                            `${currentX}%`,
-                        top:
-                            `${currentY}%`,
                         transform:
-                            "translate(-50%, -50%) scale(1) rotate(0deg)",
+                            `
+                            translate3d(
+                                -50%,
+                                -50%,
+                                0
+                            )
+                            translate3d(
+                                0,
+                                0,
+                                0
+                            )
+                            scale(1)
+                            rotate(0deg)
+                            `,
+
                         opacity: 1
                     },
 
-                    {
-                        left:
-                            `${controlX}%`,
-                        top:
-                            `${controlY}%`,
-                        transform:
-                            "translate(-50%, -50%) scale(0.72) rotate(-18deg)",
-                        opacity: 0.65,
-                        offset: 0.42
-                    },
 
                     {
-                        left: "50%",
-                        top: "50%",
                         transform:
-                            "translate(-50%, -50%) scale(0.1) rotate(0deg)",
+                            `
+                            translate3d(
+                                -50%,
+                                -50%,
+                                0
+                            )
+                            translate3d(
+                                ${midTranslateX}px,
+                                ${midTranslateY}px,
+                                0
+                            )
+                            scale(0.68)
+                            rotate(
+                                ${direction * -22}deg
+                            )
+                            `,
+
+                        opacity: 0.75,
+
+                        offset: 0.48
+                    },
+
+
+                    {
+                        transform:
+                            `
+                            translate3d(
+                                -50%,
+                                -50%,
+                                0
+                            )
+                            translate3d(
+                                ${dx}px,
+                                ${dy}px,
+                                0
+                            )
+                            scale(0.08)
+                            rotate(
+                                ${direction * 30}deg
+                            )
+                            `,
+
                         opacity: 0
                     }
 
                 ],
+
                 {
-                    duration: 650,
-                    delay: index * 20,
-                    easing:
-                        "cubic-bezier(0.7, 0, 0.84, 0)",
+                    duration: 620,
+
+                    delay: index * 22,
+
+                    easing: "cubic-bezier(0.7, 0, 0.84, 0)",
+
                     fill: "forwards"
                 }
+
             );
 
         }
     );
 
 }
-
 
 /* ==================================================
    OPEN LAUNCHER
@@ -695,26 +896,7 @@ function openLucidLauncher() {
     );
 
 
-    /*
-        Give the CSS a frame to
-        register the open state,
-        then release the apps
-        from the Orb.
-    */
-
-    requestAnimationFrame(
-        () => {
-
-            requestAnimationFrame(
-                () => {
-
-                    moveAppsToSavedPositions();
-
-                }
-            );
-
-        }
-    );
+    moveAppsToSavedPositions();
 
 }
 
@@ -739,11 +921,6 @@ function closeLucidLauncher() {
     launcherOpen = false;
 
 
-    /*
-        Pull everything back
-        into the Orb.
-    */
-
     moveAppsToOrb();
 
 
@@ -755,7 +932,7 @@ function closeLucidLauncher() {
             );
 
         },
-        550
+        700
     );
 
 }
@@ -964,11 +1141,6 @@ function setupDesktopApp(
         "click",
         event => {
 
-            /*
-                Clicking opens the app.
-                Dragging does not.
-            */
-
             if (moved) {
 
                 event.preventDefault();
@@ -1008,20 +1180,61 @@ const startButton =
 
 if (startButton) {
 
-    startButton.addEventListener(
+    const desktop =
+        document.getElementById(
+            "desktop"
+        );
+
+
+    desktop.addEventListener(
         "click",
         event => {
+            if (
+                event.target.closest(
+                    ".desktop-app"
+                )
+            ) {
 
-            event.stopPropagation();
+                return;
+
+            }
 
 
-            if (launcherOpen) {
+            const rect =
+                desktop.getBoundingClientRect();
 
-                closeLucidLauncher();
 
-            } else {
+            const centerX =
+                rect.left +
+                rect.width / 2;
 
-                openLucidLauncher();
+            const centerY =
+                rect.top +
+                rect.height / 2;
+
+            const distance =
+                Math.hypot(
+                    event.clientX -
+                    centerX,
+
+                    event.clientY -
+                    centerY
+                );
+
+
+            if (
+                distance <= 65
+            ) {
+
+                if (launcherOpen) {
+
+                    closeLucidLauncher();
+
+                } else {
+
+                    openLucidLauncher();
+
+                }
 
             }
 

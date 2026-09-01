@@ -3045,9 +3045,9 @@ button[data-action="equals"] {
     background:
         radial-gradient(
             circle at 50% 50%,
-            rgba(108, 76, 160, 0.38),
-            rgba(28, 20, 48, 0.72) 42%,
-            rgba(5, 6, 10, 0.92) 100%
+            rgba(105,75,155,0.42),
+            rgba(34,23,56,0.68) 45%,
+            rgba(5,6,10,0.92) 100%
         );
 
     opacity: 0;
@@ -3057,7 +3057,13 @@ button[data-action="equals"] {
     z-index: 2;
 
     transition:
-        opacity 0.45s ease;
+        opacity 0.65s
+        cubic-bezier(
+            0.16,
+            1,
+            0.3,
+            1
+        );
 
 }
 
@@ -3253,6 +3259,7 @@ button[data-action="equals"] {
     flex-direction: column;
 
     align-items: center;
+
     justify-content: center;
 
     gap: 7px;
@@ -3270,59 +3277,20 @@ button[data-action="equals"] {
     opacity: 0;
 
     transform:
-        translate(
+        translate3d(
             -50%,
-            -50%
+            -50%,
+            0
         )
-        translate(
-            var(--origin-x),
-            var(--origin-y)
-        )
-        scale(0.15);
-
-    transition:
-        left 0.72s cubic-bezier(
-            0.16,
-            1,
-            0.3,
-            1
-        ),
-        top 0.72s cubic-bezier(
-            0.16,
-            1,
-            0.3,
-            1
-        ),
-        transform 0.72s cubic-bezier(
-            0.16,
-            1,
-            0.3,
-            1
-        ),
-        opacity 0.38s ease;
+        scale(0.08);
 
     user-select: none;
 
-}
-
-
-#desktop.lucid-launcher-open
-.desktop-app {
-
-    pointer-events: auto;
-
-    opacity: 1;
-
-    transform:
-        translate(
-            -50%,
-            -50%
-        )
-        translate(0, 0)
-        scale(1);
+    will-change:
+        transform,
+        opacity;
 
 }
-
 
 .desktop-app-icon {
 
@@ -3384,7 +3352,11 @@ button[data-action="equals"] {
 .desktop-app-icon {
 
     transform:
-        translateY(-2px)
+        translate3d(
+            0,
+            -2px,
+            0
+        )
         scale(1.04);
 
     box-shadow:
@@ -3483,4 +3455,61 @@ button[data-action="equals"] {
 
     display: none !important;
 
+}
+
+#start-button {
+    z-index: 30 !important;
+}
+
+#desktop-apps {
+    z-index: 10 !important;
+}
+
+.window {
+    z-index: 100 !important;
+}
+
+#start-menu {
+    z-index: 90 !important;
+}
+
+#taskbar {
+    z-index: 1000 !important;
+}
+
+#desktop.lucid-launcher-open
+.desktop-app {
+    will-change: transform, opacity;
+
+    transform:
+        translate3d(
+            -50%,
+            -50%,
+            0
+        )
+        scale(0.08);
+    pointer-events: auto;
+
+}
+
+#desktop-apps {
+    contain: layout paint;
+
+    transform:
+        translate3d(
+            0,
+            0,
+            0
+        );
+}
+
+#lucid-atmosphere {
+    will-change: opacity;
+
+    transform:
+        translate3d(
+            0,
+            0,
+            0
+        );
 }
