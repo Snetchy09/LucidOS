@@ -3,76 +3,33 @@
 
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LucidOS</title>
-
     <link rel="stylesheet" href="css/system.css">
+    <link rel="stylesheet" href="css/lucid-additions.css">
 </head>
 
 <body>
-
     <div id="desktop">
-
         <div id="lucid-atmosphere"></div>
+        <div id="desktop-apps" aria-label="Desktop applications"></div>
 
-        <div
-            id="desktop-apps"
-            aria-label="Desktop applications"
-        ></div>
-
-        <!-- START BUTTON (LUCID CENTER ORB) -->
-
-        <button
-            id="start-button"
-            aria-label="Open Lucid launcher"
-        >
-
+        <button id="start-button" aria-label="Open Lucid launcher">
             <span class="lucid-center">
-
                 <span class="lucid-orb">
-
                     <span class="lucid-orb-eye"></span>
-
                 </span>
-
             </span>
-
         </button>
 
-        <!-- START MENU -->
-
-        <div
-            id="start-menu"
-            aria-hidden="true"
-        ></div>
-
-        <!-- TASKBAR -->
-
+        <div id="start-menu" aria-hidden="true"></div>
         <div id="taskbar">
-
             <div id="taskbar-apps"></div>
-
-            <div id="clock">
-                00:00
-            </div>
-
+            <div id="clock">00:00</div>
         </div>
-
     </div>
 
-
-    <!-- MAIN PROGRAM -->
-
-    <script
-        type="module"
-        src="js/main.js"
-    ></script>
-
+    <script type="module" src="js/main.js"></script>
 </body>
 
 </html>
