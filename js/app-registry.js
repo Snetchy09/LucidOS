@@ -2,7 +2,7 @@ import { deleteUserFile, saveUserFile } from "./filesystem.js";
 
 const APP_REGISTRY_KEY = "lucid-installed-apps";
 const EXTERNAL_APPS_KEY = "lucid-external-apps";
-const REGISTRY_VERSION_KEY = "lucid-app-registry-v2";
+const REGISTRY_VERSION_KEY = "lucid-app-registry-v3";
 
 const appCatalog = [
     { id: "files", name: "Files", icon: "📁", version: "1.0.0", category: "System", type: "core", description: "Browse and manage your Lucid files." },
@@ -22,6 +22,7 @@ const appCatalog = [
 function getExternalApps() {
     const saved = localStorage.getItem(EXTERNAL_APPS_KEY);
     if (!saved) return [];
+
     try {
         const apps = JSON.parse(saved);
         return Array.isArray(apps) ? apps : [];
@@ -36,6 +37,7 @@ function saveExternalApps(apps) {
 
 function writeInstalledAppFile(app) {
     if (!app || !app.id || app.type === "core") return;
+
     const manifest = {
         type: "lucid-app",
         id: app.id,
@@ -44,8 +46,13 @@ function writeInstalledAppFile(app) {
         category: app.category || "Other",
         description: app.description || ""
     };
-    saveUserFile(["Downloads"], `${app.id}.lucidapp`, JSON.stringify(manifest, null, 2), "application/json")
-        .catch(error => console.warn("Lucid: could not save app package:", error));
+
+    saveUserFile(
+        ["Downloads"],
+        `${app.id}.lucidapp`,
+        JSON.stringify(manifest, null, 2),
+        "application/json"
+    ).catch(error => console.warn("Lucid: could not save app package:", error));
 }
 
 function removeInstalledAppFile(appId) {
@@ -54,6 +61,7 @@ function removeInstalledAppFile(appId) {
 
 function installExternalApp(app) {
     if (!app || !app.id || isAppInstalled(app.id)) return false;
+
     const externalApps = getExternalApps();
     if (externalApps.some(item => item.id === app.id)) return false;
 
@@ -74,7 +82,9 @@ function installExternalApp(app) {
     externalApps.push(installed);
     saveExternalApps(externalApps);
     writeInstalledAppFile(installed);
-    window.dispatchEvent(new CustomEvent("lucid-app-installed", { detail: { appId: app.id, app: installed } }));
+    window.dispatchEvent(new CustomEvent("lucid-app-installed", {
+        detail: { appId: app.id, app: installed }
+    }));
     return true;
 }
 
@@ -82,30 +92,42 @@ const appLaunchers = {};
 
 function initializeAppRegistry() {
     const saved = localStorage.getItem(APP_REGISTRY_KEY);
-    const coreIds = appCatalog.filter(app => app.type === "core").map(app => app.id);
-    const firstRunApps = ["paint"];
+    const coreIds = appCatalog
+        .filter(app => app.type === "core")
+        .map(app => app.id);
 
     if (!saved) {
-        localStorage.setItem(APP_REGISTRY_KEY, JSON.stringify([...coreIds, ...firstRunApps]));
-        localStorage.setItem(REGISTRY_VERSION_KEY, "2");
+        localStorage.setItem(APP_REGISTRY_KEY, JSON.stringify(coreIds));
+        localStorage.setItem(REGISTRY_VERSION_KEY, "3");
         return;
     }
 
     try {
-        const existing = JSON.parse(saved);
-        const extras = localStorage.getItem(REGISTRY_VERSION_KEY) === "2" ? [] : firstRunApps;
-        const merged = [...new Set([...existing, ...coreIds, ...extras])];
+        let existing = JSON.parse(saved);
+        if (!Array.isArray(existing)) throw new Error("Invalid registry");
+
+        const version = localStorage.getItem(REGISTRY_VERSION_KEY);
+
+        // Paint used to be installed on first launch. Remove that legacy default
+        // once, so new installs start clean and Paint can come from the Store.
+        if (version !== "3") existing = existing.filter(id => id !== "paint");
+
+        const merged = [...new Set([...existing, ...coreIds])];
         localStorage.setItem(APP_REGISTRY_KEY, JSON.stringify(merged));
-        localStorage.setItem(REGISTRY_VERSION_KEY, "2");
+        localStorage.setItem(REGISTRY_VERSION_KEY, "3");
     } catch {
-        localStorage.setItem(APP_REGISTRY_KEY, JSON.stringify([...coreIds, ...firstRunApps]));
-        localStorage.setItem(REGISTRY_VERSION_KEY, "2");
+        localStorage.setItem(APP_REGISTRY_KEY, JSON.stringify(coreIds));
+        localStorage.setItem(REGISTRY_VERSION_KEY, "3");
     }
 }
 
 function getInstalledIds() {
     const saved = localStorage.getItem(APP_REGISTRY_KEY);
-    if (!saved) { initializeAppRegistry(); return getInstalledIds(); }
+    if (!saved) {
+        initializeAppRegistry();
+        return getInstalledIds();
+    }
+
     try {
         const ids = JSON.parse(saved);
         if (!Array.isArray(ids)) throw new Error("Invalid registry");
@@ -122,7 +144,10 @@ function saveInstalledIds(ids) {
 
 function getInstalledApps() {
     const installedIds = new Set(getInstalledIds());
-    const builtInApps = appCatalog.filter(app => installedIds.has(app.id)).map(app => ({ ...app, installed: true }));
+    const builtInApps = appCatalog
+        .filter(app => installedIds.has(app.id))
+        .map(app => ({ ...app, installed: true }));
+
     return [...builtInApps, ...getExternalApps()];
 }
 
@@ -150,7 +175,9 @@ function installApp(appId) {
     installedIds.push(appId);
     saveInstalledIds(installedIds);
     writeInstalledAppFile(app);
-    window.dispatchEvent(new CustomEvent("lucid-app-installed", { detail: { appId, app } }));
+    window.dispatchEvent(new CustomEvent("lucid-app-installed", {
+        detail: { appId, app }
+    }));
     return true;
 }
 
@@ -163,12 +190,15 @@ function uninstallApp(appId) {
     removeInstalledAppFile(appId);
     removeDesktopPosition(appId);
 
-    window.dispatchEvent(new CustomEvent("lucid-app-uninstalled", { detail: { appId, app } }));
+    window.dispatchEvent(new CustomEvent("lucid-app-uninstalled", {
+        detail: { appId, app }
+    }));
     return true;
 }
 
 function removeDesktopPosition(appId) {
     const key = "lucid-desktop-positions";
+
     try {
         const positions = JSON.parse(localStorage.getItem(key)) || {};
         delete positions[appId];
@@ -177,7 +207,9 @@ function removeDesktopPosition(appId) {
 }
 
 function registerAppLauncher(appId, launcher) {
-    if (typeof launcher !== "function") throw new TypeError(`Invalid launcher for ${appId}`);
+    if (typeof launcher !== "function") {
+        throw new TypeError(`Invalid launcher for ${appId}`);
+    }
     appLaunchers[appId] = launcher;
 }
 
@@ -186,8 +218,18 @@ function getAppLauncher(appId) {
 }
 
 function registerApp(app) {
-    if (!app || !app.id || !app.name || appCatalog.some(existing => existing.id === app.id)) return false;
-    appCatalog.push({ icon: "◇", version: "1.0.0", category: "Other", type: "optional", description: "A Lucid application.", ...app });
+    if (!app || !app.id || !app.name || appCatalog.some(existing => existing.id === app.id)) {
+        return false;
+    }
+
+    appCatalog.push({
+        icon: "◇",
+        version: "1.0.0",
+        category: "Other",
+        type: "optional",
+        description: "A Lucid application.",
+        ...app
+    });
     return true;
 }
 
