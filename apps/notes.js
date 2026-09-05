@@ -1,7 +1,9 @@
 import { createWindow } from "../js/window-manager.js";
 import { notifyAnomalyEngine } from "../js/anomaly-engine.js";
+import { saveUserFile, deleteUserFile } from "../js/filesystem.js";
 
 const STORAGE_KEY = "lucid_notes";
+const NOTES_FOLDER = ["Documents", "Notes"];
 
 function createNotes() {
     notifyAnomalyEngine("notes-opened");
@@ -9,10 +11,7 @@ function createNotes() {
     const content = `
         <div class="lucid-notes">
             <aside class="notes-sidebar">
-                <div class="notes-header">
-                    <strong>Notes</strong>
-                    <button class="notes-new" title="New note">+</button>
-                </div>
+                <div class="notes-header"><strong>Notes</strong><button class="notes-new" title="New note">+</button></div>
                 <div class="notes-list"></div>
             </aside>
             <main class="notes-editor">
@@ -24,7 +23,6 @@ function createNotes() {
     `;
 
     const windowElement = createWindow("📝 Notes", content);
-
     const notesList = windowElement.querySelector(".notes-list");
     const titleInput = windowElement.querySelector(".notes-title");
     const contentInput = windowElement.querySelector(".notes-content");
@@ -36,14 +34,19 @@ function createNotes() {
 
     function loadNotes() {
         try {
-            return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            return Array.isArray(stored) ? stored : [];
         } catch {
             return [];
         }
     }
 
-    function saveNotes() {
+    async function saveNotes() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+        for (const note of notes) {
+            const fileName = `${note.id}.lnote`;
+            await saveUserFile(NOTES_FOLDER, fileName, JSON.stringify(note, null, 2), "application/json");
+        }
     }
 
     function createNote() {
@@ -55,50 +58,38 @@ function createNotes() {
         };
 
         notes.unshift(note);
-        saveNotes();
         currentNoteId = note.id;
+        saveNotes().catch(error => console.error("Lucid Notes save failed:", error));
         renderList();
         openNote(note);
     }
 
-    function deleteNote(id) {
-        notes = notes.filter(note => note.id !== id);
-        saveNotes();
+    async function deleteNote(id) {
+        const note = notes.find(item => item.id === id);
+        notes = notes.filter(item => item.id !== id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+        if (note) await deleteUserFile(NOTES_FOLDER, `${note.id}.lnote`).catch(() => {});
 
         if (currentNoteId === id) {
             currentNoteId = null;
             titleInput.value = "";
             contentInput.value = "";
         }
-
         renderList();
     }
 
     function renderList() {
         notesList.innerHTML = "";
-
-        if (notes.length === 0) {
-            const empty = document.createElement("div");
-            empty.className = "notes-empty";
-            empty.textContent = "No notes yet";
-            notesList.appendChild(empty);
+        if (!notes.length) {
+            notesList.innerHTML = '<div class="notes-empty">No notes yet</div>';
             return;
         }
 
         notes.forEach(note => {
             const item = document.createElement("button");
             item.className = "notes-list-item";
-
-            if (note.id === currentNoteId) {
-                item.classList.add("active");
-            }
-
-            item.innerHTML = `
-                <span class="notes-item-title">${escapeHtml(note.title)}</span>
-                <span class="notes-item-preview">${escapeHtml(note.content).slice(0, 35)}</span>
-                <span class="notes-item-delete">×</span>
-            `;
-
+            if (note.id === currentNoteId) item.classList.add("active");
+            item.innerHTML = `<span class="notes-item-title">${escapeHtml(note.title)}</span><span class="notes-item-preview">${escapeHtml(note.content).slice(0, 35)}</span><span class="notes-item-delete">×</span>`;
             item.addEventListener("click", event => {
                 if (event.target.classList.contains("notes-item-delete")) {
                     deleteNote(note.id);
@@ -106,7 +97,6 @@ function createNotes() {
                 }
                 openNote(note);
             });
-
             notesList.appendChild(item);
         });
     }
@@ -121,22 +111,19 @@ function createNotes() {
 
     function updateCurrentNote() {
         if (!currentNoteId) return;
-
         const note = notes.find(item => item.id === currentNoteId);
         if (!note) return;
 
         note.title = titleInput.value || "Untitled Note";
         note.content = contentInput.value;
         note.updated = Date.now();
-
-        saveNotes();
-
         status.textContent = "Saving...";
-        setTimeout(() => {
+        saveNotes().then(() => {
             status.textContent = "Saved";
-        }, 300);
-
-        renderList();
+            renderList();
+        }).catch(() => {
+            status.textContent = "Save failed";
+        });
 
         notifyAnomalyEngine("note-edited", { noteId: note.id });
     }
@@ -152,12 +139,8 @@ function createNotes() {
     }
 
     renderList();
-
-    if (notes.length > 0) {
-        openNote(notes[0]);
-    } else {
-        createNote();
-    }
+    if (notes.length) openNote(notes[0]);
+    else createNote();
 
     return windowElement;
 }
