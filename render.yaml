@@ -1,0 +1,27 @@
+services:
+    - type: web
+      name: lucid-publish
+      runtime: node
+      rootDir: server
+      buildCommand: npm ci
+      startCommand: npm start
+      healthCheckPath: /health
+      envVars:
+          - key: B2_REGION
+            sync: false
+          - key: B2_BUCKET_NAME
+            sync: false
+          - key: B2_APPLICATION_KEY_ID
+            sync: false
+          - key: B2_APPLICATION_KEY
+            sync: false
+          - key: B2_PUBLIC_BASE_URL
+            sync: false
+          - key: SUPABASE_URL
+            sync: false
+          - key: SUPABASE_ANON_KEY
+            sync: false
+          - key: LUCID_ORIGIN
+            sync: false
+          - key: B2_PRO_MAX_APP_BYTES
+            sync: false
