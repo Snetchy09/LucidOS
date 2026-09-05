@@ -1,3 +1,5 @@
+import { saveUserFile } from "../js/filesystem.js";
+
 const PROJECTS_KEY = "lucid-studio-projects-v1";
 const ACTIVE_PROJECT_KEY = "lucid-studio-active-project";
 
@@ -15,6 +17,8 @@ function readProjects() {
 
 function writeProjects(projects) {
     localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+    saveUserFile(["Documents", "Lucid Projects"], "projects.json", JSON.stringify(projects, null, 2), "application/json")
+        .catch(error => console.warn("Lucid project file save failed:", error));
 }
 
 function generateProjectId() {
@@ -22,16 +26,16 @@ function generateProjectId() {
 }
 
 function createProject({ name = "Untitled App", language = "lucid-script" } = {}) {
+    const cleanName = name.trim() || "Untitled App";
     const now = new Date().toISOString();
-
     const project = {
         id: generateProjectId(),
-        name: name.trim() || "Untitled App",
+        name: cleanName,
         language,
-        source: `app "${name.trim() || "Untitled App"}"
+        source: `app "${cleanName}"
 
 window {
-    title "${name.trim() || "Untitled App"}"
+    title "${cleanName}"
 
     text "Welcome to Lucid Script!"
 }
@@ -46,7 +50,6 @@ window {
     projects.unshift(project);
     writeProjects(projects);
     localStorage.setItem(ACTIVE_PROJECT_KEY, project.id);
-
     return project;
 }
 
@@ -60,8 +63,7 @@ function getProject(id) {
 
 function getActiveProject() {
     const activeId = localStorage.getItem(ACTIVE_PROJECT_KEY);
-    if (!activeId) return null;
-    return getProject(activeId);
+    return activeId ? getProject(activeId) : null;
 }
 
 function setActiveProject(id) {
@@ -76,14 +78,12 @@ function updateProject(id, updates = {}) {
     const index = projects.findIndex(project => project.id === id);
     if (index === -1) throw new Error("Project not found.");
 
-    const current = projects[index];
     projects[index] = {
-        ...current,
+        ...projects[index],
         ...updates,
-        id: current.id,
+        id: projects[index].id,
         updatedAt: new Date().toISOString()
     };
-
     writeProjects(projects);
     return projects[index];
 }
@@ -102,10 +102,9 @@ function deleteProject(id) {
     const projects = readProjects();
     const filtered = projects.filter(project => project.id !== id);
     if (filtered.length === projects.length) return false;
-    writeProjects(filtered);
 
-    const activeId = localStorage.getItem(ACTIVE_PROJECT_KEY);
-    if (activeId === id) localStorage.removeItem(ACTIVE_PROJECT_KEY);
+    writeProjects(filtered);
+    if (localStorage.getItem(ACTIVE_PROJECT_KEY) === id) localStorage.removeItem(ACTIVE_PROJECT_KEY);
     return true;
 }
 
@@ -139,16 +138,4 @@ function projectLanguageLabel(language) {
     }
 }
 
-export {
-    createProject,
-    getProjects,
-    getProject,
-    getActiveProject,
-    setActiveProject,
-    updateProject,
-    saveProjectSource,
-    renameProject,
-    deleteProject,
-    duplicateProject,
-    projectLanguageLabel
-};
+export { createProject, getProjects, getProject, getActiveProject, setActiveProject, updateProject, saveProjectSource, renameProject, deleteProject, duplicateProject, projectLanguageLabel };
