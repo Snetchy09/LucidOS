@@ -52,7 +52,7 @@ function installExternalApp(app) {
     const externalApps = getExternalApps();
     if (externalApps.some(item => item.id === app.id)) return false;
 
-    externalApps.push({
+    const installed = {
         id: app.id,
         name: app.name,
         icon: app.icon || app.icon_url || "◇",
@@ -64,11 +64,12 @@ function installExternalApp(app) {
         entry_point: app.entry_point || null,
         installed: true,
         external: true
-    });
+    };
 
+    externalApps.push(installed);
     saveExternalApps(externalApps);
-    writeInstalledAppFile(app);
-    window.dispatchEvent(new CustomEvent("lucid-app-installed", { detail: { appId: app.id, app } }));
+    writeInstalledAppFile(installed);
+    window.dispatchEvent(new CustomEvent("lucid-app-installed", { detail: { appId: app.id, app: installed } }));
     return true;
 }
 
@@ -77,18 +78,19 @@ const appLaunchers = {};
 function initializeAppRegistry() {
     const saved = localStorage.getItem(APP_REGISTRY_KEY);
     const coreIds = appCatalog.filter(app => app.type === "core").map(app => app.id);
+    const firstRunApps = ["paint"];
 
     if (!saved) {
-        localStorage.setItem(APP_REGISTRY_KEY, JSON.stringify(coreIds));
+        localStorage.setItem(APP_REGISTRY_KEY, JSON.stringify([...coreIds, ...firstRunApps]));
         return;
     }
 
     try {
         const existing = JSON.parse(saved);
-        const merged = [...new Set([...existing, ...coreIds])];
+        const merged = [...new Set([...existing, ...coreIds, ...firstRunApps])];
         localStorage.setItem(APP_REGISTRY_KEY, JSON.stringify(merged));
     } catch {
-        localStorage.setItem(APP_REGISTRY_KEY, JSON.stringify(coreIds));
+        localStorage.setItem(APP_REGISTRY_KEY, JSON.stringify([...coreIds, ...firstRunApps]));
     }
 }
 
@@ -139,7 +141,6 @@ function installApp(appId) {
     installedIds.push(appId);
     saveInstalledIds(installedIds);
     writeInstalledAppFile(app);
-
     window.dispatchEvent(new CustomEvent("lucid-app-installed", { detail: { appId, app } }));
     return true;
 }
