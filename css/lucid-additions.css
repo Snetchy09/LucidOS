@@ -1,0 +1,181 @@
+.settings-wide {
+    align-items: flex-start;
+}
+
+.wallpaper-input {
+    width: min(520px, 100%);
+}
+
+.settings-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.settings-hint,
+.wallpaper-status,
+.storage-status {
+    display: block;
+    opacity: .7;
+    margin-top: 8px;
+}
+
+.installed-apps {
+    display: grid;
+    gap: 8px;
+    margin: 16px 0 22px;
+}
+
+.installed-app-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 12px;
+    background: rgba(255,255,255,.035);
+}
+
+.installed-app-row > div {
+    min-width: 0;
+    flex: 1;
+}
+
+.installed-app-row small {
+    display: block;
+    opacity: .55;
+}
+
+.installed-app-icon {
+    width: 34px;
+    text-align: center;
+    font-size: 20px;
+}
+
+.danger-zone {
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid rgba(255,80,80,.22);
+    border-radius: 14px;
+    background: rgba(255,80,80,.05);
+}
+
+.erase-everything {
+    background: #7e2424;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.file-item-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-item-size {
+    opacity: .55;
+    font-size: 12px;
+}
+
+.file-preview {
+    height: 100%;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+}
+
+.file-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.lucid-paint {
+    width: min(1100px, 92vw);
+    height: min(760px, 82vh);
+    display: flex;
+    flex-direction: column;
+    background: rgba(16,18,24,.96);
+}
+
+.paint-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.paint-brand {
+    font-weight: 700;
+    margin-right: auto;
+}
+
+.paint-modes,
+.paint-tools {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.paint-mode.active,
+#paint-eraser.active {
+    background: rgba(255,255,255,.16);
+}
+
+.paint-tools label,
+.paint-animation-bar label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+}
+
+.paint-stage {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: #11131a;
+    overflow: auto;
+}
+
+#paint-canvas {
+    max-width: 100%;
+    max-height: 100%;
+    background-color: #fff;
+    background-image: linear-gradient(45deg, #eee 25%, transparent 25%), linear-gradient(-45deg, #eee 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #eee 75%), linear-gradient(-45deg, transparent 75%, #eee 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    touch-action: none;
+}
+
+#paint-canvas.pixel-canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+.paint-animation-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.paint-status {
+    padding: 7px 12px;
+    font-size: 12px;
+    opacity: .65;
+    border-top: 1px solid rgba(255,255,255,.05);
+}
