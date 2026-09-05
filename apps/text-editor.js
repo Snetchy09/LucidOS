@@ -1,8 +1,9 @@
 import { createWindow } from "../js/window-manager.js";
-import { lucidFileSystem, saveFileSystem } from "../js/filesystem.js";
+import { saveFileSystem, saveUserFile } from "../js/filesystem.js";
 
 function createTextEditor(file = null) {
-    const startingText = file ? file.content : "";
+    let currentFile = file;
+    const startingText = file ? String(file.content ?? "") : "";
     const fileName = file ? file.name : "Untitled";
 
     const content = `
@@ -16,7 +17,6 @@ function createTextEditor(file = null) {
     `;
 
     const windowElement = createWindow("📝 " + fileName, content);
-
     const editor = windowElement.querySelector(".editor");
     const saveButton = windowElement.querySelector(".editor-save");
     const status = windowElement.querySelector(".editor-status");
@@ -24,24 +24,31 @@ function createTextEditor(file = null) {
     editor.value = startingText;
 
     saveButton.addEventListener("click", async () => {
-        if (!file) {
-            status.textContent = "Nothing to save";
-            return;
+        if (!currentFile) {
+            const name = prompt("Save document as:", "Untitled.txt");
+            if (!name?.trim()) return;
+
+            const cleanName = name.trim().endsWith(".txt") ? name.trim() : `${name.trim()}.txt`;
+            await saveUserFile(["Documents"], cleanName, editor.value, "text/plain");
+            currentFile = { type: "file", name: cleanName, content: editor.value, mimeType: "text/plain", size: editor.value.length };
+            windowElement.querySelector(".window-title").textContent = "📝 " + cleanName;
+        } else {
+            currentFile.content = editor.value;
+            currentFile.mimeType = "text/plain";
+            currentFile.size = editor.value.length;
+            currentFile.modifiedAt = new Date().toISOString();
+            await saveFileSystem();
         }
-        file.content = editor.value;
-        await saveFileSystem();
+
         status.textContent = "Saved ✓";
-        setTimeout(() => { status.textContent = "Ready"; }, 1500);
+        savedText = editor.value;
+        setTimeout(() => { status.textContent = "Ready"; }, 1200);
     });
 
     let savedText = editor.value;
 
     editor.addEventListener("input", () => {
-        if (editor.value !== savedText) {
-            status.textContent = "Unsaved changes";
-        } else {
-            status.textContent = "Ready";
-        }
+        status.textContent = editor.value !== savedText ? "Unsaved changes" : "Ready";
     });
 
     editor.addEventListener("keydown", event => {
@@ -52,7 +59,6 @@ function createTextEditor(file = null) {
     });
 
     editor.focus();
-
     return windowElement;
 }
 
