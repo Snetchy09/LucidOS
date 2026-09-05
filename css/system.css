@@ -3513,3 +3513,2410 @@ button[data-action="equals"] {
             0
         );
 }
+
+/* ==================================================
+   LUCID STUDIO
+================================================== */
+
+.lucid-studio {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    background: #111318;
+    color: #e5e7eb;
+
+    overflow: hidden;
+}
+
+
+.studio-header {
+    padding: 28px 32px 22px;
+
+    border-bottom: 1px solid #272b33;
+}
+
+
+.studio-eyebrow {
+    color: #777c87;
+
+    font-size: 10px;
+
+    letter-spacing: 2px;
+}
+
+
+.studio-header h1 {
+    margin: 6px 0 0;
+
+    font-size: 28px;
+}
+
+
+.studio-header p {
+    margin: 7px 0 0;
+
+    color: #777c87;
+
+    font-size: 13px;
+}
+
+
+.studio-body {
+    flex: 1;
+
+    overflow: auto;
+
+    padding: 30px;
+}
+
+
+/* AUTH */
+
+.studio-auth {
+    min-height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.studio-auth-card {
+    width: min(
+        440px,
+        100%
+    );
+
+    padding: 26px;
+
+    border: 1px solid #292d35;
+
+    border-radius: 15px;
+
+    background: #171a20;
+
+    box-shadow:
+        0 20px 50px
+        rgba(0,0,0,0.2);
+}
+
+
+.studio-auth-tabs {
+    display: flex;
+
+    gap: 6px;
+
+    margin-bottom: 24px;
+}
+
+
+.studio-auth-tab {
+    flex: 1;
+
+    padding: 9px;
+
+    border: 1px solid #30343d;
+
+    border-radius: 7px;
+
+    background: #191c22;
+
+    color: #858a95;
+
+    cursor: pointer;
+}
+
+
+.studio-auth-tab.active {
+    background: #2a2e37;
+
+    color: white;
+}
+
+
+.studio-auth-form {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 13px;
+}
+
+
+.studio-auth-form h2 {
+    margin: 0 0 5px;
+
+    font-size: 21px;
+}
+
+
+.studio-auth-form label {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+    color: #8b909b;
+
+    font-size: 12px;
+}
+
+
+.studio-auth-form input {
+    padding: 10px;
+
+    border:
+        1px solid
+        #30343d;
+
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #101216;
+
+    color: #e5e7eb;
+}
+
+
+.studio-auth-form input:focus {
+    border-color: #555b68;
+}
+
+
+/* SECURITY WARNING */
+
+.studio-security-warning {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+    padding: 11px;
+
+    border:
+        1px solid
+        rgba(180,70,70,0.35);
+
+    border-radius: 7px;
+
+    background:
+        rgba(130,35,35,0.08);
+
+    color: #bd7474;
+
+    font-size: 10px;
+
+    line-height: 1.5;
+}
+
+
+.studio-security-warning strong {
+    color: #db8585;
+
+    font-size: 11px;
+}
+
+
+/* BUTTON */
+
+.studio-primary-button {
+    margin-top: 5px;
+
+    padding: 10px 14px;
+
+    border: 1px solid #3b404b;
+
+    border-radius: 8px;
+
+    background: #292e38;
+
+    color: #eee;
+
+    cursor: pointer;
+}
+
+
+.studio-primary-button:hover {
+    background: #343a46;
+}
+
+
+.studio-auth-message {
+    min-height: 18px;
+
+    color: #858a95;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+/* DASHBOARD */
+
+.studio-welcome {
+    margin-bottom: 25px;
+}
+
+
+.studio-welcome span {
+    color: #777c87;
+
+    font-size: 10px;
+
+    letter-spacing: 1.5px;
+}
+
+
+.studio-welcome h2 {
+    margin: 7px 0 3px;
+
+    font-size: 24px;
+}
+
+
+.studio-welcome p {
+    margin: 0;
+
+    color: #777c87;
+
+    font-size: 13px;
+}
+
+
+.studio-dashboard-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(210px, 1fr)
+        );
+
+    gap: 12px;
+}
+
+
+.studio-dashboard-card {
+    min-height: 150px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 7px;
+
+    padding: 18px;
+
+    border:
+        1px solid
+        #292d35;
+
+    border-radius: 13px;
+
+    background: #171a20;
+
+    color: #ddd;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+
+
+.studio-dashboard-card:hover {
+    transform:
+        translateY(-2px);
+
+    background: #1c2027;
+
+    border-color: #3a3f49;
+}
+
+
+.studio-card-icon {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 6px;
+
+    border-radius: 10px;
+
+    background: #272b34;
+
+    font-size: 20px;
+}
+
+
+.studio-dashboard-card strong {
+    font-size: 14px;
+}
+
+
+.studio-dashboard-card > span:last-child {
+    color: #737883;
+
+    font-size: 11px;
+}
+
+
+/* DOCS */
+
+.studio-docs {
+    max-width: 800px;
+
+    margin: 0 auto;
+}
+
+
+.studio-docs-content {
+    padding: 25px 0 50px;
+}
+
+
+.studio-docs-content h2 {
+    margin-top: 7px;
+
+    font-size: 26px;
+}
+
+
+.studio-docs-content h3 {
+    margin-top: 30px;
+
+    color: #dfe1e5;
+
+    font-size: 15px;
+}
+
+
+.studio-docs-content p {
+    color: #9297a2;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+}
+
+
+.studio-docs-content pre {
+    padding: 17px;
+
+    overflow-x: auto;
+
+    border:
+        1px solid
+        #292d35;
+
+    border-radius: 9px;
+
+    background: #0d0f13;
+}
+
+
+.studio-docs-content code {
+    color: #c7c9d2;
+
+    font-family: monospace;
+
+    font-size: 12px;
+
+    line-height: 1.7;
+}
+
+
+.studio-docs-note {
+    margin-top: 30px;
+
+    padding: 13px;
+
+    border-radius: 8px;
+
+    background: #191c22;
+
+    color: #767b86;
+
+    font-size: 11px;
+}
+
+
+.studio-back-button {
+    padding: 8px 12px;
+
+    border:
+        1px solid
+        #30343d;
+
+    border-radius: 7px;
+
+    background: #191c22;
+
+    color: #aeb2bb;
+
+    cursor: pointer;
+}
+
+
+/* NEW APP */
+
+.studio-new-app {
+    max-width: 800px;
+
+    margin: 0 auto;
+}
+
+
+.studio-new-app h2 {
+    margin-top: 30px;
+}
+
+
+.studio-new-app p {
+    color: #777c87;
+
+    font-size: 13px;
+}
+
+
+.studio-language-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(200px, 1fr)
+        );
+
+    gap: 12px;
+
+    margin-top: 25px;
+}
+
+
+.studio-language {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 7px;
+
+    padding: 18px;
+
+    border:
+        1px solid
+        #292d35;
+
+    border-radius: 12px;
+
+    background: #171a20;
+
+    color: #ddd;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+
+.studio-language:hover,
+.studio-language.active {
+    background: #242830;
+
+    border-color: #414651;
+}
+
+
+.studio-language span {
+    color: #777c87;
+
+    font-size: 11px;
+}
+
+
+.studio-coming-soon {
+    margin-top: 25px;
+
+    padding: 15px;
+
+    border-radius: 9px;
+
+    background: #181b21;
+
+    color: #696e79;
+
+    font-size: 11px;
+}
+
+/* ==================================================
+   STUDIO SUBMISSIONS
+================================================== */
+
+.studio-submissions {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+
+.studio-submissions-header {
+    margin: 28px 0;
+}
+
+
+.studio-submissions-header h2 {
+    margin: 6px 0;
+    font-size: 26px;
+}
+
+
+.studio-submissions-header p {
+    margin: 0;
+    color: #777c87;
+    font-size: 13px;
+}
+
+
+.studio-submission-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+
+.studio-submission {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 16px;
+
+    border: 1px solid #292d35;
+    border-radius: 11px;
+
+    background: #171a20;
+}
+
+
+.studio-submission h3 {
+    margin: 0 0 5px;
+    font-size: 14px;
+}
+
+
+.studio-submission span {
+    color: #737883;
+    font-size: 11px;
+}
+
+
+.submission-status {
+    padding: 6px 9px;
+
+    border-radius: 7px;
+
+    background: #242830;
+
+    font-size: 10px;
+
+    text-transform: capitalize;
+}
+
+
+.submission-status-pending {
+    color: #c0b68c;
+}
+
+
+.submission-status-approved {
+    color: #a9c6ad;
+}
+
+
+.submission-status-rejected {
+    color: #c78989;
+}
+
+
+.studio-no-submissions {
+    padding: 30px;
+    text-align: center;
+    color: #676c76;
+    font-size: 12px;
+}
+
+/* ==================================================
+   LUCID STUDIO EDITOR
+================================================== */
+
+.studio-editor {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: 0;
+}
+
+
+.studio-editor-toolbar {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 16px;
+}
+
+
+.studio-editor-toolbar h2 {
+    margin: 5px 0 0;
+
+    font-size: 20px;
+}
+
+
+.studio-editor-actions {
+    display: flex;
+
+    gap: 7px;
+}
+
+
+.studio-tool-button,
+.studio-run-button {
+    padding: 8px 13px;
+
+    border: 1px solid #30343d;
+
+    border-radius: 7px;
+
+    background: #191c22;
+
+    color: #c5c8d0;
+
+    cursor: pointer;
+}
+
+
+.studio-tool-button:hover {
+    background: #242830;
+}
+
+
+.studio-run-button {
+    background: #292d37;
+
+    color: #eee;
+}
+
+
+.studio-run-button:hover {
+    background: #353a46;
+}
+
+
+.studio-editor-layout {
+    flex: 1;
+
+    min-height: 0;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+
+    gap: 12px;
+}
+
+
+.studio-code-panel,
+.studio-preview-panel {
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border:
+        1px solid
+        #292d35;
+
+    border-radius: 12px;
+
+    background: #101216;
+}
+
+
+.studio-code-label,
+.studio-preview-label {
+    height: 34px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 12px;
+
+    border-bottom:
+        1px solid
+        #292d35;
+
+    color: #6f747f;
+
+    font-size: 10px;
+
+    letter-spacing: 1px;
+}
+
+
+.lucid-code-editor {
+    flex: 1;
+
+    width: 100%;
+    min-height: 0;
+
+    resize: none;
+
+    border: none;
+    outline: none;
+
+    padding: 18px;
+
+    background: #0d0f13;
+
+    color: #d8dae0;
+
+    font-family:
+        "Consolas",
+        "Cascadia Code",
+        monospace;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+    tab-size: 4;
+}
+
+
+.lucid-code-editor::selection {
+    background: #383246;
+}
+
+
+.lucid-preview {
+    flex: 1;
+
+    min-height: 0;
+
+    overflow: auto;
+}
+
+
+.studio-preview-empty {
+    height: 100%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px;
+
+    color: #5f646e;
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+
+.studio-editor-status {
+    min-height: 24px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding-top: 7px;
+
+    color: #686d78;
+
+    font-size: 10px;
+}
+
+
+/* ==================================================
+   LUCID SCRIPT PREVIEW
+================================================== */
+
+.lucid-preview-app {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            #292336 0%,
+            #111318 55%,
+            #0b0c10 100%
+        );
+
+    color: #e7e8ec;
+}
+
+
+.lucid-preview-top {
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 12px;
+
+    border-bottom:
+        1px solid
+        #292d35;
+
+    background:
+        rgba(14,16,22,0.8);
+}
+
+
+.lucid-preview-app-name {
+    color: #bcb7cb;
+
+    font-size: 10px;
+}
+
+
+.lucid-preview-runtime {
+    color: #555a65;
+
+    font-size: 8px;
+
+    letter-spacing: 1.5px;
+}
+
+
+.lucid-preview-window {
+    width:
+        min(
+            90%,
+            460px
+        );
+
+    min-height: 250px;
+
+    margin: auto;
+
+    display: flex;
+
+    flex-direction: column;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.09);
+
+    border-radius: 12px;
+
+    background:
+        rgba(19,21,28,0.92);
+
+    box-shadow:
+        0 20px 50px
+        rgba(0,0,0,0.35);
+
+    overflow: hidden;
+}
+
+
+.lucid-preview-title {
+    min-height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 14px;
+
+    border-bottom:
+        1px solid
+        #292d35;
+
+    color: #d8d9df;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+.lucid-preview-body {
+    flex: 1;
+
+    padding: 22px;
+
+    overflow: auto;
+}
+
+
+.lucid-preview-text {
+    margin: 0 0 14px;
+
+    color: #aeb2bc;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+.lucid-preview-button {
+    padding: 9px 14px;
+
+    border:
+        1px solid
+        #3a3f4a;
+
+    border-radius: 8px;
+
+    background: #252a33;
+
+    color: #e2e3e7;
+
+    cursor: pointer;
+}
+
+
+.lucid-preview-button:hover {
+    background: #303641;
+}
+
+
+.lucid-runtime-error {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    padding: 14px;
+
+    border:
+        1px solid
+        rgba(180,80,80,0.35);
+
+    border-radius: 8px;
+
+    background:
+        rgba(120,35,35,0.09);
+
+    color: #c98484;
+
+    font-family: monospace;
+
+    font-size: 11px;
+}
+
+
+.lucid-preview-error {
+    margin-top: 12px;
+
+    padding: 10px;
+
+    border-radius: 7px;
+
+    background:
+        rgba(120,35,35,0.08);
+
+    color: #c98484;
+
+    font-size: 11px;
+}
+
+
+@media (max-width: 800px) {
+
+    .studio-editor-layout {
+
+        grid-template-columns:
+            1fr;
+
+        grid-template-rows:
+            1fr
+            1fr;
+
+    }
+
+}
+
+/* ==================================================
+   LUCID SCRIPT POLISH
+================================================== */
+
+.studio-editor-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+}
+
+
+.studio-editor-permissions {
+
+    color: #555a65;
+
+    font-size: 10px;
+
+}
+
+
+.studio-manifest-view {
+
+    padding: 20px;
+
+}
+
+
+.studio-manifest-title {
+
+    margin-bottom: 12px;
+
+    color: #9b95aa;
+
+    font-size: 11px;
+
+    letter-spacing: 1px;
+
+}
+
+
+.studio-manifest-view pre {
+
+    margin: 0;
+
+    padding: 15px;
+
+    overflow: auto;
+
+    border:
+        1px solid
+        #292d35;
+
+    border-radius: 9px;
+
+    background: #0b0d11;
+
+    color: #bfc2ca;
+
+    font-family: monospace;
+
+    font-size: 11px;
+
+    line-height: 1.6;
+
+}
+
+
+.studio-build-success {
+
+    height: 100%;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 25px;
+
+    text-align: center;
+
+}
+
+
+.studio-build-icon {
+
+    width: 55px;
+
+    height: 55px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin-bottom: 15px;
+
+    border-radius: 50%;
+
+    background: #242931;
+
+    color: #b8c9ba;
+
+    font-size: 25px;
+
+}
+
+
+.studio-build-success h3 {
+
+    margin: 0;
+
+    font-size: 17px;
+
+}
+
+
+.studio-build-success p {
+
+    margin: 7px 0;
+
+    color: #767b86;
+
+    font-size: 12px;
+
+}
+
+
+.studio-build-manifest {
+
+    margin-top: 8px;
+
+    color: #626773;
+
+    font-size: 10px;
+
+}
+
+
+.studio-export-button {
+
+    margin-top: 20px;
+
+    padding: 9px 14px;
+
+    border:
+        1px solid
+        #353a45;
+
+    border-radius: 8px;
+
+    background: #252a32;
+
+    color: #d7d9de;
+
+    font-size: 11px;
+
+    text-decoration: none;
+
+}
+
+
+.studio-export-button:hover {
+
+    background: #303640;
+
+}
+
+
+/* ==================================================
+   LUCID NOTIFICATIONS
+================================================== */
+
+.lucid-script-notifications {
+
+    position: fixed;
+
+    right: 20px;
+
+    top: 20px;
+
+    z-index: 10000;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+}
+
+
+.lucid-script-notification {
+
+    min-width: 210px;
+
+    max-width: 330px;
+
+    padding: 11px 13px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.09);
+
+    border-radius: 9px;
+
+    background:
+        rgba(21,23,30,0.96);
+
+    color: #d9dbe1;
+
+    box-shadow:
+        0 12px 35px
+        rgba(0,0,0,0.35);
+
+    font-size: 11px;
+
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease;
+
+}
+
+/* ==================================================
+   LUCID STUDIO — PROJECT SYSTEM
+================================================== */
+
+.studio-projects {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 32px;
+    overflow-y: auto;
+}
+
+.studio-projects-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.studio-section-eyebrow {
+    margin-bottom: 8px;
+    color: #737783;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.studio-projects h1 {
+    margin: 0;
+    color: #f1f2f4;
+    font-size: 27px;
+    font-weight: 600;
+}
+
+.studio-projects-header p {
+    margin: 7px 0 0;
+    color: #777b86;
+    font-size: 13px;
+}
+
+.studio-primary-btn,
+.studio-secondary-btn {
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease;
+}
+
+.studio-primary-btn {
+    border: 1px solid #7771a8;
+    background: #69628f;
+    color: #ffffff;
+}
+
+.studio-primary-btn:hover {
+    background: #766fa1;
+}
+
+.studio-primary-btn:active,
+.studio-secondary-btn:active {
+    transform: scale(0.98);
+}
+
+.studio-secondary-btn {
+    border: 1px solid #343741;
+    background: #1c1f25;
+    color: #d8dae0;
+}
+
+.studio-secondary-btn:hover {
+    background: #252830;
+}
+
+.studio-project-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(auto-fill, minmax(270px, 1fr));
+    gap: 14px;
+}
+
+.studio-project-card {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    min-height: 145px;
+    padding: 18px;
+    box-sizing: border-box;
+    border: 1px solid #292c34;
+    border-radius: 13px;
+    background: #17191f;
+    transition:
+        border-color 0.15s ease,
+        transform 0.15s ease,
+        background 0.15s ease;
+}
+
+.studio-project-card:hover {
+    border-color: #3b3e49;
+    background: #1b1e24;
+    transform: translateY(-2px);
+}
+
+.studio-project-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background: #252330;
+
+    color: #bdb5e6;
+
+    font-size: 21px;
+}
+
+.studio-project-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.studio-project-info h3 {
+    margin: 2px 0 5px;
+
+    overflow: hidden;
+
+    color: #eceef2;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.studio-project-info p {
+    margin: 0;
+
+    color: #888c97;
+
+    font-size: 11px;
+}
+
+.studio-project-info span {
+    display: block;
+
+    margin-top: 17px;
+
+    color: #5f636d;
+
+    font-size: 10px;
+}
+
+.studio-project-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.studio-project-open,
+.studio-project-more {
+    border: 1px solid #30333c;
+    border-radius: 7px;
+
+    background: #20232a;
+    color: #cfd1d7;
+
+    cursor: pointer;
+}
+
+.studio-project-open {
+    padding: 6px 9px;
+    font-size: 10px;
+}
+
+.studio-project-more {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+
+    font-size: 16px;
+}
+
+.studio-project-open:hover,
+.studio-project-more:hover {
+    background: #292c34;
+}
+
+.studio-project-empty {
+    grid-column: 1 / -1;
+
+    min-height: 330px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+.studio-empty-icon {
+    width: 62px;
+    height: 62px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 18px;
+
+    border-radius: 16px;
+
+    background: #201e2b;
+
+    color: #afa7d9;
+
+    font-size: 27px;
+}
+
+.studio-project-empty h2 {
+    margin: 0;
+
+    color: #e8e9ed;
+
+    font-size: 18px;
+}
+
+.studio-project-empty p {
+    max-width: 360px;
+
+    margin: 8px 0 20px;
+
+    color: #70747f;
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* DIALOG */
+
+.studio-dialog-overlay {
+    position: fixed;
+    inset: 0;
+
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(5, 6, 9, 0.72);
+
+    backdrop-filter: blur(8px);
+}
+
+.studio-dialog {
+    width: min(420px, 100%);
+
+    box-sizing: border-box;
+
+    padding: 22px;
+
+    border: 1px solid #30333d;
+    border-radius: 15px;
+
+    background: #15171c;
+
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.45);
+}
+
+.studio-dialog-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+}
+
+.studio-dialog-header h2 {
+    margin: 0;
+
+    color: #eeeeF2;
+
+    font-size: 18px;
+}
+
+.studio-dialog-header p {
+    margin: 5px 0 0;
+
+    color: #6e727d;
+
+    font-size: 11px;
+}
+
+.studio-dialog-close {
+    width: 28px;
+    height: 28px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: transparent;
+    color: #777b86;
+
+    font-size: 18px;
+
+    cursor: pointer;
+}
+
+.studio-dialog-close:hover {
+    background: #24272e;
+    color: #eeeeee;
+}
+
+.studio-dialog label {
+    display: block;
+
+    margin-bottom: 16px;
+
+    color: #aeb1ba;
+
+    font-size: 11px;
+}
+
+.studio-dialog input,
+.studio-dialog select {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    margin-top: 7px;
+
+    padding: 10px 11px;
+
+    border: 1px solid #30333c;
+    border-radius: 8px;
+
+    outline: none;
+
+    background: #101216;
+    color: #e7e8ec;
+
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.studio-dialog input:focus,
+.studio-dialog select:focus {
+    border-color: #68618f;
+}
+
+.studio-input-error {
+    border-color: #9b5960 !important;
+}
+
+.studio-dialog-note {
+    margin: 15px 0 20px;
+
+    padding: 11px;
+
+    border: 1px solid #292c34;
+    border-radius: 8px;
+
+    background: #1a1c21;
+
+    color: #797d88;
+
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.studio-dialog-note strong {
+    color: #bcb6de;
+}
+
+.studio-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.studio-menu-action {
+    width: 100%;
+
+    margin-top: 7px;
+
+    padding: 11px 12px;
+
+    border: 1px solid #2c3038;
+    border-radius: 8px;
+
+    background: #1b1e24;
+    color: #cfd1d7;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.studio-menu-action:hover {
+    background: #252830;
+}
+
+.studio-menu-action.danger {
+    color: #df9a9f;
+}
+
+.studio-coming-soon {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+.studio-coming-icon {
+    width: 62px;
+    height: 62px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 17px;
+
+    border-radius: 16px;
+
+    background: #211f2c;
+    color: #aea6d8;
+
+    font-size: 26px;
+}
+
+.studio-coming-soon h2 {
+    margin: 0;
+
+    color: #eceef2;
+
+    font-size: 18px;
+}
+
+.studio-coming-soon p {
+    margin: 8px 0 20px;
+
+    color: #727681;
+
+    font-size: 12px;
+}
+
+.studio-saved {
+    border-color: #595f6d !important;
+}
+
+/* ==================================================
+   LUCID STUDIO — EDITOR
+================================================== */
+
+.studio-editor {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    background:
+        radial-gradient(
+            circle at 50% -20%,
+            rgba(108, 99, 150, 0.10),
+            transparent 45%
+        ),
+        #111318;
+
+    color: #e8e9ed;
+}
+
+
+/* ==================================================
+   EDITOR TOOLBAR
+================================================== */
+
+.studio-editor-toolbar {
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    flex-shrink: 0;
+
+    padding: 0 12px;
+
+    border-bottom: 1px solid #292c34;
+
+    background: rgba(21, 23, 28, 0.94);
+
+    box-sizing: border-box;
+}
+
+.studio-editor-project {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    min-width: 0;
+}
+
+.studio-editor-project > button {
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    padding: 0;
+
+    border: 1px solid #30333b;
+    border-radius: 8px;
+
+    background: #1c1f25;
+
+    color: #b8bbc4;
+
+    font-size: 17px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.studio-editor-project > button:hover {
+    background: #272a32;
+    border-color: #3b3e48;
+    color: #ffffff;
+}
+
+.studio-editor-project > div {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.studio-editor-project strong {
+    max-width: 260px;
+
+    overflow: hidden;
+
+    color: #eceef2;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.studio-editor-project small {
+    margin-top: 3px;
+
+    color: #676b76;
+
+    font-size: 9px;
+    letter-spacing: 0.5px;
+}
+
+
+/* ==================================================
+   EDITOR ACTIONS
+================================================== */
+
+.studio-editor-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+}
+
+.studio-editor-actions button {
+    min-height: 32px;
+
+    white-space: nowrap;
+}
+
+
+/* ==================================================
+   EDITOR MAIN AREA
+================================================== */
+
+.studio-editor-layout {
+    flex: 1;
+
+    min-height: 0;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.15fr)
+        minmax(320px, 0.85fr);
+
+    gap: 1px;
+
+    background: #292c34;
+
+    overflow: hidden;
+}
+
+
+/* ==================================================
+   CODE PANEL
+================================================== */
+
+.studio-code-panel {
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    background: #101216;
+
+    overflow: hidden;
+}
+
+.studio-code-label {
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    flex-shrink: 0;
+
+    padding: 0 14px;
+
+    border-bottom: 1px solid #252830;
+
+    background: #15171c;
+
+    color: #777b86;
+
+    font-family:
+        Inter,
+        system-ui,
+        sans-serif;
+
+    font-size: 10px;
+}
+
+.studio-code-label span:first-child {
+    color: #bfc1c8;
+
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+}
+
+.studio-code-label span:last-child {
+    color: #666a75;
+
+    letter-spacing: 0.4px;
+}
+
+
+/* ==================================================
+   CODE EDITOR
+================================================== */
+
+#lucid-code {
+    flex: 1;
+
+    min-width: 0;
+    min-height: 0;
+
+    width: 100%;
+    height: 100%;
+
+    resize: none;
+
+    box-sizing: border-box;
+
+    padding: 18px 20px;
+
+    border: none;
+    outline: none;
+
+    border-radius: 0;
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(255,255,255,0.012),
+            transparent 120px
+        ),
+        #101216;
+
+    color: #d8d9df;
+
+    caret-color: #c9c2ee;
+
+    font-family:
+        "Cascadia Code",
+        "SFMono-Regular",
+        Consolas,
+        "Liberation Mono",
+        Menlo,
+        monospace;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+    tab-size: 4;
+
+    white-space: pre;
+
+    overflow: auto;
+}
+
+#lucid-code::selection {
+    background: rgba(122, 113, 171, 0.30);
+}
+
+#lucid-code::placeholder {
+    color: #4d515b;
+}
+
+
+/* Scrollbar */
+
+#lucid-code::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+#lucid-code::-webkit-scrollbar-track {
+    background: #101216;
+}
+
+#lucid-code::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+
+    background: #30333b;
+
+    border: 2px solid #101216;
+}
+
+#lucid-code::-webkit-scrollbar-thumb:hover {
+    background: #424650;
+}
+
+
+/* ==================================================
+   PREVIEW PANEL
+================================================== */
+
+.studio-preview-panel {
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    background: #14161b;
+
+    overflow: hidden;
+}
+
+.studio-preview-label {
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+
+    flex-shrink: 0;
+
+    padding: 0 14px;
+
+    border-bottom: 1px solid #252830;
+
+    background: #15171c;
+
+    color: #777b86;
+
+    font-size: 10px;
+
+    letter-spacing: 0.4px;
+}
+
+.lucid-preview {
+    flex: 1;
+
+    min-width: 0;
+    min-height: 0;
+
+    padding: 20px;
+
+    box-sizing: border-box;
+
+    overflow: auto;
+
+    background:
+        radial-gradient(
+            circle at center top,
+            rgba(107, 98, 151, 0.08),
+            transparent 45%
+        ),
+        #0f1115;
+}
+
+.lucid-preview::-webkit-scrollbar {
+    width: 9px;
+}
+
+.lucid-preview::-webkit-scrollbar-track {
+    background: #0f1115;
+}
+
+.lucid-preview::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background: #30333b;
+}
+
+
+/* ==================================================
+   EMPTY PREVIEW
+================================================== */
+
+.studio-preview-empty {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px;
+
+    box-sizing: border-box;
+
+    color: #545862;
+
+    text-align: center;
+
+    font-size: 12px;
+}
+
+
+/* ==================================================
+   EDITOR FOOTER
+================================================== */
+
+.studio-editor-footer {
+    height: 29px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    flex-shrink: 0;
+
+    padding: 0 12px;
+
+    border-top: 1px solid #292c34;
+
+    background: #15171c;
+
+    box-sizing: border-box;
+
+    color: #626670;
+
+    font-size: 9px;
+}
+
+.studio-editor-status {
+    color: #777b86;
+}
+
+.studio-editor-permissions {
+    color: #5f636e;
+}
+
+
+/* ==================================================
+   SAVE STATE
+================================================== */
+
+.studio-editor-actions .studio-saved {
+    border-color: #555b68;
+
+    background: #252830;
+
+    color: #dadddf;
+}
+
+
+/* ==================================================
+   SMALL WINDOWS
+================================================== */
+
+@media (max-width: 850px) {
+
+    .studio-editor-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 0.8fr;
+    }
+
+    .studio-editor-actions {
+        gap: 4px;
+    }
+
+    .studio-editor-actions button {
+        padding: 7px 9px;
+    }
+
+}
+
+/* ==================================================
+   LUCID SCRIPT CODE EDITOR
+================================================== */
+
+.lucid-editor {
+    flex: 1;
+
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+
+    overflow: hidden;
+
+    background: #101216;
+}
+
+
+/* ==================================================
+   LINE NUMBERS
+================================================== */
+
+.lucid-line-numbers {
+    width: 52px;
+
+    flex-shrink: 0;
+
+    padding-top: 18px;
+
+    box-sizing: border-box;
+
+    border-right: 1px solid #20232a;
+
+    background: #0e1014;
+
+    color: #4f535e;
+
+    font-family:
+        "Cascadia Code",
+        "SFMono-Regular",
+        Consolas,
+        monospace;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+    text-align: right;
+
+    user-select: none;
+
+    overflow: hidden;
+
+    white-space: pre;
+
+    padding-right: 12px;
+}
+
+
+/* ==================================================
+   ACTUAL CODE AREA
+================================================== */
+
+#lucid-code {
+    flex: 1;
+
+    min-width: 0;
+    min-height: 0;
+
+    width: 0;
+    height: 100%;
+
+    margin: 0;
+
+    padding: 18px 20px;
+
+    box-sizing: border-box;
+
+    border: none;
+    outline: none;
+    border-radius: 0;
+
+    resize: none;
+
+    overflow: auto;
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(255,255,255,0.012),
+            transparent 160px
+        ),
+        #101216;
+
+    color: #d8d9df;
+
+    caret-color: #c9c2ee;
+
+    font-family:
+        "Cascadia Code",
+        "SFMono-Regular",
+        Consolas,
+        "Liberation Mono",
+        Menlo,
+        monospace;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+    letter-spacing: 0;
+
+    white-space: pre;
+
+    tab-size: 4;
+}
+
+#lucid-code::selection {
+    background: rgba(118, 108, 168, 0.30);
+}
+
+#lucid-code:focus {
+    outline: none;
+}
+
+
+/* ==================================================
+   CODE SCROLLBARS
+================================================== */
+
+#lucid-code::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+#lucid-code::-webkit-scrollbar-track {
+    background: #101216;
+}
+
+#lucid-code::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+
+    background: #30333b;
+
+    border: 2px solid #101216;
+}
+
+#lucid-code::-webkit-scrollbar-thumb:hover {
+    background: #414550;
+}
+
+
+/* Keep line numbers synchronized */
+
+.lucid-line-numbers::-webkit-scrollbar {
+    width: 0;
+}

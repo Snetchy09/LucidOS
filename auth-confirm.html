@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Lucid — Verification</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    #282136 0%,
+                    #111018 55%,
+                    #07080b 100%
+                );
+
+            color: #e8e5ed;
+
+            font-family:
+                Arial,
+                sans-serif;
+
+        }
+
+
+        .verification {
+
+            width:
+                min(
+                    430px,
+                    calc(100vw - 32px)
+                );
+
+            padding: 35px;
+
+            text-align: center;
+
+            border:
+                1px solid
+                rgba(255,255,255,0.1);
+
+            border-radius: 20px;
+
+            background:
+                rgba(20,18,27,0.9);
+
+            box-shadow:
+                0 25px 70px
+                rgba(0,0,0,0.45);
+
+        }
+
+
+        .orb {
+
+            width: 66px;
+            height: 66px;
+
+            margin:
+                0 auto 20px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle at 35% 28%,
+                    #a79ac0,
+                    #665873 42%,
+                    #201c28 100%
+                );
+
+            box-shadow:
+                0 0 35px
+                rgba(145,115,190,0.3);
+
+        }
+
+
+        .orb::after {
+
+            content: "•";
+
+            color: white;
+
+            font-size: 22px;
+
+        }
+
+
+        .eyebrow {
+
+            color: #777182;
+
+            font-size: 10px;
+
+            letter-spacing: 3px;
+
+        }
+
+
+        h1 {
+
+            margin:
+                7px 0 10px;
+
+            font-size: 27px;
+
+            font-weight: 500;
+
+        }
+
+
+        p {
+
+            color: #898493;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+
+        }
+
+
+        .status {
+
+            margin-top: 25px;
+
+            padding: 12px;
+
+            border-radius: 9px;
+
+            background: #191720;
+
+            color: #a9a3b3;
+
+            font-size: 12px;
+
+        }
+
+
+        .success {
+
+            color: #b9d6bc;
+
+        }
+
+
+        .error {
+
+            color: #c98b8b;
+
+        }
+
+
+        button {
+
+            margin-top: 18px;
+
+            padding:
+                10px 17px;
+
+            border:
+                1px solid
+                #3a3545;
+
+            border-radius: 8px;
+
+            background: #292430;
+
+            color: #e5e1eb;
+
+            cursor: pointer;
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <main class="verification">
+
+        <div class="orb"></div>
+
+        <div class="eyebrow">
+            LUCID DEVELOPER
+        </div>
+
+        <h1>
+            Verifying your email
+        </h1>
+
+        <p>
+            Lucid is confirming your developer identity.
+        </p>
+
+        <div
+            id="status"
+            class="status"
+        >
+            Please wait...
+        </div>
+
+    </main>
+
+
+    <script
+        type="module"
+        src="./js/auth-confirm.js"
+    ></script>
+
+</body>
+
+</html>

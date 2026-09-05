@@ -1,269 +1,80 @@
 let highestZIndex = 10;
 
-
 function createWindow(title, content) {
-
-    const windowElement =
-        document.createElement("div");
-
-    windowElement.className =
-        "window";
-
-    windowElement.style.zIndex =
-        ++highestZIndex;
-
+    const windowElement = document.createElement("div");
+    windowElement.className = "window";
+    windowElement.style.zIndex = ++highestZIndex;
 
     windowElement.innerHTML = `
-
         <div class="title-bar">
-
-            <div class="window-title">
-                ${title}
-            </div>
-
+            <div class="window-title">${title}</div>
             <div class="window-controls">
-
-                <button
-                    class="window-control minimize-button"
-                >
-                    −
-                </button>
-
-                <button
-                    class="window-control maximize-button"
-                >
-                    □
-                </button>
-
-                <button
-                    class="window-control close-button"
-                >
-                    ×
-                </button>
-
+                <button class="window-control minimize-button">−</button>
+                <button class="window-control maximize-button">□</button>
+                <button class="window-control close-button">×</button>
             </div>
-
         </div>
-
-        <div class="window-content">
-            ${content}
-        </div>
-
+        <div class="window-content">${content}</div>
     `;
 
+    document.getElementById("desktop").appendChild(windowElement);
 
-    document
-        .getElementById("desktop")
-        .appendChild(windowElement);
+    const taskbarApps = document.getElementById("taskbar-apps");
+    const taskbarButton = document.createElement("button");
+    taskbarButton.className = "taskbar-app";
+    taskbarButton.textContent = title;
+    taskbarApps.appendChild(taskbarButton);
 
+    windowElement.addEventListener("mousedown", () => {
+        windowElement.style.zIndex = ++highestZIndex;
+    });
 
-    /* TASKBAR BUTTON */
+    taskbarButton.addEventListener("click", () => {
+        windowElement.classList.remove("minimized");
+        windowElement.style.zIndex = ++highestZIndex;
+    });
 
-    const taskbarApps =
-        document.getElementById(
-            "taskbar-apps"
-        );
+    windowElement.querySelector(".close-button").addEventListener("click", () => {
+        windowElement.remove();
+        taskbarButton.remove();
+    });
 
+    windowElement.querySelector(".minimize-button").addEventListener("click", () => {
+        windowElement.classList.add("minimized");
+    });
 
-    const taskbarButton =
-        document.createElement("button");
+    windowElement.querySelector(".maximize-button").addEventListener("click", () => {
+        windowElement.classList.toggle("maximized");
+    });
 
-
-    taskbarButton.className =
-        "taskbar-app";
-
-
-    taskbarButton.textContent =
-        title;
-
-
-    taskbarApps.appendChild(
-        taskbarButton
-    );
-
-
-    /* BRING TO FRONT */
-
-    windowElement.addEventListener(
-        "mousedown",
-        function () {
-
-            windowElement.style.zIndex =
-                ++highestZIndex;
-
-        }
-    );
-
-
-    /* TASKBAR */
-
-    taskbarButton.addEventListener(
-        "click",
-        function () {
-
-            windowElement.classList.remove(
-                "minimized"
-            );
-
-            windowElement.style.zIndex =
-                ++highestZIndex;
-
-        }
-    );
-
-
-    /* CLOSE */
-
-    const closeButton =
-        windowElement.querySelector(
-            ".close-button"
-        );
-
-
-    closeButton.addEventListener(
-        "click",
-        function () {
-
-            windowElement.remove();
-
-            taskbarButton.remove();
-
-        }
-    );
-
-
-    /* MINIMIZE */
-
-    const minimizeButton =
-        windowElement.querySelector(
-            ".minimize-button"
-        );
-
-
-    minimizeButton.addEventListener(
-        "click",
-        function () {
-
-            windowElement.classList.add(
-                "minimized"
-            );
-
-        }
-    );
-
-
-    /* MAXIMIZE */
-
-    const maximizeButton =
-        windowElement.querySelector(
-            ".maximize-button"
-        );
-
-
-    maximizeButton.addEventListener(
-        "click",
-        function () {
-
-            windowElement.classList.toggle(
-                "maximized"
-            );
-
-        }
-    );
-
-
-    /* DRAGGING */
-
-    makeDraggable(
-        windowElement,
-
-        windowElement.querySelector(
-            ".title-bar"
-        )
-    );
-
+    makeDraggable(windowElement, windowElement.querySelector(".title-bar"));
 
     return windowElement;
 }
 
-
-function makeDraggable(
-    windowElement,
-    titleBar
-) {
-
+function makeDraggable(windowElement, titleBar) {
     let dragging = false;
-
     let offsetX = 0;
     let offsetY = 0;
 
+    titleBar.addEventListener("mousedown", event => {
+        if (event.target.closest(".window-controls")) return;
 
-    titleBar.addEventListener(
-        "mousedown",
-        function (event) {
+        dragging = true;
+        offsetX = event.clientX - windowElement.offsetLeft;
+        offsetY = event.clientY - windowElement.offsetTop;
+    });
 
-            if (
-                event.target.closest(
-                    ".window-controls"
-                )
-            ) {
-                return;
-            }
+    document.addEventListener("mousemove", event => {
+        if (!dragging) return;
 
+        windowElement.style.left = (event.clientX - offsetX) + "px";
+        windowElement.style.top = (event.clientY - offsetY) + "px";
+    });
 
-            dragging = true;
-
-
-            offsetX =
-                event.clientX -
-                windowElement.offsetLeft;
-
-
-            offsetY =
-                event.clientY -
-                windowElement.offsetTop;
-
-        }
-    );
-
-
-    document.addEventListener(
-        "mousemove",
-        function (event) {
-
-            if (!dragging) {
-                return;
-            }
-
-
-            windowElement.style.left =
-                (
-                    event.clientX -
-                    offsetX
-                ) + "px";
-
-
-            windowElement.style.top =
-                (
-                    event.clientY -
-                    offsetY
-                ) + "px";
-
-        }
-    );
-
-
-    document.addEventListener(
-        "mouseup",
-        function () {
-
-            dragging = false;
-
-        }
-    );
+    document.addEventListener("mouseup", () => {
+        dragging = false;
+    });
 }
 
-
-export {
-    createWindow
-};
+export { createWindow };

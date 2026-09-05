@@ -1,86 +1,19 @@
-/*
-    ==========================================
-             LUCIDOS ANOMALY ENGINE
-    ==========================================
-
-    still in work , planning to make it work when the OS is built and enaugh apps are there.
-
-*/
-
-
-import {
-    getLucidLevel
-} from "./lucid-state.js";
-
-
-/* =========================
-   CURRENT LEVEL
-========================= */
+import { getLucidLevel } from "./lucid-state.js";
 
 function getAnomalyLevel() {
-/*template */
-
     return getLucidLevel();
-
 }
 
-
-/* =========================
-   ANOMALY CHECK
-========================= */
-
-function shouldAnomalyAppear(
-    anomalyName
-) {
-
-    /*
-     TEMPORARY
-    */
-
+function shouldAnomalyAppear(anomalyName) {
     return false;
-
 }
 
-
-/* =========================
-   ANOMALY VALUE
-========================= */
-
-function getAnomalyValue(
-    name,
-    normalValue
-) {
-
-    /*
-        also for future use
-    */
-
+function getAnomalyValue(name, normalValue) {
     return normalValue;
-
 }
 
-
-/* =========================
-   EVENT HOOK
-========================= */
-
-function notifyAnomalyEngine(
-    eventName,
-    data = {}
-) {
-
-    /*
-        again for future use
-    */
-
+function notifyAnomalyEngine(eventName, data = {}) {
     return;
-
 }
 
-
-export {
-    getAnomalyLevel,
-    shouldAnomalyAppear,
-    getAnomalyValue,
-    notifyAnomalyEngine
-};
+export { getAnomalyLevel, shouldAnomalyAppear, getAnomalyValue, notifyAnomalyEngine };
