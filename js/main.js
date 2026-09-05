@@ -374,6 +374,8 @@ if (startButton) {
     const desktop = document.getElementById("desktop");
 
     desktop.addEventListener("click", event => {
+        // The Lucid orb is disabled while any window is open.
+        if (document.querySelector(".window")) return;
         if (event.target.closest(".desktop-app")) return;
 
         const rect = desktop.getBoundingClientRect();
@@ -396,6 +398,8 @@ if (startButton) {
 
     startButton.addEventListener("click", event => {
         event.stopPropagation();
+        // Keep the orb inactive whenever a window exists.
+        if (document.querySelector(".window")) return;
         if (launcherOpen) {
             closeLucidLauncher();
         } else {
