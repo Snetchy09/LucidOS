@@ -1,8 +1,7 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.112.4";
+import { createClient } from "@supabase/supabase-js";
 
-const config = window.LUCID_CONFIG || {};
-const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || config.SUPABASE_URL || "";
-const supabaseKey = import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY || config.SUPABASE_PUBLISHABLE_KEY || "";
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
 
 let supabase = null;
 
@@ -45,7 +44,9 @@ async function signUpDeveloper(email, password, username, displayName) {
     if (data.user && !data.session) {
         return { user: data.user, needsConfirmation: true };
     }
-    if (!data.user) throw new Error("Developer account could not be created.");
+    if (!data.user) {
+        throw new Error("Developer account could not be created.");
+    }
 
     await createDeveloperProfile(data.user, username, displayName);
     return { user: data.user, needsConfirmation: false };
