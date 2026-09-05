@@ -1,7 +1,8 @@
-import { saveUserFile } from "./filesystem.js";
+import { deleteUserFile, saveUserFile } from "./filesystem.js";
 
 const APP_REGISTRY_KEY = "lucid-installed-apps";
 const EXTERNAL_APPS_KEY = "lucid-external-apps";
+const REGISTRY_VERSION_KEY = "lucid-app-registry-v2";
 
 const appCatalog = [
     { id: "files", name: "Files", icon: "📁", version: "1.0.0", category: "System", type: "core", description: "Browse and manage your Lucid files." },
@@ -47,6 +48,10 @@ function writeInstalledAppFile(app) {
         .catch(error => console.warn("Lucid: could not save app package:", error));
 }
 
+function removeInstalledAppFile(appId) {
+    deleteUserFile(["Downloads"], `${appId}.lucidapp`).catch(() => {});
+}
+
 function installExternalApp(app) {
     if (!app || !app.id || isAppInstalled(app.id)) return false;
     const externalApps = getExternalApps();
@@ -82,15 +87,19 @@ function initializeAppRegistry() {
 
     if (!saved) {
         localStorage.setItem(APP_REGISTRY_KEY, JSON.stringify([...coreIds, ...firstRunApps]));
+        localStorage.setItem(REGISTRY_VERSION_KEY, "2");
         return;
     }
 
     try {
         const existing = JSON.parse(saved);
-        const merged = [...new Set([...existing, ...coreIds, ...firstRunApps])];
+        const extras = localStorage.getItem(REGISTRY_VERSION_KEY) === "2" ? [] : firstRunApps;
+        const merged = [...new Set([...existing, ...coreIds, ...extras])];
         localStorage.setItem(APP_REGISTRY_KEY, JSON.stringify(merged));
+        localStorage.setItem(REGISTRY_VERSION_KEY, "2");
     } catch {
         localStorage.setItem(APP_REGISTRY_KEY, JSON.stringify([...coreIds, ...firstRunApps]));
+        localStorage.setItem(REGISTRY_VERSION_KEY, "2");
     }
 }
 
@@ -151,6 +160,7 @@ function uninstallApp(appId) {
 
     saveInstalledIds(getInstalledIds().filter(id => id !== appId));
     saveExternalApps(getExternalApps().filter(item => item.id !== appId));
+    removeInstalledAppFile(appId);
     removeDesktopPosition(appId);
 
     window.dispatchEvent(new CustomEvent("lucid-app-uninstalled", { detail: { appId, app } }));
