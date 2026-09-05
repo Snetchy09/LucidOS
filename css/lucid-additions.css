@@ -96,86 +96,320 @@
     object-fit: contain;
 }
 
+/* Shared controls for system app windows */
+.window button {
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 9px;
+    background: rgba(255,255,255,.055);
+    color: var(--text);
+    transition: background .15s ease, border-color .15s ease, transform .15s ease;
+}
+
+.window button:hover:not(:disabled) {
+    background: rgba(255,255,255,.09);
+    border-color: rgba(255,255,255,.13);
+}
+
+.window button:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.window button:disabled {
+    opacity: .45;
+    cursor: default;
+}
+
+.window input,
+.window textarea,
+.window select {
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 9px;
+    background: rgba(5,7,11,.55);
+    color: var(--text);
+}
+
+.window input::placeholder,
+.window textarea::placeholder {
+    color: var(--muted);
+}
+
+.window select option {
+    background: #15171c;
+    color: #e7e8ec;
+}
+
+.settings-app {
+    color: var(--text);
+}
+
+.settings-sidebar {
+    background: rgba(255,255,255,.025);
+    border-right-color: rgba(255,255,255,.07);
+}
+
+.settings-tab {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    margin-bottom: 5px;
+    background: transparent !important;
+    border-color: transparent !important;
+}
+
+.settings-tab:hover,
+.settings-tab.active {
+    background: rgba(255,255,255,.075) !important;
+    border-color: rgba(255,255,255,.07) !important;
+}
+
+.settings-content h2,
+.settings-content h3 {
+    color: var(--text);
+}
+
+.settings-actions button,
+.save-account,
+.storage-reset {
+    padding: 9px 13px;
+}
+
+/* Lucid Paint */
 .lucid-paint {
-    width: min(1100px, 92vw);
-    height: min(760px, 82vh);
+    width: min(1240px, 94vw);
+    height: min(820px, 88vh);
+    min-width: 720px;
+    min-height: 520px;
     display: flex;
     flex-direction: column;
-    background: rgba(16,18,24,.96);
+    overflow: hidden;
+    background: #101218;
 }
 
-.paint-toolbar {
+.paint-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+}
+
+.paint-eyebrow {
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    color: var(--muted);
+}
+
+.paint-header h1 {
+    margin: 3px 0 0;
+    font-size: 21px;
+    font-weight: 600;
+}
+
+.paint-main-modes,
+.paint-submode-bar,
+.paint-controls,
+.paint-tool-group,
+.paint-animation-actions,
+.paint-frame-controls {
+    display: flex;
+    align-items: center;
+}
+
+.paint-main-modes {
+    gap: 5px;
+    padding: 4px;
+    border-radius: 11px;
+    background: rgba(255,255,255,.035);
+}
+
+.paint-main-mode,
+.paint-submode,
+.paint-controls button,
+.paint-tool,
+.paint-animation-actions button,
+.paint-frame-controls button {
+    padding: 8px 11px;
+    cursor: pointer;
+}
+
+.paint-main-mode.active,
+.paint-submode.active,
+.paint-tool.active {
+    background: rgba(255,255,255,.12) !important;
+    border-color: rgba(255,255,255,.13) !important;
+}
+
+.paint-submode-bar {
+    gap: 8px;
     flex-wrap: wrap;
-    gap: 10px;
-    padding: 12px;
-    border-bottom: 1px solid rgba(255,255,255,.08);
+    padding: 9px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    background: rgba(255,255,255,.018);
 }
 
-.paint-brand {
-    font-weight: 700;
-    margin-right: auto;
+.paint-controls {
+    margin-left: auto;
+    gap: 7px;
+    flex-wrap: wrap;
 }
 
-.paint-modes,
-.paint-tools {
+.paint-controls label,
+.paint-fps-control {
     display: flex;
     align-items: center;
     gap: 6px;
-    flex-wrap: wrap;
-}
-
-.paint-mode.active,
-#paint-eraser.active {
-    background: rgba(255,255,255,.16);
-}
-
-.paint-tools label,
-.paint-animation-bar label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
     font-size: 12px;
+    color: var(--text-soft);
 }
 
-.paint-stage {
+.paint-controls input[type="range"] {
+    width: 110px;
+}
+
+.paint-controls input[type="color"] {
+    width: 34px;
+    height: 28px;
+    padding: 2px;
+}
+
+.paint-workspace {
     flex: 1;
     min-height: 0;
     display: grid;
+    grid-template-columns: minmax(0, 1fr) 190px;
+    gap: 0;
+}
+
+.paint-stage {
+    min-width: 0;
+    min-height: 0;
+    display: grid;
     place-items: center;
-    padding: 20px;
-    background: #11131a;
+    padding: 24px;
     overflow: auto;
+    background:
+        radial-gradient(circle at center, rgba(70,64,90,.12), transparent 58%),
+        #0d0f15;
 }
 
 #paint-canvas {
+    display: block;
     max-width: 100%;
     max-height: 100%;
     background-color: #fff;
-    background-image: linear-gradient(45deg, #eee 25%, transparent 25%), linear-gradient(-45deg, #eee 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #eee 75%), linear-gradient(-45deg, transparent 75%, #eee 75%);
+    background-image:
+        linear-gradient(45deg, #e9e9e9 25%, transparent 25%),
+        linear-gradient(-45deg, #e9e9e9 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e9e9e9 75%),
+        linear-gradient(-45deg, transparent 75%, #e9e9e9 75%);
     background-size: 16px 16px;
     background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    box-shadow: 0 12px 34px rgba(0,0,0,.35);
     touch-action: none;
 }
 
 #paint-canvas.pixel-canvas {
+    width: min(680px, 66vw);
+    height: min(680px, 66vw);
+    min-width: 360px;
+    min-height: 360px;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
 }
 
-.paint-animation-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-top: 1px solid rgba(255,255,255,.08);
+.paint-side-panel {
+    padding: 18px;
+    border-left: 1px solid rgba(255,255,255,.07);
+    background: rgba(255,255,255,.022);
+    overflow: auto;
+}
+
+.paint-panel-title {
+    font-size: 14px;
+    font-weight: 650;
+}
+
+.paint-side-panel p {
+    margin: 7px 0 16px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.paint-tool-group {
+    gap: 6px;
+    margin-bottom: 18px;
+}
+
+.paint-tool {
+    flex: 1;
+}
+
+.paint-animation-controls[hidden] {
+    display: none;
+}
+
+.paint-animation-controls {
+    display: grid;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,.06);
+}
+
+.paint-frame-controls {
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.paint-frame-controls span {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-soft);
+}
+
+.paint-animation-actions {
+    gap: 6px;
+}
+
+.paint-animation-actions button {
+    flex: 1;
+}
+
+.paint-fps-control {
+    justify-content: space-between;
+}
+
+.paint-fps-control input {
+    width: 70px;
+    padding: 7px 8px;
 }
 
 .paint-status {
-    padding: 7px 12px;
+    padding: 8px 13px;
+    font-size: 11px;
+    color: var(--muted);
+    border-top: 1px solid rgba(255,255,255,.06);
+    background: rgba(0,0,0,.12);
+}
+
+/* Studio publishing feedback */
+.lucid-publish-notice {
+    margin: 0 14px 10px;
+    padding: 11px 13px;
+    border: 1px solid rgba(180,255,210,.12);
+    border-radius: 10px;
+    background: rgba(120,190,150,.08);
+    color: var(--text-soft);
     font-size: 12px;
-    opacity: .65;
-    border-top: 1px solid rgba(255,255,255,.05);
+}
+
+.lucid-publish-notice[data-error="true"] {
+    border-color: rgba(255,120,120,.16);
+    background: rgba(180,70,70,.08);
+}
+
+.lucid-studio-publish-button {
+    min-width: 88px;
 }
