@@ -1,18 +1,21 @@
+import { saveUserFile } from "./filesystem.js";
+
 const APP_REGISTRY_KEY = "lucid-installed-apps";
 const EXTERNAL_APPS_KEY = "lucid-external-apps";
 
 const appCatalog = [
     { id: "files", name: "Files", icon: "📁", version: "1.0.0", category: "System", type: "core", description: "Browse and manage your Lucid files." },
     { id: "lucid-studio", name: "Lucid Studio", icon: "◇", version: "1.0.0", category: "Developer", type: "core", description: "Create, test, and submit Lucid applications." },
-    { id: "settings", name: "Settings", icon: "⚙️", version: "1.0.0", category: "System", type: "core", description: "Configure Lucid OS." },
-    { id: "terminal", name: "Terminal", icon: "⌘", version: "1.0.0", category: "System", type: "core", description: "Command-line tools for Lucid OS." },
+    { id: "settings", name: "Settings", icon: "⚙️", version: "1.0.0", category: "System", type: "core", description: "Configure LucidOS." },
+    { id: "terminal", name: "Terminal", icon: "⌘", version: "1.0.0", category: "System", type: "core", description: "Command-line tools for LucidOS." },
     { id: "store", name: "Lucid Store", icon: "🛍️", version: "1.0.0", category: "System", type: "core", description: "Discover and install Lucid applications." },
     { id: "calculator", name: "Calculator", icon: "🧮", version: "1.0.0", category: "Utilities", type: "optional", description: "A simple Lucid calculator." },
     { id: "media", name: "Lucid Media", icon: "🎵", version: "1.0.0", category: "Media", type: "optional", description: "Play music and create beats." },
+    { id: "paint", name: "Lucid Paint", icon: "🎨", version: "1.0.0", category: "Creative", type: "optional", description: "Paint, pixel art, and simple animations." },
     { id: "notes", name: "Notes", icon: "📝", version: "1.0.0", category: "Productivity", type: "optional", description: "Write and organize your notes." },
     { id: "calendar", name: "Calendar", icon: "📅", version: "1.0.0", category: "Productivity", type: "optional", description: "Manage events and dates." },
     { id: "text-editor", name: "Text Editor", icon: "📄", version: "1.0.0", category: "Productivity", type: "optional", description: "Edit plain text files." },
-    { id: "browser", name: "Browser", icon: "🌐", version: "1.0.0", category: "Internet", type: "optional", description: "Browse the web from Lucid OS." }
+    { id: "browser", name: "Browser", icon: "🌐", version: "1.0.0", category: "Internet", type: "optional", description: "Browse the web from LucidOS." }
 ];
 
 function getExternalApps() {
@@ -30,10 +33,22 @@ function saveExternalApps(apps) {
     localStorage.setItem(EXTERNAL_APPS_KEY, JSON.stringify(apps));
 }
 
-function installExternalApp(app) {
-    if (!app || !app.id) return false;
-    if (isAppInstalled(app.id)) return false;
+function writeInstalledAppFile(app) {
+    if (!app || !app.id || app.type === "core") return;
+    const manifest = {
+        type: "lucid-app",
+        id: app.id,
+        name: app.name,
+        version: app.version || "1.0.0",
+        category: app.category || "Other",
+        description: app.description || ""
+    };
+    saveUserFile(["Downloads"], `${app.id}.lucidapp`, JSON.stringify(manifest, null, 2), "application/json")
+        .catch(error => console.warn("Lucid: could not save app package:", error));
+}
 
+function installExternalApp(app) {
+    if (!app || !app.id || isAppInstalled(app.id)) return false;
     const externalApps = getExternalApps();
     if (externalApps.some(item => item.id === app.id)) return false;
 
@@ -52,6 +67,7 @@ function installExternalApp(app) {
     });
 
     saveExternalApps(externalApps);
+    writeInstalledAppFile(app);
     window.dispatchEvent(new CustomEvent("lucid-app-installed", { detail: { appId: app.id, app } }));
     return true;
 }
@@ -96,8 +112,7 @@ function saveInstalledIds(ids) {
 function getInstalledApps() {
     const installedIds = new Set(getInstalledIds());
     const builtInApps = appCatalog.filter(app => installedIds.has(app.id)).map(app => ({ ...app, installed: true }));
-    const externalApps = getExternalApps();
-    return [...builtInApps, ...externalApps];
+    return [...builtInApps, ...getExternalApps()];
 }
 
 function getAllApps() {
@@ -108,24 +123,22 @@ function getAllApps() {
 function getApp(appId) {
     const builtIn = appCatalog.find(app => app.id === appId);
     if (builtIn) return builtIn;
-    const externalApps = getExternalApps();
-    return externalApps.find(app => app.id === appId) || null;
+    return getExternalApps().find(app => app.id === appId) || null;
 }
 
 function isAppInstalled(appId) {
-    const builtIn = getInstalledIds().includes(appId);
-    if (builtIn) return true;
+    if (getInstalledIds().includes(appId)) return true;
     return getExternalApps().some(app => app.id === appId);
 }
 
 function installApp(appId) {
     const app = getApp(appId);
-    if (!app) { console.warn(`Lucid: unknown app "${appId}"`); return false; }
-    if (isAppInstalled(appId)) return false;
+    if (!app || isAppInstalled(appId)) return false;
 
     const installedIds = getInstalledIds();
     installedIds.push(appId);
     saveInstalledIds(installedIds);
+    writeInstalledAppFile(app);
 
     window.dispatchEvent(new CustomEvent("lucid-app-installed", { detail: { appId, app } }));
     return true;
@@ -133,17 +146,10 @@ function installApp(appId) {
 
 function uninstallApp(appId) {
     const app = getApp(appId);
-    if (!app) return false;
-    if (app.type === "core") { console.warn(`Lucid: cannot uninstall core app "${appId}"`); return false; }
+    if (!app || app.type === "core") return false;
 
-    const installedIds = getInstalledIds();
-    const remaining = installedIds.filter(id => id !== appId);
-    saveInstalledIds(remaining);
-
-    const externalApps = getExternalApps();
-    const remainingExternal = externalApps.filter(item => item.id !== appId);
-    saveExternalApps(remainingExternal);
-
+    saveInstalledIds(getInstalledIds().filter(id => id !== appId));
+    saveExternalApps(getExternalApps().filter(item => item.id !== appId));
     removeDesktopPosition(appId);
 
     window.dispatchEvent(new CustomEvent("lucid-app-uninstalled", { detail: { appId, app } }));
@@ -169,8 +175,7 @@ function getAppLauncher(appId) {
 }
 
 function registerApp(app) {
-    if (!app || !app.id || !app.name) return false;
-    if (appCatalog.some(existing => existing.id === app.id)) return false;
+    if (!app || !app.id || !app.name || appCatalog.some(existing => existing.id === app.id)) return false;
     appCatalog.push({ icon: "◇", version: "1.0.0", category: "Other", type: "optional", description: "A Lucid application.", ...app });
     return true;
 }
