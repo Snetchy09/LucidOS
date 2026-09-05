@@ -35,9 +35,9 @@ jobs:
             - name: Build LucidOS
               run: npm run build
               env:
-                  VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-                  VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-                  VITE_LUCID_PUBLISH_API_URL: ${{ secrets.VITE_LUCID_PUBLISH_API_URL }}
+                  VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+                  VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+                  VITE_LUCID_PUBLISH_API_URL: ${{ vars.VITE_LUCID_PUBLISH_API_URL }}
 
             - name: Setup Pages
               uses: actions/configure-pages@v5
