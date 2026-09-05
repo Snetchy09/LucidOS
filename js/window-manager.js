@@ -1,4 +1,4 @@
-let highestZIndex = 10;
+let highestZIndex = 100;
 
 function createWindow(title, content) {
     const windowElement = document.createElement("div");

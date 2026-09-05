@@ -1,5 +1,5 @@
 import { createWindow } from "../js/window-manager.js";
-import { supabase, getCurrentUser, signUpDeveloper, signInDeveloper, signOutDeveloper } from "../js/lucid-store-api.js";
+import { supabase, getCurrentUser, signUpDeveloper, signOutDeveloper } from "../js/lucid-store-api.js";
 import { runLucidScript, buildManifest } from "./lucid-script-runtime.js";
 import { createProject, getProjects, getProject, getActiveProject, setActiveProject, saveProjectSource, renameProject, deleteProject, duplicateProject, projectLanguageLabel } from "./lucid-projects.js";
 
@@ -878,8 +878,13 @@ async function buildLucidProject(root, project = null) {
     }
 }
 
-function escapeHTML(value) {
-    return String(value ?? "").replaceAll("&", "&").replaceAll("<", "<").replaceAll(">", ">").replaceAll('"', """).replaceAll("'", "&#039;");
+function escapeHTML(text) {
+    return String(text ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
 export { createLucidStudio };

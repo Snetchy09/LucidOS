@@ -61,11 +61,11 @@ function saveDesktopPosition(appId, x, y) {
 }
 
 function escapeHTML(text) {
-    return String(text)
-        .replaceAll("&", "&")
-        .replaceAll("<", "<")
-        .replaceAll(">", ">")
-        .replaceAll('"', """)
+    return String(text ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
 }
 
@@ -374,6 +374,7 @@ if (startButton) {
     const desktop = document.getElementById("desktop");
 
     desktop.addEventListener("click", event => {
+        if (document.querySelector(".window")) return;
         if (event.target.closest(".desktop-app")) return;
 
         const rect = desktop.getBoundingClientRect();
@@ -396,6 +397,7 @@ if (startButton) {
 
     startButton.addEventListener("click", event => {
         event.stopPropagation();
+        if (document.querySelector(".window")) return;
         if (launcherOpen) {
             closeLucidLauncher();
         } else {

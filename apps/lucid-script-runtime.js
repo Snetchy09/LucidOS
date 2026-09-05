@@ -737,7 +737,12 @@ function buildManifest({ id, name, version = "1.0.0", description = "", language
 }
 
 function escapeHTML(text) {
-    return String(text).replaceAll("&", "&").replaceAll("<", "<").replaceAll(">", ">").replaceAll('"', """).replaceAll("'", "&#039;");
+    return String(text ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
 export { runLucidScript, buildManifest, readLucidFile, writeLucidFile };
