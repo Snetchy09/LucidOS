@@ -1,17 +1,25 @@
 import { createWindow } from "../js/window-manager.js";
-import { saveUserFile, ensureFolder, saveFileSystem } from "../js/filesystem.js";
+import { saveUserFile } from "../js/filesystem.js";
 
 function createLucidPaint() {
     const content = `
         <div class="lucid-paint">
-            <div class="paint-toolbar">
-                <div class="paint-brand">◇ Lucid Paint</div>
-                <div class="paint-modes">
-                    <button class="paint-mode active" data-mode="normal">Paint</button>
-                    <button class="paint-mode" data-mode="pixel">Pixel</button>
-                    <button class="paint-mode" data-mode="animation">Animation</button>
+            <header class="paint-header">
+                <div>
+                    <div class="paint-eyebrow">LUCID CREATIVE</div>
+                    <h1>Lucid Paint</h1>
                 </div>
-                <div class="paint-tools">
+                <div class="paint-main-modes" role="tablist" aria-label="Paint mode">
+                    <button class="paint-main-mode active" data-main-mode="normal">Normal</button>
+                    <button class="paint-main-mode" data-main-mode="pixel">Pixel</button>
+                </div>
+            </header>
+
+            <div class="paint-submode-bar">
+                <button class="paint-submode active" data-submode="draw">Draw</button>
+                <button class="paint-submode" data-submode="animation">Animation</button>
+
+                <div class="paint-controls">
                     <label>Color <input id="paint-color" type="color" value="#ffffff"></label>
                     <label>Size <input id="paint-size" type="range" min="1" max="40" value="6"></label>
                     <button id="paint-eraser">Eraser</button>
@@ -20,22 +28,44 @@ function createLucidPaint() {
                     <button id="paint-save">Save</button>
                 </div>
             </div>
-            <div class="paint-stage">
-                <canvas id="paint-canvas" width="640" height="400"></canvas>
-            </div>
-            <div class="paint-animation-bar" hidden>
-                <button id="paint-prev-frame">←</button>
-                <span id="paint-frame-label">Frame 1 / 1</span>
-                <button id="paint-next-frame">→</button>
-                <button id="paint-add-frame">＋ Frame</button>
-                <button id="paint-play">▶ Play</button>
-                <label>FPS <input id="paint-fps" type="number" min="1" max="24" value="8"></label>
-            </div>
+
+            <main class="paint-workspace">
+                <div class="paint-stage">
+                    <canvas id="paint-canvas" width="800" height="600"></canvas>
+                </div>
+
+                <aside class="paint-side-panel">
+                    <div class="paint-panel-title" id="paint-panel-title">Normal · Draw</div>
+                    <p id="paint-panel-help">Free drawing on a smooth canvas.</p>
+
+                    <div class="paint-tool-group">
+                        <button class="paint-tool active" data-tool="brush">Brush</button>
+                        <button class="paint-tool" data-tool="eraser">Eraser</button>
+                    </div>
+
+                    <div class="paint-animation-controls" hidden>
+                        <div class="paint-frame-controls">
+                            <button id="paint-prev-frame" aria-label="Previous frame">←</button>
+                            <span id="paint-frame-label">Frame 1 / 1</span>
+                            <button id="paint-next-frame" aria-label="Next frame">→</button>
+                        </div>
+                        <div class="paint-animation-actions">
+                            <button id="paint-add-frame">＋ Add frame</button>
+                            <button id="paint-play">▶ Play</button>
+                        </div>
+                        <label class="paint-fps-control">
+                            <span>FPS</span>
+                            <input id="paint-fps" type="number" min="1" max="24" value="8">
+                        </label>
+                    </div>
+                </aside>
+            </main>
+
             <div class="paint-status" id="paint-status">Ready</div>
         </div>
     `;
 
-    const windowElement = createWindow("◇ Lucid Paint", content);
+    const windowElement = createWindow("Lucid Paint", content);
     setupPaint(windowElement);
     return windowElement;
 }
@@ -44,87 +74,130 @@ function setupPaint(windowElement) {
     const root = windowElement.querySelector(".lucid-paint");
     const canvas = root.querySelector("#paint-canvas");
     const context = canvas.getContext("2d");
-    const color = root.querySelector("#paint-color");
-    const size = root.querySelector("#paint-size");
+    const colorInput = root.querySelector("#paint-color");
+    const sizeInput = root.querySelector("#paint-size");
     const status = root.querySelector("#paint-status");
+    const animationControls = root.querySelector(".paint-animation-controls");
 
-    const modeSizes = {
-        normal: [640, 400],
-        pixel: [64, 40],
-        animation: [320, 200]
+    const sizes = {
+        normal: [800, 600],
+        pixel: [64, 64]
     };
 
     const drawings = {
         normal: null,
         pixel: null,
-        animation: []
+        normalAnimation: [],
+        pixelAnimation: []
     };
 
-    let mode = "normal";
+    let mainMode = "normal";
+    let subMode = "draw";
     let frameIndex = 0;
-    let drawing = false;
-    let erasing = false;
+    let isDrawing = false;
+    let activeTool = "brush";
     let undoStack = [];
     let animationTimer = null;
 
-    function setStatus(text) {
-        status.textContent = text;
+    function setStatus(message) {
+        status.textContent = message;
+    }
+
+    function getFrameStore() {
+        return drawings[`${mainMode}Animation`];
+    }
+
+    function getDrawingKey() {
+        return mainMode;
     }
 
     function clearCanvas() {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        context.fillStyle = "#ffffff00";
-        context.fillRect(0, 0, canvas.width, canvas.height);
     }
 
     function saveSnapshot() {
-        undoStack.push(canvas.toDataURL());
-        if (undoStack.length > 20) undoStack.shift();
+        undoStack.push(canvas.toDataURL("image/png"));
+        if (undoStack.length > 30) undoStack.shift();
     }
 
     function restoreImage(data) {
         clearCanvas();
         if (!data) return;
+
         const image = new Image();
         image.onload = () => context.drawImage(image, 0, 0, canvas.width, canvas.height);
         image.src = data;
     }
 
-    function saveModeDrawing() {
-        const data = canvas.toDataURL();
-        if (mode === "animation") drawings.animation[frameIndex] = data;
-        else drawings[mode] = data;
+    function saveCurrentDrawing() {
+        const data = canvas.toDataURL("image/webp", 0.82);
+
+        if (subMode === "animation") {
+            getFrameStore()[frameIndex] = data;
+        } else {
+            drawings[getDrawingKey()] = data;
+        }
     }
 
-    function loadModeDrawing() {
-        const [width, height] = modeSizes[mode];
+    function loadCurrentDrawing() {
+        const [width, height] = sizes[mainMode];
         canvas.width = width;
         canvas.height = height;
-        context.imageSmoothingEnabled = mode !== "pixel";
-        canvas.classList.toggle("pixel-canvas", mode === "pixel");
+        canvas.classList.toggle("pixel-canvas", mainMode === "pixel");
+        context.imageSmoothingEnabled = mainMode !== "pixel";
 
-        let data;
-        if (mode === "animation") {
-            if (!drawings.animation.length) drawings.animation.push(null);
-            frameIndex = Math.min(frameIndex, drawings.animation.length - 1);
-            data = drawings.animation[frameIndex];
-            updateFrameLabel();
+        if (subMode === "animation") {
+            const frames = getFrameStore();
+            if (!frames.length) frames.push(null);
+            frameIndex = Math.min(frameIndex, frames.length - 1);
+            restoreImage(frames[frameIndex]);
+            root.querySelector("#paint-frame-label").textContent = `Frame ${frameIndex + 1} / ${frames.length}`;
         } else {
-            data = drawings[mode];
+            restoreImage(drawings[getDrawingKey()]);
         }
 
-        restoreImage(data);
         undoStack = [];
     }
 
-    function switchMode(nextMode) {
-        if (mode === nextMode) return;
-        saveModeDrawing();
-        mode = nextMode;
-        root.querySelectorAll(".paint-mode").forEach(button => button.classList.toggle("active", button.dataset.mode === mode));
-        root.querySelector(".paint-animation-bar").hidden = mode !== "animation";
-        loadModeDrawing();
-        setStatus(mode === "animation" ? "Animation mode" : `${mode[0].toUpperCase()}${mode.slice(1)} mode`);
+    function updateModeUI() {
+        root.querySelectorAll(".paint-main-mode").forEach(button => {
+            button.classList.toggle("active", button.dataset.mainMode === mainMode);
+        });
+
+        root.querySelectorAll(".paint-submode").forEach(button => {
+            button.classList.toggle("active", button.dataset.submode === subMode);
+        });
+
+        animationControls.hidden = subMode !== "animation";
+        root.querySelector("#paint-panel-title").textContent = `${mainMode === "normal" ? "Normal" : "Pixel"} · ${subMode === "draw" ? "Draw" : "Animation"}`;
+        root.querySelector("#paint-panel-help").textContent = subMode === "animation"
+            ? "Create frame-by-frame animation in this canvas."
+            : mainMode === "pixel"
+                ? "Draw crisp pixel art on a 64 × 64 canvas."
+                : "Free drawing on a smooth canvas.";
+
+        sizeInput.max = mainMode === "pixel" ? "12" : "40";
+        if (Number(sizeInput.value) > Number(sizeInput.max)) sizeInput.value = sizeInput.max;
+    }
+
+    function setMode(nextMainMode, nextSubMode = subMode) {
+        saveCurrentDrawing();
+        mainMode = nextMainMode;
+        subMode = nextSubMode;
+        frameIndex = 0;
+        updateModeUI();
+        loadCurrentDrawing();
+        setStatus(`${mainMode === "normal" ? "Normal" : "Pixel"} ${subMode === "draw" ? "draw" : "animation"}`);
+    }
+
+    function setSubmode(nextSubmode) {
+        if (subMode === nextSubmode) return;
+        saveCurrentDrawing();
+        subMode = nextSubmode;
+        frameIndex = 0;
+        updateModeUI();
+        loadCurrentDrawing();
+        setStatus(`${mainMode === "normal" ? "Normal" : "Pixel"} ${subMode}`);
     }
 
     function pointerPosition(event) {
@@ -136,13 +209,14 @@ function setupPaint(windowElement) {
     }
 
     function draw(event) {
-        if (!drawing) return;
+        if (!isDrawing) return;
+
         const point = pointerPosition(event);
-        context.lineWidth = Number(size.value);
-        context.lineCap = "round";
+        context.lineWidth = Number(sizeInput.value);
+        context.lineCap = mainMode === "pixel" ? "square" : "round";
         context.lineJoin = "round";
-        context.strokeStyle = erasing ? "rgba(0,0,0,0)" : color.value;
-        context.globalCompositeOperation = erasing ? "destination-out" : "source-over";
+        context.strokeStyle = activeTool === "eraser" ? "rgba(0,0,0,1)" : colorInput.value;
+        context.globalCompositeOperation = activeTool === "eraser" ? "destination-out" : "source-over";
         context.lineTo(point.x, point.y);
         context.stroke();
         context.beginPath();
@@ -151,8 +225,9 @@ function setupPaint(windowElement) {
 
     canvas.addEventListener("pointerdown", event => {
         saveSnapshot();
-        drawing = true;
+        isDrawing = true;
         canvas.setPointerCapture(event.pointerId);
+
         const point = pointerPosition(event);
         context.beginPath();
         context.moveTo(point.x, point.y);
@@ -161,86 +236,83 @@ function setupPaint(windowElement) {
 
     canvas.addEventListener("pointermove", draw);
     canvas.addEventListener("pointerup", () => {
-        drawing = false;
+        if (!isDrawing) return;
+        isDrawing = false;
         context.beginPath();
         context.globalCompositeOperation = "source-over";
-        saveModeDrawing();
+        saveCurrentDrawing();
     });
-    canvas.addEventListener("pointercancel", () => { drawing = false; context.beginPath(); });
-
-    root.querySelectorAll(".paint-mode").forEach(button => {
-        button.addEventListener("click", () => switchMode(button.dataset.mode));
+    canvas.addEventListener("pointercancel", () => {
+        isDrawing = false;
+        context.beginPath();
+        context.globalCompositeOperation = "source-over";
     });
 
-    root.querySelector("#paint-eraser").addEventListener("click", event => {
-        erasing = !erasing;
-        event.currentTarget.classList.toggle("active", erasing);
-        setStatus(erasing ? "Eraser enabled" : "Brush enabled");
+    root.querySelectorAll(".paint-main-mode").forEach(button => {
+        button.addEventListener("click", () => setMode(button.dataset.mainMode));
+    });
+
+    root.querySelectorAll(".paint-submode").forEach(button => {
+        button.addEventListener("click", () => setSubmode(button.dataset.submode));
+    });
+
+    root.querySelectorAll(".paint-tool").forEach(button => {
+        button.addEventListener("click", () => {
+            activeTool = button.dataset.tool;
+            root.querySelectorAll(".paint-tool").forEach(item => item.classList.toggle("active", item === button));
+            setStatus(activeTool === "eraser" ? "Eraser selected" : "Brush selected");
+        });
+    });
+
+    root.querySelector("#paint-eraser").addEventListener("click", () => {
+        activeTool = activeTool === "eraser" ? "brush" : "eraser";
+        root.querySelectorAll(".paint-tool").forEach(button => button.classList.toggle("active", button.dataset.tool === activeTool));
+        setStatus(activeTool === "eraser" ? "Eraser enabled" : "Brush enabled");
     });
 
     root.querySelector("#paint-undo").addEventListener("click", () => {
         const previous = undoStack.pop();
         if (!previous) return;
         restoreImage(previous);
-        saveModeDrawing();
+        saveCurrentDrawing();
         setStatus("Undid last stroke");
     });
 
     root.querySelector("#paint-clear").addEventListener("click", () => {
         saveSnapshot();
         clearCanvas();
-        saveModeDrawing();
+        saveCurrentDrawing();
         setStatus("Canvas cleared");
     });
 
-    root.querySelector("#paint-save").addEventListener("click", () => saveArtwork());
+    root.querySelector("#paint-save").addEventListener("click", saveArtwork);
     root.querySelector("#paint-prev-frame").addEventListener("click", () => changeFrame(-1));
     root.querySelector("#paint-next-frame").addEventListener("click", () => changeFrame(1));
     root.querySelector("#paint-add-frame").addEventListener("click", addFrame);
-    root.querySelector("#paint-play").addEventListener("click", () => toggleAnimation(root));
-
-    loadModeDrawing();
-
-    async function saveArtwork() {
-        saveModeDrawing();
-        const name = prompt("Save as:", mode === "animation" ? "My Animation" : "My Drawing");
-        if (!name) return;
-
-        if (mode === "animation") {
-            const frames = drawings.animation.filter(Boolean);
-            const data = JSON.stringify({ type: "lucid-animation", fps: Number(root.querySelector("#paint-fps").value) || 8, width: 320, height: 200, frames }, null, 2);
-            await saveUserFile(["Pictures", "Animations"], `${name.replace(/\.lpaint$/i, "")}.lpaint`, data, "application/json");
-            setStatus("Animation saved to Pictures / Animations");
-            return;
-        }
-
-        canvas.toBlob(async blob => {
-            if (!blob) return;
-            await saveUserFile(["Pictures"], `${name.replace(/\.png$/i, "")}.png`, blob, "image/png");
-            setStatus("Image saved to Pictures");
-        }, "image/png");
-    }
-
-    function updateFrameLabel() {
-        root.querySelector("#paint-frame-label").textContent = `Frame ${frameIndex + 1} / ${drawings.animation.length}`;
-    }
+    root.querySelector("#paint-play").addEventListener("click", toggleAnimation);
 
     function changeFrame(amount) {
-        saveModeDrawing();
-        frameIndex = Math.max(0, Math.min(drawings.animation.length - 1, frameIndex + amount));
-        loadModeDrawing();
+        if (subMode !== "animation") return;
+        saveCurrentDrawing();
+
+        const frames = getFrameStore();
+        frameIndex = Math.max(0, Math.min(frames.length - 1, frameIndex + amount));
+        loadCurrentDrawing();
     }
 
     function addFrame() {
-        saveModeDrawing();
-        drawings.animation.splice(frameIndex + 1, 0, null);
+        saveCurrentDrawing();
+
+        const frames = getFrameStore();
+        frames.splice(frameIndex + 1, 0, null);
         frameIndex++;
-        loadModeDrawing();
+        loadCurrentDrawing();
         setStatus("New frame added");
     }
 
-    function toggleAnimation(paintRoot) {
-        const button = paintRoot.querySelector("#paint-play");
+    function toggleAnimation() {
+        const button = root.querySelector("#paint-play");
+
         if (animationTimer) {
             clearInterval(animationTimer);
             animationTimer = null;
@@ -248,16 +320,61 @@ function setupPaint(windowElement) {
             return;
         }
 
-        if (!drawings.animation.length) return;
-        const fps = Math.max(1, Math.min(24, Number(paintRoot.querySelector("#paint-fps").value) || 8));
+        const frames = getFrameStore();
+        if (!frames.length) return;
+
+        const fps = Math.max(1, Math.min(24, Number(root.querySelector("#paint-fps").value) || 8));
         animationTimer = setInterval(() => {
-            saveModeDrawing();
-            frameIndex = (frameIndex + 1) % drawings.animation.length;
-            loadModeDrawing();
+            saveCurrentDrawing();
+            frameIndex = (frameIndex + 1) % frames.length;
+            loadCurrentDrawing();
         }, 1000 / fps);
+
         button.textContent = "■ Stop";
-        loadModeDrawing();
     }
+
+    async function saveArtwork() {
+        saveCurrentDrawing();
+
+        const name = prompt("Save as:", subMode === "animation" ? "My Animation" : "My Drawing");
+        if (!name) return;
+
+        if (subMode === "animation") {
+            const frames = getFrameStore().filter(Boolean);
+            const animation = {
+                type: "lucid-animation",
+                mode: mainMode,
+                fps: Number(root.querySelector("#paint-fps").value) || 8,
+                width: sizes[mainMode][0],
+                height: sizes[mainMode][1],
+                frames
+            };
+
+            await saveUserFile(
+                ["Pictures", "Animations"],
+                `${name.replace(/\.lpaint$/i, "")}.lpaint`,
+                JSON.stringify(animation),
+                "application/json"
+            );
+            setStatus("Animation saved to Pictures / Animations");
+            return;
+        }
+
+        canvas.toBlob(async blob => {
+            if (!blob) return;
+
+            await saveUserFile(
+                ["Pictures"],
+                `${name.replace(/\.(png|webp)$/i, "")}.webp`,
+                blob,
+                "image/webp"
+            );
+            setStatus("Compressed image saved to Pictures");
+        }, "image/webp", 0.82);
+    }
+
+    loadCurrentDrawing();
+    updateModeUI();
 }
 
 export { createLucidPaint };
