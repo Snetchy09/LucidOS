@@ -26,45 +26,24 @@ function createMediaApp() {
             </aside>
             <main class="media-main">
                 <section class="media-page" id="media-library-page">
-                    <div class="media-page-header">
-                        <h1>Library</h1>
-                        <p>Music stored in Home / Music.</p>
-                    </div>
+                    <div class="media-page-header"><h1>Library</h1><p>Music stored in Home / Music.</p></div>
                     <div class="media-library" id="media-library"></div>
                 </section>
                 <section class="media-page hidden" id="media-player-page">
-                    <div class="media-page-header">
-                        <h1>Player</h1>
-                        <p>Play files from your Lucid Music folder.</p>
-                    </div>
+                    <div class="media-page-header"><h1>Player</h1><p>Play files from your Lucid Music folder.</p></div>
                     <div class="media-player">
                         <div class="media-art">♪</div>
                         <h2 class="media-track-title" id="media-player-title">Nothing playing</h2>
                         <div class="media-track-artist" id="media-player-artist">Choose a track</div>
-                        <div class="media-progress">
-                            <span id="media-current-time">0:00</span>
-                            <input class="media-progress-slider" id="media-progress" type="range" min="0" max="100" value="0">
-                            <span id="media-duration">0:00</span>
-                        </div>
-                        <div class="media-controls">
-                            <button id="media-shuffle" title="Shuffle">🔀</button>
-                            <button id="media-prev" title="Previous">⏮</button>
-                            <button class="media-play" id="media-play" title="Play / Pause">▶</button>
-                            <button id="media-next" title="Next">⏭</button>
-                            <button id="media-repeat" title="Repeat">🔁</button>
-                        </div>
+                        <div class="media-progress"><span id="media-current-time">0:00</span><input class="media-progress-slider" id="media-progress" type="range" min="0" max="100" value="0"><span id="media-duration">0:00</span></div>
+                        <div class="media-controls"><button id="media-shuffle">🔀</button><button id="media-prev">⏮</button><button class="media-play" id="media-play">▶</button><button id="media-next">⏭</button><button id="media-repeat">🔁</button></div>
                         <div class="media-volume">🔊 <input class="media-volume-slider" id="media-volume" type="range" min="0" max="1" step="0.01" value="1"></div>
                     </div>
                 </section>
                 <section class="media-page hidden" id="media-studio-page">
                     <div class="media-studio-header">
                         <div><h1>Studio</h1><p>Make a simple beat and save it to Music.</p></div>
-                        <div class="media-studio-controls">
-                            <label>BPM<input class="media-bpm" id="media-bpm" type="number" min="40" max="240" value="120"></label>
-                            <button id="studio-play">▶ Play</button>
-                            <button id="studio-clear">Clear</button>
-                            <button id="studio-save">Save</button>
-                        </div>
+                        <div class="media-studio-controls"><label>BPM<input class="media-bpm" id="media-bpm" type="number" min="40" max="240" value="120"></label><button id="studio-play">▶ Play</button><button id="studio-clear">Clear</button><button id="studio-save">Save</button></div>
                     </div>
                     <div class="sequencer" id="sequencer"></div>
                     <div class="studio-help">Your beat pattern is stored with the rest of your files.</div>
@@ -75,23 +54,54 @@ function createMediaApp() {
 
     const windowElement = createWindow("Lucid Media", content);
     setupMedia(windowElement);
-    refreshLibrary(windowElement.querySelector(".lucid-media"));
+    const root = windowElement.querySelector(".lucid-media");
+
+    migrateLegacyLibrary().then(() => refreshLibrary(root));
     return windowElement;
+}
+
+async function migrateLegacyLibrary() {
+    if (localStorage.getItem("lucid-media-migrated") === "1") return;
+
+    try {
+        const db = await openLegacyDatabase();
+        const oldTracks = await new Promise((resolve, reject) => {
+            const transaction = db.transaction("tracks", "readonly");
+            const request = transaction.objectStore("tracks").getAll();
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => reject(request.error);
+        });
+
+        for (const track of oldTracks) {
+            if (!(track.file instanceof Blob)) continue;
+            const existing = getFiles(["Music"]).some(item => item.name === track.name);
+            if (!existing) await saveUserFile(["Music"], track.name, track.file, track.file.type || "audio/mpeg");
+        }
+
+        db.close();
+    } catch (error) {
+        console.warn("Lucid Media: no legacy library to migrate", error);
+    } finally {
+        localStorage.setItem("lucid-media-migrated", "1");
+    }
+}
+
+function openLegacyDatabase() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open("lucid-media-db", 1);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
 }
 
 function setupMedia(windowElement) {
     const root = windowElement.querySelector(".lucid-media");
     const fileInput = root.querySelector("#media-file-input");
 
-    root.querySelectorAll(".media-nav").forEach(button => {
-        button.addEventListener("click", () => switchPage(root, button.dataset.page));
-    });
-
+    root.querySelectorAll(".media-nav").forEach(button => button.addEventListener("click", () => switchPage(root, button.dataset.page)));
     root.querySelector("#media-import").addEventListener("click", () => fileInput.click());
     fileInput.addEventListener("change", async event => {
-        for (const file of [...event.target.files]) {
-            await saveUserFile(["Music"], file.name, file, file.type || "audio/mpeg");
-        }
+        for (const file of [...event.target.files]) await saveUserFile(["Music"], file.name, file, file.type || "audio/mpeg");
         fileInput.value = "";
         refreshLibrary(root);
     });
@@ -119,16 +129,13 @@ function setupMedia(windowElement) {
     audio.addEventListener("ended", handleTrackEnded);
 
     createSequencer(root);
-    root.querySelector("#studio-play").addEventListener("click", toggleStudio);
+    root.querySelector("#studio-play").addEventListener("click", () => toggleStudio(root));
     root.querySelector("#studio-clear").addEventListener("click", clearStudio);
     root.querySelector("#studio-save").addEventListener("click", () => saveStudio(root));
 
     document.addEventListener("keydown", event => {
         if (event.target.matches("input, textarea")) return;
-        if (event.code === "Space") {
-            event.preventDefault();
-            togglePlayback();
-        }
+        if (event.code === "Space") { event.preventDefault(); togglePlayback(); }
     });
 }
 
@@ -140,7 +147,6 @@ function switchPage(root, page) {
 function refreshLibrary(root) {
     if (!root) return;
     tracks.forEach(track => track.url && URL.revokeObjectURL(track.url));
-
     tracks = getFiles(["Music"])
         .filter(file => file.type === "file" && (file.mimeType?.startsWith("audio/") || /\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(file.name)))
         .map(file => {
@@ -272,12 +278,10 @@ function createSequencer(root) {
     });
 }
 
-function toggleStudio() {
+function toggleStudio(root) {
     initializeAudio();
     if (audioContext.state === "suspended") audioContext.resume();
-    const root = document.querySelector(".window:last-child .lucid-media");
-    const button = root?.querySelector("#studio-play");
-    if (!button) return;
+    const button = root.querySelector("#studio-play");
     if (studioTimer) {
         clearInterval(studioTimer);
         studioTimer = null;
@@ -335,12 +339,7 @@ function clearStudio() {
 async function saveStudio(root) {
     const name = prompt("Save beat as:", "My Beat.lucidbeat");
     if (!name) return;
-
-    const pattern = [...root.querySelectorAll(".sequencer-row")].map(row => ({
-        instrument: row.dataset.instrument,
-        steps: [...row.querySelectorAll(".sequencer-step")].map(step => step.classList.contains("active"))
-    }));
-
+    const pattern = [...root.querySelectorAll(".sequencer-row")].map(row => ({ instrument: row.dataset.instrument, steps: [...row.querySelectorAll(".sequencer-step")].map(step => step.classList.contains("active")) }));
     const data = JSON.stringify({ bpm: Number(root.querySelector("#media-bpm").value) || 120, pattern }, null, 2);
     await saveUserFile(["Music"], name.endsWith(".lucidbeat") ? name : `${name}.lucidbeat`, data, "application/json");
 }
