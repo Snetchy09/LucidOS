@@ -1,16 +1,18 @@
 import { createFilesApp } from "../apps/files.js";
 import { createStoreApp } from "../apps/lucid-store.js";
 import { createMediaApp } from "../apps/media.js";
+import { createLucidPaint } from "../apps/lucid-paint.js";
 import { createCalculator } from "../apps/calculator.js";
 import { createNotes } from "../apps/notes.js";
 import { createCalendar } from "../apps/calendar.js";
 import { createTextEditor } from "../apps/text-editor.js";
 import { createTerminal } from "../apps/terminal.js";
 import { loadFileSystem } from "./filesystem.js";
+import { loadSettings } from "./settings.js";
 import { createSettingsApp } from "../apps/settings.js";
 import { createBrowser } from "../apps/browser.js";
-import { getLucidLevel, setLucidLevel } from "./lucid-state.js";
-import { initializeAppRegistry, getInstalledApps, installApp, registerAppLauncher, getAppLauncher } from "./app-registry.js";
+import { getLucidLevel } from "./lucid-state.js";
+import { initializeAppRegistry, getInstalledApps, registerAppLauncher, getAppLauncher } from "./app-registry.js";
 import { createLucidStudio } from "../apps/lucid-studio.js";
 
 console.log("Lucid level:", getLucidLevel());
@@ -25,6 +27,7 @@ registerAppLauncher("terminal", createTerminal);
 registerAppLauncher("store", createStoreApp);
 registerAppLauncher("calculator", createCalculator);
 registerAppLauncher("media", createMediaApp);
+registerAppLauncher("paint", createLucidPaint);
 registerAppLauncher("notes", createNotes);
 registerAppLauncher("calendar", createCalendar);
 registerAppLauncher("text-editor", createTextEditor);
@@ -113,13 +116,8 @@ function buildDesktopApps() {
         const saved = positions[app.id];
         const position = saved || defaultPositions[index % defaultPositions.length];
 
-        button.style.left = `${position.x}%`;
-        button.style.top = `${position.y}%`;
-        button.style.setProperty("--origin-x", "0px");
-        button.style.setProperty("--origin-y", "0px");
         button.style.left = "50%";
         button.style.top = "50%";
-
         button.dataset.targetX = position.x;
         button.dataset.targetY = position.y;
 
@@ -141,15 +139,12 @@ function moveAppsToSavedPositions() {
     apps.forEach((app, index) => {
         const targetX = Number(app.dataset.targetX);
         const targetY = Number(app.dataset.targetY);
-
         const targetPX = targetX / 100 * rect.width;
         const targetPY = targetY / 100 * rect.height;
-
         const dx = targetPX - centerX;
         const dy = targetPY - centerY;
         const distance = Math.hypot(dx, dy);
         const finalAngle = Math.atan2(dy, dx);
-
         const direction = index % 2 === 0 ? 1 : -1;
         const orbitAngle = direction * 0.9;
         const delay = index * 35;
@@ -159,44 +154,17 @@ function moveAppsToSavedPositions() {
 
         const startX = centerX - targetPX;
         const startY = centerY - targetPY;
-
         const midAngle = finalAngle - orbitAngle;
         const midRadius = distance * 0.55;
         const midX = centerX + Math.cos(midAngle) * midRadius;
         const midY = centerY + Math.sin(midAngle) * midRadius;
-
         const midTranslateX = midX - targetPX;
         const midTranslateY = midY - targetPY;
 
         app.animate([
-            {
-                transform: `
-                    translate3d(-50%, -50%, 0)
-                    translate3d(${startX}px, ${startY}px, 0)
-                    scale(0.08)
-                    rotate(${direction * -30}deg)
-                `,
-                opacity: 0
-            },
-            {
-                transform: `
-                    translate3d(-50%, -50%, 0)
-                    translate3d(${midTranslateX}px, ${midTranslateY}px, 0)
-                    scale(0.68)
-                    rotate(${direction * 22}deg)
-                `,
-                opacity: 0.8,
-                offset: 0.52
-            },
-            {
-                transform: `
-                    translate3d(-50%, -50%, 0)
-                    translate3d(0, 0, 0)
-                    scale(1)
-                    rotate(0deg)
-                `,
-                opacity: 1
-            }
+            { transform: `translate3d(-50%, -50%, 0) translate3d(${startX}px, ${startY}px, 0) scale(0.08) rotate(${direction * -30}deg)`, opacity: 0 },
+            { transform: `translate3d(-50%, -50%, 0) translate3d(${midTranslateX}px, ${midTranslateY}px, 0) scale(0.68) rotate(${direction * 22}deg)`, opacity: 0.8, offset: 0.52 },
+            { transform: "translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1) rotate(0deg)", opacity: 1 }
         ], {
             duration: 820,
             delay,
@@ -212,60 +180,28 @@ function moveAppsToOrb() {
     apps.forEach((app, index) => {
         const targetX = Number(app.dataset.targetX);
         const targetY = Number(app.dataset.targetY);
-
         const container = document.getElementById("desktop-apps");
         const rect = container.getBoundingClientRect();
-
         const targetPX = targetX / 100 * rect.width;
         const targetPY = targetY / 100 * rect.height;
-
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
-
         const dx = centerX - targetPX;
         const dy = centerY - targetPY;
         const distance = Math.hypot(dx, dy);
         const angle = Math.atan2(dy, dx);
-
         const direction = index % 2 === 0 ? 1 : -1;
         const orbitAngle = angle + direction * 0.9;
-
         const midRadius = distance * 0.55;
         const midX = centerX + Math.cos(orbitAngle) * midRadius;
         const midY = centerY + Math.sin(orbitAngle) * midRadius;
-
         const midTranslateX = midX - targetPX;
         const midTranslateY = midY - targetPY;
 
         app.animate([
-            {
-                transform: `
-                    translate3d(-50%, -50%, 0)
-                    translate3d(0, 0, 0)
-                    scale(1)
-                    rotate(0deg)
-                `,
-                opacity: 1
-            },
-            {
-                transform: `
-                    translate3d(-50%, -50%, 0)
-                    translate3d(${midTranslateX}px, ${midTranslateY}px, 0)
-                    scale(0.68)
-                    rotate(${direction * -22}deg)
-                `,
-                opacity: 0.75,
-                offset: 0.48
-            },
-            {
-                transform: `
-                    translate3d(-50%, -50%, 0)
-                    translate3d(${dx}px, ${dy}px, 0)
-                    scale(0.08)
-                    rotate(${direction * 30}deg)
-                `,
-                opacity: 0
-            }
+            { transform: "translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1) rotate(0deg)", opacity: 1 },
+            { transform: `translate3d(-50%, -50%, 0) translate3d(${midTranslateX}px, ${midTranslateY}px, 0) scale(0.68) rotate(${direction * -22}deg)`, opacity: 0.75, offset: 0.48 },
+            { transform: `translate3d(-50%, -50%, 0) translate3d(${dx}px, ${dy}px, 0) scale(0.08) rotate(${direction * 30}deg)`, opacity: 0 }
         ], {
             duration: 620,
             delay: index * 22,
@@ -277,7 +213,6 @@ function moveAppsToOrb() {
 
 function openLucidLauncher() {
     if (launcherOpen) return;
-
     const desktop = document.getElementById("desktop");
     launcherOpen = true;
     desktop.classList.add("lucid-launcher-open");
@@ -286,14 +221,10 @@ function openLucidLauncher() {
 
 function closeLucidLauncher() {
     if (!launcherOpen) return;
-
     const desktop = document.getElementById("desktop");
     launcherOpen = false;
     moveAppsToOrb();
-
-    setTimeout(() => {
-        desktop.classList.remove("lucid-launcher-open");
-    }, 700);
+    setTimeout(() => desktop.classList.remove("lucid-launcher-open"), 700);
 }
 
 function setupDesktopApp(element, app) {
@@ -305,9 +236,7 @@ function setupDesktopApp(element, app) {
     let startTop = 0;
 
     element.addEventListener("pointerdown", event => {
-        if (!launcherOpen) return;
-        if (event.button !== 0) return;
-
+        if (!launcherOpen || event.button !== 0) return;
         dragging = true;
         moved = false;
         startPointerX = event.clientX;
@@ -320,20 +249,15 @@ function setupDesktopApp(element, app) {
 
     element.addEventListener("pointermove", event => {
         if (!dragging) return;
-
         const desktop = document.getElementById("desktop-apps");
         const rect = desktop.getBoundingClientRect();
-
         const dx = event.clientX - startPointerX;
         const dy = event.clientY - startPointerY;
 
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-            moved = true;
-        }
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) moved = true;
 
         let x = startLeft + (dx / rect.width) * 100;
         let y = startTop + (dy / rect.height) * 100;
-
         x = Math.max(8, Math.min(92, x));
         y = Math.max(10, Math.min(88, y));
 
@@ -343,17 +267,10 @@ function setupDesktopApp(element, app) {
         element.style.top = `${y}%`;
     });
 
-    element.addEventListener("pointerup", event => {
+    element.addEventListener("pointerup", () => {
         if (!dragging) return;
         dragging = false;
-
-        if (moved) {
-            saveDesktopPosition(
-                app.id,
-                Number(element.dataset.targetX),
-                Number(element.dataset.targetY)
-            );
-        }
+        if (moved) saveDesktopPosition(app.id, Number(element.dataset.targetX), Number(element.dataset.targetY));
     });
 
     element.addEventListener("click", event => {
@@ -366,7 +283,34 @@ function setupDesktopApp(element, app) {
     });
 }
 
+function applyWallpaper(url) {
+    const desktop = document.getElementById("desktop");
+    if (!desktop) return;
+
+    const cleanUrl = String(url || "").trim();
+    if (!cleanUrl) {
+        desktop.style.removeProperty("background-image");
+        desktop.style.removeProperty("background-size");
+        desktop.style.removeProperty("background-position");
+        desktop.style.removeProperty("background-repeat");
+        return;
+    }
+
+    desktop.style.backgroundImage = `url("${cleanUrl.replaceAll('"', '\\"')}")`;
+    desktop.style.backgroundSize = "cover";
+    desktop.style.backgroundPosition = "center";
+    desktop.style.backgroundRepeat = "no-repeat";
+}
+
 buildDesktopApps();
+loadSettings().then(settings => applyWallpaper(settings.wallpaper)).catch(error => console.warn("Lucid: could not load wallpaper settings", error));
+
+window.addEventListener("lucid-settings-changed", event => {
+    if (event.detail?.wallpaper !== undefined) applyWallpaper(event.detail.wallpaper);
+});
+
+window.addEventListener("lucid-app-installed", () => buildDesktopApps());
+window.addEventListener("lucid-app-uninstalled", () => buildDesktopApps());
 
 const startButton = document.getElementById("start-button");
 
@@ -380,34 +324,22 @@ if (startButton) {
         const rect = desktop.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
-
-        const distance = Math.hypot(
-            event.clientX - centerX,
-            event.clientY - centerY
-        );
+        const distance = Math.hypot(event.clientX - centerX, event.clientY - centerY);
 
         if (distance <= 65) {
-            if (launcherOpen) {
-                closeLucidLauncher();
-            } else {
-                openLucidLauncher();
-            }
+            if (launcherOpen) closeLucidLauncher();
+            else openLucidLauncher();
         }
     });
 
     startButton.addEventListener("click", event => {
         event.stopPropagation();
         if (document.querySelector(".window")) return;
-        if (launcherOpen) {
-            closeLucidLauncher();
-        } else {
-            openLucidLauncher();
-        }
+        if (launcherOpen) closeLucidLauncher();
+        else openLucidLauncher();
     });
 }
 
 document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && launcherOpen) {
-        closeLucidLauncher();
-    }
+    if (event.key === "Escape" && launcherOpen) closeLucidLauncher();
 });
