@@ -1,3 +1,5 @@
+import { getAppLauncher } from "./app-registry.js";
+
 let highestZIndex = 100;
 
 function createWindow(title, content) {
@@ -51,6 +53,25 @@ function createWindow(title, content) {
 
     return windowElement;
 }
+
+function createSettingsTaskbarButton() {
+    const taskbarApps = document.getElementById("taskbar-apps");
+    if (!taskbarApps || taskbarApps.querySelector(".taskbar-settings")) return;
+
+    const button = document.createElement("button");
+    button.className = "taskbar-app taskbar-settings";
+    button.textContent = "⚙️";
+    button.title = "Settings";
+
+    button.addEventListener("click", () => {
+        const launcher = getAppLauncher("settings");
+        if (launcher) launcher();
+    });
+
+    taskbarApps.appendChild(button);
+}
+
+createSettingsTaskbarButton();
 
 function makeDraggable(windowElement, titleBar) {
     let dragging = false;

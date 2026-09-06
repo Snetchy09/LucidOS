@@ -318,7 +318,6 @@ if (startButton) {
     const desktop = document.getElementById("desktop");
 
     desktop.addEventListener("click", event => {
-        if (document.querySelector(".window")) return;
         if (event.target.closest(".desktop-app")) return;
 
         const rect = desktop.getBoundingClientRect();
@@ -334,7 +333,6 @@ if (startButton) {
 
     startButton.addEventListener("click", event => {
         event.stopPropagation();
-        if (document.querySelector(".window")) return;
         if (launcherOpen) closeLucidLauncher();
         else openLucidLauncher();
     });
