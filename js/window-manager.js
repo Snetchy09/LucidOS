@@ -43,28 +43,31 @@ function setupSettingsTaskbar() {
     button.textContent = "⚙️";
     button.title = "Settings";
     button.setAttribute("aria-label", "Settings");
-    button.addEventListener("click", () => {
-        const launcher = window.__lucidGetAppLauncher?.("settings");
-        if (launcher) launcher();
+    button.addEventListener("click", async () => {
+        const module = await import("../apps/settings.js");
+        module.createSettingsApp();
     });
     taskbarApps.prepend(button);
 }
-function setupOrbLauncher() {
+function setupOrbLauncherBridge() {
     const startButton = document.getElementById("start-button");
-    const desktop = document.getElementById("desktop");
-    if (!startButton || !desktop) return;
-    const replacement = startButton.cloneNode(true);
-    startButton.replaceWith(replacement);
-    const toggle = () => {
-        if (desktop.classList.contains("lucid-launcher-open")) replacement.dispatchEvent(new MouseEvent("click", { bubbles: false }));
-        else replacement.dispatchEvent(new MouseEvent("click", { bubbles: false }));
-    };
-    const open = () => { replacement.dataset.launcherAction = "open"; replacement.dispatchEvent(new CustomEvent("lucid-orb-toggle")); };
-    replacement.addEventListener("lucid-orb-toggle", () => { window.dispatchEvent(new CustomEvent("lucid-launcher-toggle")); });
-    replacement.addEventListener("click", event => {
-        event.stopPropagation();
-        window.dispatchEvent(new CustomEvent("lucid-launcher-toggle"));
+    if (!startButton) return;
+    let replaying = false;
+    startButton.addEventListener("click", () => {
+        if (replaying || !document.querySelector(".window")) return;
+        const originalQuerySelector = document.querySelector;
+        replaying = true;
+        document.querySelector = function(selector) {
+            if (selector === ".window") return null;
+            return originalQuerySelector.call(document, selector);
+        };
+        try {
+            startButton.click();
+        } finally {
+            document.querySelector = originalQuerySelector;
+            replaying = false;
+        }
     });
 }
-window.addEventListener("load", () => { setupSettingsTaskbar(); setupOrbLauncher(); });
+window.addEventListener("load", () => { setupSettingsTaskbar(); setupOrbLauncherBridge(); });
 export { createWindow };
