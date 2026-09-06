@@ -2,7 +2,24 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
 let supabase = null;
-if (supabaseUrl && supabaseKey) supabase = createClient(supabaseUrl, supabaseKey);
+const authRedirect = "https://snetchy09.github.io/LucidOS/";
+if (supabaseUrl && supabaseKey) {
+    const client = createClient(supabaseUrl, supabaseKey);
+    const auth = new Proxy(client.auth, {
+        get(target, property, receiver) {
+            if (property === "signUp") {
+                return ({ email, password, options = {} }) => target.signUp({ email, password, options: { ...options, emailRedirectTo: authRedirect } });
+            }
+            return Reflect.get(target, property, receiver);
+        }
+    });
+    supabase = new Proxy(client, {
+        get(target, property, receiver) {
+            if (property === "auth") return auth;
+            return Reflect.get(target, property, receiver);
+        }
+    });
+}
 async function getCurrentUser() {
     if (!supabase) return null;
     const { data, error } = await supabase.auth.getUser();
@@ -11,14 +28,7 @@ async function getCurrentUser() {
 }
 async function signUpDeveloper(email, password, username, displayName) {
     if (!supabase) throw new Error("Lucid Store is not configured for developer accounts.");
-    const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-            emailRedirectTo: "https://snetchy09.github.io/LucidOS/",
-            data: { username, display_name: displayName }
-        }
-    });
+    const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { username, display_name: displayName } } });
     if (error) throw error;
     if (data.user && !data.session) return { user: data.user, needsConfirmation: true };
     if (!data.user) throw new Error("Developer account could not be created.");
