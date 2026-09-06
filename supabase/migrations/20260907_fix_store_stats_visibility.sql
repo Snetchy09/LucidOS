@@ -1,0 +1,2 @@
+alter view public.lucid_app_store_stats rename column id to app_id;
+create or replace view public.lucid_app_store_stats as select a.id as app_id,count(distinct r.id)::bigint as review_count,coalesce(round(avg(r.rating)::numeric,2),0)::numeric as average_rating,count(distinct d.id)::bigint as download_count from public.lucid_apps a left join public.lucid_app_reviews r on r.app_id=a.id left join public.lucid_app_downloads d on d.app_id=a.id group by a.id;
