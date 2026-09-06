@@ -6,6 +6,10 @@ import { createClient } from "@supabase/supabase-js";
 const PORT = Number(process.env.PORT || 3000);
 const FREE_MAX_APP_BYTES = 100 * 1024 * 1024;
 const PRO_MAX_APP_BYTES = Number(process.env.B2_PRO_MAX_APP_BYTES || 1024 * 1024 * 1024);
+const lucidOrigin = (() => {
+    const configured = String(process.env.LUCID_ORIGIN || "https://snetchY09.github.io");
+    try { return new URL(configured).origin; } catch { return "https://snetchy09.github.io"; }
+})();
 
 const required = [
     "B2_REGION",
@@ -17,9 +21,7 @@ const required = [
 ];
 
 for (const name of required) {
-    if (!process.env[name]) {
-        console.warn(`Lucid Publish: ${name} is not configured.`);
-    }
+    if (!process.env[name]) console.warn(`Lucid Publish: ${name} is not configured.`);
 }
 
 const b2 = new S3Client({
@@ -41,7 +43,7 @@ function sendJson(res, status, value) {
     res.writeHead(status, {
         "Content-Type": "application/json; charset=utf-8",
         "Content-Length": Buffer.byteLength(body),
-        "Access-Control-Allow-Origin": process.env.LUCID_ORIGIN || "*",
+        "Access-Control-Allow-Origin": lucidOrigin,
         "Access-Control-Allow-Headers": "Authorization, Content-Type, X-Lucid-App-Id, X-Lucid-App-Name, X-Lucid-Version",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
     });
@@ -148,7 +150,7 @@ async function publish(req, res) {
 const server = http.createServer(async (req, res) => {
     if (req.method === "OPTIONS") {
         res.writeHead(204, {
-            "Access-Control-Allow-Origin": process.env.LUCID_ORIGIN || "*",
+            "Access-Control-Allow-Origin": lucidOrigin,
             "Access-Control-Allow-Headers": "Authorization, Content-Type, X-Lucid-App-Id, X-Lucid-App-Name, X-Lucid-Version",
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
         });
