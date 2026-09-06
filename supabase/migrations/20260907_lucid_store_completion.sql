@@ -1,0 +1,18 @@
+alter table public.lucid_app_submissions add column if not exists storage_provider text not null default 'b2';
+alter table public.lucid_app_submissions add column if not exists source_key text;
+alter table public.lucid_app_submissions add column if not exists package_size bigint;
+alter table public.lucid_apps add column if not exists source_key text;
+alter table public.lucid_apps add column if not exists package_size bigint;
+alter table public.lucid_apps add column if not exists published_at timestamptz;
+alter table public.lucid_app_versions add column if not exists package_size bigint;
+alter table public.lucid_developers add column if not exists plan text not null default 'free';
+alter table public.lucid_developers add column if not exists plan_expires_at timestamptz;
+alter table public.lucid_developers add column if not exists billing_customer_id text;
+alter table public.lucid_developers add column if not exists billing_subscription_id text;
+create table if not exists public.lucid_app_reviews (id uuid primary key default gen_random_uuid(),app_id text not null references public.lucid_apps(id) on delete cascade,user_id uuid not null references auth.users(id) on delete cascade,rating smallint not null check (rating between 1 and 5),review text not null default '',created_at timestamptz not null default now(),updated_at timestamptz not null default now(),unique(app_id,user_id));
+create table if not exists public.lucid_app_downloads (id uuid primary key default gen_random_uuid(),app_id text not null references public.lucid_apps(id) on delete cascade,user_id uuid references auth.users(id) on delete set null,version text,created_at timestamptz not null default now());
+create index if not exists lucid_app_reviews_app_id_idx on public.lucid_app_reviews(app_id);
+create index if not exists lucid_app_downloads_app_id_idx on public.lucid_app_downloads(app_id);
+create index if not exists lucid_app_submissions_status_idx on public.lucid_app_submissions(status);
+create or replace view public.lucid_app_store_stats with (security_invoker=true) as select a.id,count(distinct r.id)::bigint as review_count,coalesce(round(avg(r.rating)::numeric,2),0)::numeric as average_rating,count(distinct d.id)::bigint as download_count from public.lucid_apps a left join public.lucid_app_reviews r on r.app_id=a.id left join public.lucid_app_downloads d on d.app_id=a.id group by a.id;
+revoke all on function public.handle_new_lucid_developer() from anon,authenticated;
