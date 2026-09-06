@@ -58,7 +58,7 @@ async function getAppReviews(appId) {
     if (!supabase || !appId) return [];
     const { data, error } = await supabase.from("lucid_app_reviews").select("id,rating,review,created_at,user_id").eq("app_id", appId).order("created_at", { ascending: false }).limit(30);
     if (error) throw error;
-    return data || [];
+    return (data || []).map(item => ({ ...item, review_text: item.review || "" }));
 }
 async function saveAppReview(appId, rating, reviewText) {
     if (!supabase) throw new Error("Lucid Store is not configured.");
@@ -69,4 +69,27 @@ async function saveAppReview(appId, rating, reviewText) {
     const { error } = await supabase.from("lucid_app_reviews").upsert({ app_id: appId, user_id: user.id, rating: value, review: String(reviewText || "").trim().slice(0, 1000) }, { onConflict: "app_id,user_id" });
     if (error) throw error;
 }
-export { supabase, getStoreApps, getCurrentUser, signUpDeveloper, signInDeveloper, signOutDeveloper, recordAppDownload, getAppReviews, saveAppReview };
+async function getOwnSubmissions() {
+    if (!supabase) return [];
+    const { data, error } = await supabase.from("lucid_app_submissions").select("id,app_id,name,description,category,version,package_key,source_key,icon_key,status,rejection_reason,submitted_at,reviewed_at,reviewer_id,package_size").order("submitted_at", { ascending: false });
+    if (error) throw error;
+    return data || [];
+}
+async function getReviewQueue() {
+    if (!supabase) return [];
+    const user = await getCurrentUser();
+    const role = String(user?.app_metadata?.role || "").toLowerCase();
+    if (!user || !["admin", "reviewer"].includes(role)) throw new Error("Reviewer access is required.");
+    const { data, error } = await supabase.from("lucid_app_submissions").select("id,app_id,developer_id,name,description,category,version,package_key,source_key,icon_key,status,rejection_reason,submitted_at,reviewed_at,package_size").eq("status", "pending").order("submitted_at", { ascending: true });
+    if (error) throw error;
+    return data || [];
+}
+async function reviewSubmission(id, status, rejectionReason = "") {
+    if (!supabase) throw new Error("Lucid Store is not configured.");
+    const user = await getCurrentUser();
+    const role = String(user?.app_metadata?.role || "").toLowerCase();
+    if (!user || !["admin", "reviewer"].includes(role)) throw new Error("Reviewer access is required.");
+    const { error } = await supabase.rpc("review_lucid_submission", { submission_id: id, decision: status, reason: String(rejectionReason || "").trim().slice(0, 1000) });
+    if (error) throw error;
+}
+export { supabase, getStoreApps, getCurrentUser, signUpDeveloper, signInDeveloper, signOutDeveloper, recordAppDownload, getAppReviews, saveAppReview, getOwnSubmissions, getReviewQueue, reviewSubmission };
