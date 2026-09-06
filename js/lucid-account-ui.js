@@ -124,12 +124,7 @@ function showPlans() {
 function setupStore() {
     const root = document.querySelector(".lucid-store");
     const grid = root?.querySelector("#store-grid");
-    if (!root || !grid || root.dataset.paintReady === "true") return;
-    if (grid.querySelector("[data-lucid-paint]")) {
-        root.dataset.paintReady = "true";
-        return;
-    }
-    root.dataset.paintReady = "true";
+    if (!root || !grid || grid.querySelector("[data-lucid-paint]")) return;
     const installed = isAppInstalled("paint");
     const card = document.createElement("article");
     card.className = "store-app-card";
