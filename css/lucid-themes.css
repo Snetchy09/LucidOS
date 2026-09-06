@@ -1,0 +1,219 @@
+:root[data-theme="light"] {
+    --bg: #eef0f4;
+    --surface: #f8f9fb;
+    --surface-2: #f1f3f6;
+    --surface-3: #e8ebf0;
+    --surface-4: #dde1e8;
+    --surface-5: #d3d7df;
+    --border: #c8cdd6;
+    --border-soft: #d9dde4;
+    --text: #1d2027;
+    --text-soft: #4e5561;
+    --muted: #707783;
+    --muted-dark: #8b919b;
+}
+:root[data-theme="light"] body {
+    background: var(--bg);
+    color: var(--text);
+}
+:root[data-theme="light"] #desktop {
+    background: radial-gradient(circle at 50% 48%, rgba(112, 99, 150, 0.12), transparent 36%), linear-gradient(180deg, #f7f8fa, #e7eaf0);
+}
+:root[data-theme="light"] #taskbar {
+    background: rgba(248, 249, 251, 0.92);
+    border-top-color: rgba(0, 0, 0, 0.08);
+}
+:root[data-theme="light"] .window {
+    border-color: #c8cdd6;
+    background: var(--surface);
+    box-shadow: 0 18px 45px rgba(38, 42, 50, 0.16);
+}
+:root[data-theme="light"] .title-bar {
+    background: #e5e8ed;
+    color: var(--text);
+    border-bottom-color: #d2d6dd;
+}
+:root[data-theme="light"] .window-control {
+    color: #4e5561;
+}
+:root[data-theme="light"] .window-control:hover {
+    background: #d9dde4;
+}
+:root[data-theme="light"] .desktop-app {
+    color: #252a32;
+}
+:root[data-theme="light"] .desktop-app-name {
+    color: #252a32;
+    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.8);
+}
+:root[data-theme="light"] .desktop-app-icon {
+    background: linear-gradient(145deg, #ffffff, #e1e4ea);
+    border-color: #cbd0d8;
+    box-shadow: 0 6px 15px rgba(36, 40, 48, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+:root[data-theme="light"] .file-item.selected,
+:root[data-theme="light"] .taskbar-app:hover,
+:root[data-theme="light"] .file-item:hover {
+    background: var(--surface-4);
+}
+:root[data-theme="light"] .taskbar-app,
+:root[data-theme="light"] .file-tool,
+:root[data-theme="light"] .editor-save {
+    background: var(--surface-3);
+    border-color: var(--border);
+    color: var(--text-soft);
+}
+:root[data-theme="light"] .text-editor .editor {
+    background: #ffffff;
+    color: #252a32;
+    border-color: var(--border);
+}
+:root[data-theme="light"] .terminal {
+    background: #f4f5f7;
+    color: #252a32;
+}
+.lucid-account-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(8, 10, 14, 0.55);
+}
+.lucid-account-dialog,
+.lucid-plans-dialog {
+    width: min(440px, 100%);
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+.lucid-account-dialog h2,
+.lucid-plans-dialog h2 {
+    margin: 0 0 8px;
+}
+.lucid-account-dialog p {
+    margin: 0 0 20px;
+    color: var(--text-soft);
+}
+.lucid-account-dialog label {
+    display: grid;
+    gap: 6px;
+    margin: 12px 0;
+    color: var(--text-soft);
+    font-size: 13px;
+}
+.lucid-account-dialog input {
+    width: 100%;
+    padding: 10px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--text);
+}
+.lucid-account-message {
+    min-height: 20px;
+    margin: 12px 0;
+    color: var(--text-soft);
+    font-size: 12px;
+}
+.lucid-account-primary,
+.account-plan-button {
+    padding: 9px 13px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-3);
+    color: var(--text);
+    cursor: pointer;
+}
+.studio-forgot-password {
+    display: block;
+    margin: 9px auto 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--purple-soft);
+    cursor: pointer;
+    font-size: 12px;
+}
+.account-plan-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-2);
+}
+.account-plan-label {
+    color: var(--purple-soft);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+}
+.account-plan-card h3 {
+    margin: 4px 0;
+}
+.account-plan-card p {
+    margin: 0;
+    color: var(--text-soft);
+    font-size: 12px;
+}
+.lucid-plans-dialog {
+    position: relative;
+    width: min(650px, 100%);
+}
+.lucid-dialog-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 20px;
+}
+.lucid-plan-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+}
+.lucid-plan {
+    display: grid;
+    gap: 8px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-2);
+}
+.lucid-plan strong {
+    font-size: 20px;
+}
+.lucid-plan span {
+    color: var(--text-soft);
+    font-size: 12px;
+}
+.lucid-plan b {
+    font-size: 12px;
+}
+.lucid-plan-featured {
+    border-color: var(--purple);
+}
+@media (max-width: 560px) {
+    .lucid-plan-grid {
+        grid-template-columns: 1fr;
+    }
+    .account-plan-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
