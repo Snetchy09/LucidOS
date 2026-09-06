@@ -56,7 +56,7 @@ async function recordAppDownload(appId, version) {
 }
 async function getAppReviews(appId) {
     if (!supabase || !appId) return [];
-    const { data, error } = await supabase.from("lucid_app_reviews").select("id,rating,review_text,created_at,user_id").eq("app_id", appId).order("created_at", { ascending: false }).limit(30);
+    const { data, error } = await supabase.from("lucid_app_reviews").select("id,rating,review,created_at,user_id").eq("app_id", appId).order("created_at", { ascending: false }).limit(30);
     if (error) throw error;
     return data || [];
 }
@@ -66,7 +66,7 @@ async function saveAppReview(appId, rating, reviewText) {
     if (!user) throw new Error("Sign in to leave a review.");
     const value = Math.max(1, Math.min(5, Number(rating) || 0));
     if (!value) throw new Error("Choose a rating.");
-    const { error } = await supabase.from("lucid_app_reviews").upsert({ app_id: appId, user_id: user.id, rating: value, review_text: String(reviewText || "").trim().slice(0, 1000) }, { onConflict: "app_id,user_id" });
+    const { error } = await supabase.from("lucid_app_reviews").upsert({ app_id: appId, user_id: user.id, rating: value, review: String(reviewText || "").trim().slice(0, 1000) }, { onConflict: "app_id,user_id" });
     if (error) throw error;
 }
 export { supabase, getStoreApps, getCurrentUser, signUpDeveloper, signInDeveloper, signOutDeveloper, recordAppDownload, getAppReviews, saveAppReview };
