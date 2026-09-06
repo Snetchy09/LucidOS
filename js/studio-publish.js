@@ -24,11 +24,11 @@ function escapeHTML(text) {
         .replaceAll("'", "&#039;");
 }
 
-function collectAssets(folderName, files, path = [folderName]) {
+function collectAssets(files, path) {
     const assets = [];
     for (const file of files) {
         if (file.type === "folder") {
-            assets.push(...collectAssets(file.name, file.children || [], [...path, file.name]));
+            assets.push(...collectAssets(file.children || [], [...path, file.name]));
             continue;
         }
         assets.push({
@@ -41,8 +41,7 @@ function collectAssets(folderName, files, path = [folderName]) {
 }
 
 function getProjectAssets() {
-    const categories = ["Pictures", "Music", "Videos"];
-    return categories.flatMap(folder => collectAssets(folder, getFiles([folder])));
+    return ["Pictures", "Music", "Videos"].flatMap(folder => collectAssets(getFiles([folder]), [folder]));
 }
 
 function assetKey(path) {
@@ -52,13 +51,14 @@ function assetKey(path) {
 function findAsset(path) {
     const names = Array.isArray(path) ? [...path] : String(path || "").split("/").filter(Boolean);
     if (names[0] === "Home") names.shift();
-    let folder = null;
+    if (!names.length) return null;
+    let folderPath = [];
     for (let i = 0; i < names.length - 1; i++) {
-        folder = getFiles(folder ? [...folder, names[i]] : [names[i]]).find(item => item.type === "folder");
+        const folder = getFiles(folderPath).find(item => item.type === "folder" && item.name === names[i]);
         if (!folder) return null;
+        folderPath = [...folderPath, folder.name];
     }
-    const parentPath = names.slice(0, -1);
-    return getFiles(parentPath).find(item => item.type === "file" && item.name === names.at(-1)) || null;
+    return getFiles(folderPath).find(item => item.type === "file" && item.name === names.at(-1)) || null;
 }
 
 async function blobToBase64(content) {
@@ -67,18 +67,14 @@ async function blobToBase64(content) {
         const bytes = new Uint8Array(buffer);
         let binary = "";
         const chunkSize = 0x8000;
-        for (let i = 0; i < bytes.length; i += chunkSize) {
-            binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-        }
+        for (let i = 0; i < bytes.length; i += chunkSize) binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
         return btoa(binary);
     }
 
     const bytes = new TextEncoder().encode(String(content ?? ""));
     let binary = "";
     const chunkSize = 0x8000;
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-    }
+    for (let i = 0; i < bytes.length; i += chunkSize) binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
     return btoa(binary);
 }
 
