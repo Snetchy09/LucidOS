@@ -7,7 +7,7 @@ const PORT = Number(process.env.PORT || 3000);
 const FREE_MAX_APP_BYTES = 100 * 1024 * 1024;
 const PRO_MAX_APP_BYTES = Number(process.env.B2_PRO_MAX_APP_BYTES || 1024 * 1024 * 1024);
 const lucidOrigin = (() => {
-    const configured = String(process.env.LUCID_ORIGIN || "https://snetchY09.github.io");
+    const configured = String(process.env.LUCID_ORIGIN || "https://snetchy09.github.io");
     try { return new URL(configured).origin; } catch { return "https://snetchy09.github.io"; }
 })();
 
