@@ -40,7 +40,7 @@ async function sendReset(form) {
         return;
     }
     message.textContent = "Sending reset link...";
-    const redirectTo = `${window.location.origin}${window.location.pathname}`;
+    const redirectTo = "https://snetchy09.github.io/LucidOS/";
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     message.textContent = error ? error.message : "If that email has an account, a reset link has been sent.";
 }
