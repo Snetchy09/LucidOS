@@ -22,10 +22,7 @@ function renderApps(root, category) {
     const normalizedApps = apps.map(app => ({ ...app, icon: app.icon || app.icon_url || "◇", type: app.app_type || "community", installed: isAppInstalled(app.id) }));
     const filteredApps = category === "All" ? normalizedApps : normalizedApps.filter(app => app.category === category);
     grid.innerHTML = "";
-    if (!filteredApps.length) {
-        grid.innerHTML = '<div class="store-empty">No apps in this category yet.</div>';
-        return;
-    }
+    if (!filteredApps.length) { grid.innerHTML = '<div class="store-empty">No apps in this category yet.</div>'; return; }
     filteredApps.forEach(app => {
         const card = document.createElement("article");
         card.className = "store-app-card";
@@ -45,8 +42,7 @@ async function loadStoreCatalog(windowElement) {
     grid.innerHTML = '<div class="store-loading">Loading Lucid Store...</div>';
     try {
         const apps = await getStoreApps();
-        const merged = [...builtInStoreApps, ...apps.filter(app => !builtInStoreApps.some(local => local.id === app.id))];
-        root.__storeApps = merged;
+        root.__storeApps = [...builtInStoreApps, ...apps.filter(app => !builtInStoreApps.some(local => local.id === app.id))];
         renderApps(root, "All");
     } catch (error) {
         console.error("Lucid Store failed to load:", error);
@@ -59,7 +55,7 @@ async function showReviews(app) {
     const user = await getCurrentUser();
     const overlay = document.createElement("div");
     overlay.className = "lucid-account-overlay lucid-store-review-overlay";
-    overlay.innerHTML = `<div class="lucid-plans-dialog"><button class="lucid-dialog-close" type="button">×</button><div class="account-plan-label">${escapeHTML(app.name)}</div><h2>Reviews</h2><div class="store-review-list">${reviews.length ? reviews.map(review => `<article class="store-review"><div class="store-review-head"><strong>${"★".repeat(review.rating)}${"☆".repeat(5-review.rating)}</strong><span>${new Date(review.created_at).toLocaleDateString()}</span></div><div class="store-review-text">${escapeHTML(review.review_text || "No written review.")}</div></article>`).join("") : '<div class="store-empty">No reviews yet.</div>'}</div>${user ? '<textarea class="store-review-input" maxlength="1000" placeholder="Write a review..."></textarea><div class="store-review-actions"><select class="store-review-rating"><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select><button class="account-plan-button">Save review</button></div>' : '<p class="store-empty">Sign in to write a review.</p>'}</div>`;
+    overlay.innerHTML = `<div class="lucid-plans-dialog"><button class="lucid-dialog-close" type="button">×</button><div class="account-plan-label">${escapeHTML(app.name)}</div><h2>Reviews</h2><div class="store-review-list">${reviews.length ? reviews.map(review => `<article class="store-review"><div class="store-review-head"><strong>${"★".repeat(review.rating)}${"☆".repeat(5-review.rating)}</strong><span>${new Date(review.created_at).toLocaleDateString()}</span></div><div class="store-review-text">${escapeHTML(review.review || "No written review.")}</div></article>`).join("") : '<div class="store-empty">No reviews yet.</div>'}</div>${user ? '<textarea class="store-review-input" maxlength="1000" placeholder="Write a review..."></textarea><div class="store-review-actions"><select class="store-review-rating"><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select><button class="account-plan-button">Save review</button></div>' : '<p class="store-empty">Sign in to write a review.</p>'}</div>`;
     document.body.appendChild(overlay);
     const close = () => overlay.remove();
     overlay.querySelector(".lucid-dialog-close").addEventListener("click", close);
