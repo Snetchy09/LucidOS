@@ -4,7 +4,15 @@ observer.observe(document.body, { childList: true, subtree: true });
 setupAuth();
 setupAccount();
 if (supabase) supabase.auth.onAuthStateChange(event => { if (event === "PASSWORD_RECOVERY") showPasswordReset(); refreshAccountUI(); });
-function setupAuth() { if (!window.lucidAuth) window.lucidAuth = { open: showAuthDialog }; }
+function setupAuth() {
+    if (!window.lucidAuth) window.lucidAuth = { open: showAuthDialog };
+    document.querySelectorAll(".studio-auth").forEach(section => {
+        if (section.dataset.universalAccount === "true") return;
+        section.dataset.universalAccount = "true";
+        section.innerHTML = `<div class="studio-auth-card"><div class="account-plan-label">LUCID ACCOUNT</div><h2>Use your Lucid account</h2><p>Sign in or create your account to use Lucid Studio.</p><button type="button" class="lucid-account-primary">Open Account</button></div>`;
+        section.querySelector(".lucid-account-primary").addEventListener("click", () => showAuthDialog("signin"));
+    });
+}
 function refreshAccountUI() { document.querySelectorAll('.settings-page[data-page-content="account"]').forEach(page => { page.dataset.accountReady = ""; setupAccount(); }); }
 async function showAuthDialog(mode = "signin") {
     if (document.querySelector(".lucid-auth-overlay")) return;
