@@ -1,4 +1,6 @@
 drop policy if exists "Users can create reviews" on public.lucid_app_reviews;
 drop policy if exists "Users can update own reviews" on public.lucid_app_reviews;
+drop policy if exists "reviews_insert_own" on public.lucid_app_reviews;
+drop policy if exists "reviews_update_own" on public.lucid_app_reviews;
 create policy "Users can create reviews" on public.lucid_app_reviews for insert to authenticated with check ((select auth.uid()) = user_id and (length(coalesce(review,'')) = 0 or lower(coalesce(auth.jwt()->'app_metadata'->>'plan','free')) in ('pro','premium','subscriber')));
 create policy "Users can update own reviews" on public.lucid_app_reviews for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id and (length(coalesce(review,'')) = 0 or lower(coalesce(auth.jwt()->'app_metadata'->>'plan','free')) in ('pro','premium','subscriber')));
