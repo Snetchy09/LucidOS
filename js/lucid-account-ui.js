@@ -3,6 +3,7 @@ const observer = new MutationObserver(() => { setupAuth(); setupAccount(); });
 observer.observe(document.body, { childList: true, subtree: true });
 setupAuth();
 setupAccount();
+loadLemon();
 if (supabase) supabase.auth.onAuthStateChange(event => { if (event === "PASSWORD_RECOVERY") showPasswordReset(); refreshAccountUI(); });
 function setupAuth() {
     window.lucidAuth = { open: showAuthDialog };
@@ -14,6 +15,26 @@ function setupAuth() {
     });
 }
 function refreshAccountUI() { document.querySelectorAll('.settings-page[data-page-content="account"]').forEach(page => { page.dataset.accountReady = ""; setupAccount(); }); }
+function loadLemon() {
+    if (window.LemonSqueezy) return;
+    if (document.querySelector('script[data-lucid-lemon]')) return;
+    const script = document.createElement("script");
+    script.src = "https://app.lemonsqueezy.com/js/lemon.js";
+    script.defer = true;
+    script.dataset.lucidLemon = "true";
+    document.head.appendChild(script);
+}
+function setupLemonEvents() {
+    if (!window.LemonSqueezy || window.lucidLemonEventsReady) return false;
+    window.lucidLemonEventsReady = true;
+    window.LemonSqueezy.Setup({ eventHandler: data => { if (data?.event === "Checkout.Success") handleCheckoutSuccess(); } });
+    return true;
+}
+async function waitForLemon() {
+    loadLemon();
+    for (let i = 0; i < 30; i++) { if (setupLemonEvents()) return true; await new Promise(resolve => setTimeout(resolve, 200)); }
+    return false;
+}
 async function showAuthDialog(mode = "signin") {
     if (document.querySelector(".lucid-auth-overlay")) return;
     const overlay = document.createElement("div");
@@ -86,8 +107,7 @@ async function setupAccount() {
     const authButton = page.querySelector(".account-auth-button");
     const planCard = page.querySelector(".account-plan-card");
     if (!authCard || !authDetail || !authButton || !planCard) return;
-    const plan = String(user?.app_metadata?.plan || user?.app_metadata?.subscription || "free").toLowerCase();
-    const plus = ["pro", "premium", "subscriber"].includes(plan);
+    const plus = hasPlus(user);
     if (user) {
         authDetail.textContent = `Signed in as ${user.email || "your account"}`;
         authButton.textContent = "Sign out";
@@ -101,31 +121,57 @@ async function setupAccount() {
     planCard.querySelector("p").textContent = plus ? "1 GB publishing limit and larger developer features." : "100 MB publishing limit and access to the Lucid Store.";
     const planButton = planCard.querySelector(".account-plan-button");
     planButton.textContent = plus ? "Manage Plus" : "Upgrade to Plus";
-    planButton.onclick = async () => { const currentUser = await getCurrentUser(); if (!currentUser) { await showAuthDialog("signup"); return; } showPlans(plus); };
+    planButton.onclick = async () => { const currentUser = await getCurrentUser(); if (!currentUser) { await showAuthDialog("signup"); return; } showPlans(hasPlus(currentUser)); };
 }
+function hasPlus(user) { const plan = String(user?.app_metadata?.plan || user?.app_metadata?.subscription || "free").toLowerCase(); return ["pro", "premium", "subscriber"].includes(plan); }
 function showPlans(plus) {
     if (document.querySelector(".lucid-plans-overlay")) return;
     const overlay = document.createElement("div");
     overlay.className = "lucid-account-overlay lucid-plans-overlay";
-    overlay.innerHTML = `<div class="lucid-plans-dialog"><button class="lucid-dialog-close" type="button">×</button><div class="account-plan-label">LUCID PLUS</div><h2>${plus ? "Your Plus plan" : "Choose your plan"}</h2><div class="lucid-plan-grid"><div class="lucid-plan"><h3>Free</h3><strong>100 MB</strong><span>Publishing limit</span><b>${plus ? "Included" : "Current plan"}</b></div><div class="lucid-plan lucid-plan-featured"><h3>Plus</h3><strong>1 GB</strong><span>Larger app publishing limit</span><button class="account-plan-button" id="lucid-plus-action">${plus ? "Manage Plus" : "Upgrade to Plus"}</button></div></div><p class="settings-hint">Payments are handled securely by Lemon Squeezy. Lucid only receives subscription status through signed webhooks.</p><div class="lucid-account-message" id="lucid-billing-message"></div></div>`;
+    overlay.innerHTML = `<div class="lucid-plans-dialog"><button class="lucid-dialog-close" type="button">×</button><div class="account-plan-label">LUCID PLUS</div><h2>${plus ? "Your Plus plan" : "Choose your plan"}</h2><div class="lucid-plan-grid"><div class="lucid-plan"><h3>Free</h3><strong>100 MB</strong><span>Publishing limit</span><b>${plus ? "Included" : "Current plan"}</b></div><div class="lucid-plan lucid-plan-featured"><h3>Plus</h3><strong>1 GB</strong><span>Larger app publishing limit</span><button class="account-plan-button" id="lucid-plus-action">${plus ? "Manage Plus" : "Upgrade to Plus"}</button></div></div><div class="lucid-billing-status" id="lucid-billing-status"><span></span><div><strong>Secure checkout</strong><small>Powered by Lemon Squeezy. Lucid never handles your card details.</small></div></div><div class="lucid-account-message" id="lucid-billing-message"></div></div>`;
     document.body.appendChild(overlay);
     const close = () => overlay.remove();
     overlay.querySelector(".lucid-dialog-close").addEventListener("click", close);
     overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
-    overlay.querySelector("#lucid-plus-action")?.addEventListener("click", async () => {
-        const button = overlay.querySelector("#lucid-plus-action");
-        const message = overlay.querySelector("#lucid-billing-message");
-        button.disabled = true;
-        try {
-            const user = await getCurrentUser();
-            const { data } = await supabase.auth.getSession();
-            const token = data.session?.access_token;
-            if (!token || !user) { await showAuthDialog("signup"); overlay.remove(); return; }
-            const response = await fetch("https://lucid-backend.vercel.app/api/create-checkout", { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } });
-            const result = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(result.error || `Checkout failed (${response.status}).`);
-            window.location.href = result.url;
-        } catch (error) { message.textContent = error.message || "Unable to open checkout."; button.disabled = false; }
-    });
+    if (!plus) overlay.querySelector("#lucid-plus-action")?.addEventListener("click", () => startCheckout(overlay));
 }
+async function startCheckout(overlay) {
+    const button = overlay.querySelector("#lucid-plus-action");
+    const message = overlay.querySelector("#lucid-billing-message");
+    const status = overlay.querySelector("#lucid-billing-status");
+    button.disabled = true;
+    button.textContent = "Preparing checkout…";
+    message.textContent = "Securing your checkout…";
+    try {
+        const user = await getCurrentUser();
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+        if (!token || !user) { await showAuthDialog("signup"); overlay.remove(); return; }
+        const response = await fetch("https://lucid-backend.vercel.app/api/create-checkout", { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || `Checkout failed (${response.status}).`);
+        const ready = await waitForLemon();
+        if (!ready) throw new Error("The secure checkout could not load. Please try again.");
+        status.classList.add("active");
+        message.textContent = "Checkout ready. Your payment stays inside LucidOS.";
+        button.textContent = "Checkout open";
+        window.LemonSqueezy.Url.Open(result.url);
+    } catch (error) { message.textContent = error.message || "Unable to open checkout."; button.textContent = "Upgrade to Plus"; button.disabled = false; status.classList.remove("active"); }
+}
+async function handleCheckoutSuccess() {
+    document.querySelectorAll("#lucid-plus-action").forEach(button => { button.disabled = true; button.textContent = "Verifying Plus…"; });
+    const message = document.querySelector("#lucid-billing-message");
+    if (message) message.textContent = "Payment confirmed. Waiting for Lucid to receive the subscription status…";
+    for (let i = 0; i < 12; i++) {
+        try {
+            await supabase.auth.refreshSession();
+            const user = await getCurrentUser();
+            if (hasPlus(user)) { document.querySelector(".lucid-plans-overlay")?.remove(); refreshAccountUI(); document.dispatchEvent(new CustomEvent("lucid-account-changed")); return; }
+        } catch {}
+        await new Promise(resolve => setTimeout(resolve, 2500));
+    }
+    if (message) message.textContent = "Payment succeeded. Plus activation is still syncing—close this window and reopen Account in a moment.";
+    document.querySelectorAll("#lucid-plus-action").forEach(button => { button.disabled = false; button.textContent = "Check Plus status"; button.onclick = handlePlanRefresh; });
+}
+async function handlePlanRefresh() { await supabase.auth.refreshSession(); document.querySelector(".lucid-plans-overlay")?.remove(); refreshAccountUI(); }
 function escapeHTML(text) { return String(text ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
