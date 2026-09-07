@@ -1,5 +1,6 @@
 import { supabase, getCurrentUser } from "./lucid-store-api.js";
-const observer = new MutationObserver(() => setupAuth();
+const observer = new MutationObserver(() => { setupAuth(); setupAccount(); });
+observer.observe(document.body, { childList: true, subtree: true });
 setupAuth();
 setupAccount();
 if (supabase) supabase.auth.onAuthStateChange(event => { if (event === "PASSWORD_RECOVERY") showPasswordReset(); refreshAccountUI(); });
@@ -96,7 +97,7 @@ function showPlans(plus) {
     if (document.querySelector(".lucid-plans-overlay")) return;
     const overlay = document.createElement("div");
     overlay.className = "lucid-account-overlay lucid-plans-overlay";
-    overlay.innerHTML = `<div class="lucid-plans-dialog"><button class="lucid-dialog-close" type="button">×</button><div class="account-plan-label">LUCID PLUS</div><h2>${plus ? "Your Plus plan" : "Choose your plan"}</h2><div class="lucid-plan-grid"><div class="lucid-plan"><h3>Free</h3><strong>100 MB</strong><span>Publishing limit</span><b>${plus ? "Included" : "Current plan"}</b></div><div class="lucid-plan lucid-plan-featured"><h3>Plus</h3><strong>1 GB</strong><span>Larger app publishing limit</span><button class="account-plan-button" id="lucid-plus-action">${plus ? "Open billing" : "Upgrade to Plus"}</button></div></div><p class="settings-hint">Payments are handled securely by Lemon Squeezy. Lucid only receives subscription status through signed webhooks.</p><div class="lucid-account-message" id="lucid-billing-message"></div></div>`;
+    overlay.innerHTML = `<div class="lucid-plans-dialog"><button class="lucid-dialog-close" type="button">×</button><div class="account-plan-label">LUCID PLUS</div><h2>${plus ? "Your Plus plan" : "Choose your plan"}</h2><div class="lucid-plan-grid"><div class="lucid-plan"><h3>Free</h3><strong>100 MB</strong><span>Publishing limit</span><b>${plus ? "Included" : "Current plan"}</b></div><div class="lucid-plan lucid-plan-featured"><h3>Plus</h3><strong>1 GB</strong><span>Larger app publishing limit</span><button class="account-plan-button" id="lucid-plus-action">${plus ? "Manage Plus" : "Upgrade to Plus"}</button></div></div><p class="settings-hint">Payments are handled securely by Lemon Squeezy. Lucid only receives subscription status through signed webhooks.</p><div class="lucid-account-message" id="lucid-billing-message"></div></div>`;
     document.body.appendChild(overlay);
     const close = () => overlay.remove();
     overlay.querySelector(".lucid-dialog-close").addEventListener("click", close);
