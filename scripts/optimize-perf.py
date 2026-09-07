@@ -1,6 +1,19 @@
 #!/usr/bin/env python3
+import urllib.request
 from pathlib import Path
+
 root = Path(__file__).resolve().parents[1]
+MAIN_GOOD = "https://raw.githubusercontent.com/Snetchy09/LucidOS/fcd658b8e89d35fefeafb0f4db990e57e9764840/js/main.js"
+
+def restore_main_if_needed():
+    path = root / "js" / "main.js"
+    src = path.read_text() if path.exists() else ""
+    if "buildDesktopApps" in src and "function updateClock" in src and len(src) > 8000:
+        return
+    print("main.js looks incomplete, restoring...")
+    data = urllib.request.urlopen(MAIN_GOOD, timeout=30).read().decode()
+    path.write_text(data)
+    print(f"restored main.js ({len(data)} bytes)")
 
 def patch_studio():
     path = root / "apps" / "lucid-studio.js"
@@ -51,6 +64,9 @@ def patch_studio():
 def patch_main():
     path = root / "js" / "main.js"
     src = path.read_text()
+    if "if (clock.textContent !== text)" in src and "buildDesktopApps" in src:
+        print("main already optimized")
+        return
     old = """function updateClock() {
     const clock = document.getElementById("clock");
     if (!clock) return;
@@ -68,9 +84,6 @@ def patch_main():
     const text = `${hours}:${minutes}`;
     if (clock.textContent !== text) clock.textContent = text;
 }"""
-    if "if (clock.textContent !== text)" in src:
-        print("main already optimized")
-        return
     if old not in src:
         raise SystemExit("main: clock function not found")
     path.write_text(src.replace(old, new))
@@ -101,6 +114,7 @@ def patch_css():
     print("css optimized")
 
 if __name__ == "__main__":
+    restore_main_if_needed()
     patch_studio()
     patch_main()
     patch_css()
