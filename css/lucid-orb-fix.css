@@ -1,0 +1,8 @@
+#start-button {
+    z-index: 600;
+}
+#desktop.lucid-launcher-open .desktop-app {
+    pointer-events: auto;
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(1);
+}
