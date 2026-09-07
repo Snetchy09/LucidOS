@@ -469,7 +469,16 @@ function openLucidScriptEditor(root, project = null) {
     const lineNumbers = root.querySelector("#lucid-line-numbers");
     codeEditor.value = project.source || "";
     updateLineNumbers();
-    function updateLineNumbers() { const lineCount = codeEditor.value.split("\n").length; let output = ""; for (let i = 1; i <= lineCount; i++) output += i + "\n"; lineNumbers.textContent = output; }
+    function updateLineNumbers() {
+        const value = codeEditor.value;
+        let lineCount = 1;
+        for (let i = 0; i < value.length; i++) if (value.charCodeAt(i) === 10) lineCount++;
+        if (lineCount === lastLineCount) return;
+        lastLineCount = lineCount;
+        const parts = new Array(lineCount);
+        for (let i = 0; i < lineCount; i++) parts[i] = i + 1;
+        lineNumbers.textContent = parts.join("\n");
+    }
     function saveCurrentStudioProject() { saveProjectSource(project.id, codeEditor.value); project = getProject(project.id); if (statusElement) statusElement.textContent = "Saved"; saveButton?.classList.add("studio-saved"); setTimeout(() => saveButton?.classList.remove("studio-saved"), 700); }
     root.querySelector("#studio-back-projects")?.addEventListener("click", () => { saveCurrentStudioProject(); renderStudioProjects(root); });
     root.querySelector("#studio-editor-docs")?.addEventListener("click", () => { saveCurrentStudioProject(); renderLucidScriptDocs(root); });
@@ -478,11 +487,13 @@ function openLucidScriptEditor(root, project = null) {
     root.querySelector("#studio-build")?.addEventListener("click", async () => { saveCurrentStudioProject(); await buildLucidProject(root, project); });
     saveButton?.addEventListener("click", saveCurrentStudioProject);
     let autoSaveTimer = null;
-    codeEditor.addEventListener("input", () => { updateLineNumbers(); if (statusElement) statusElement.textContent = "Unsaved changes"; clearTimeout(autoSaveTimer); autoSaveTimer = setTimeout(() => saveCurrentStudioProject(), 700); });
-    codeEditor.addEventListener("scroll", () => { lineNumbers.scrollTop = codeEditor.scrollTop; });
+    let lastLineCount = -1;
+    let lineNumbersRaf = 0;
+    codeEditor.addEventListener("input", () => { if (!lineNumbersRaf) lineNumbersRaf = requestAnimationFrame(() => { lineNumbersRaf = 0; updateLineNumbers(); }); if (statusElement) statusElement.textContent = "Unsaved changes"; clearTimeout(autoSaveTimer); autoSaveTimer = setTimeout(() => saveCurrentStudioProject(), 700); });
+    codeEditor.addEventListener("scroll", () => { if (lineNumbers.scrollTop !== codeEditor.scrollTop) lineNumbers.scrollTop = codeEditor.scrollTop; }, { passive: true });
     codeEditor.addEventListener("keydown", event => {
-        if (event.key === "Tab") { event.preventDefault(); const start = codeEditor.selectionStart; const end = codeEditor.selectionEnd; const value = codeEditor.value; codeEditor.value = value.slice(0, start) + "    " + value.slice(end); codeEditor.selectionStart = start + 4; codeEditor.selectionEnd = start + 4; updateLineNumbers(); codeEditor.dispatchEvent(new Event("input")); return; }
-        if (event.key === "Enter") { event.preventDefault(); const start = codeEditor.selectionStart; const value = codeEditor.value; const currentLine = value.slice(0, start).split("\n").pop(); const indentation = currentLine.match(/^[ \t]*/)?.[0] || ""; let nextIndent = indentation; if (currentLine.trimEnd().endsWith("{")) nextIndent += "    "; if (value.slice(start).startsWith("}") && nextIndent.endsWith("    ")) nextIndent = nextIndent.slice(0, -4); codeEditor.value = value.slice(0, start) + "\n" + nextIndent + value.slice(start); const newPosition = start + 1 + nextIndent.length; codeEditor.selectionStart = newPosition; codeEditor.selectionEnd = newPosition; updateLineNumbers(); codeEditor.dispatchEvent(new Event("input")); return; }
+        if (event.key === "Tab") { event.preventDefault(); const start = codeEditor.selectionStart; const end = codeEditor.selectionEnd; const value = codeEditor.value; codeEditor.value = value.slice(0, start) + "    " + value.slice(end); codeEditor.selectionStart = start + 4; codeEditor.selectionEnd = start + 4; lastLineCount = -1; codeEditor.dispatchEvent(new Event("input")); return; }
+        if (event.key === "Enter") { event.preventDefault(); const start = codeEditor.selectionStart; const value = codeEditor.value; const currentLine = value.slice(0, start).split("\n").pop(); const indentation = currentLine.match(/^[ \t]*/)?.[0] || ""; let nextIndent = indentation; if (currentLine.trimEnd().endsWith("{")) nextIndent += "    "; if (value.slice(start).startsWith("}") && nextIndent.endsWith("    ")) nextIndent = nextIndent.slice(0, -4); codeEditor.value = value.slice(0, start) + "\n" + nextIndent + value.slice(start); const newPosition = start + 1 + nextIndent.length; codeEditor.selectionStart = newPosition; codeEditor.selectionEnd = newPosition; lastLineCount = -1; codeEditor.dispatchEvent(new Event("input")); return; }
         if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") { event.preventDefault(); saveCurrentStudioProject(); return; }
         if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); saveCurrentStudioProject(); runStudioCode(root); }
     });
