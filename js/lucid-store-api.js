@@ -41,13 +41,13 @@ async function signOutDeveloper() {
 }
 async function getStoreApps() {
     if (!supabase) return [];
-    const { data, error } = await supabase.from("lucid_apps").select("id,name,description,icon,icon_url,category,version,app_type,status,package_key,source_key,entry_point,created_at,updated_at,package_size").eq("status", "approved").order("created_at", { ascending: true });
+    const { data, error } = await supabase.from("lucid_apps").select("id,name,description,icon,icon_url,category,version,app_type,status,package_key,source_key,entry_point,created_at,updated_at,package_size,store_images").eq("status", "approved").order("created_at", { ascending: true });
     if (error) throw error;
     const apps = data || [];
     if (!apps.length) return [];
     const { data: stats } = await supabase.from("lucid_app_store_stats").select("app_id,review_count,average_rating,download_count").in("app_id", apps.map(app => app.id));
     const statMap = new Map((stats || []).map(item => [item.app_id, item]));
-    return apps.map(app => ({ ...app, icon: app.icon || app.icon_url || "◇", ...(statMap.get(app.id) || { review_count: 0, average_rating: 0, download_count: 0 }) }));
+    return apps.map(app => ({ ...app, store_images: Array.isArray(app.store_images) ? app.store_images : [], icon: app.icon || app.icon_url || "◇", ...(statMap.get(app.id) || { review_count: 0, average_rating: 0, download_count: 0 }) }));
 }
 async function recordAppDownload(appId, version) {
     if (!supabase || !appId) return;
@@ -71,7 +71,7 @@ async function saveAppReview(appId, rating, reviewText) {
 }
 async function getOwnSubmissions() {
     if (!supabase) return [];
-    const { data, error } = await supabase.from("lucid_app_submissions").select("id,app_id,name,description,category,version,package_key,source_key,icon_key,status,rejection_reason,submitted_at,reviewed_at,reviewer_id,package_size").order("submitted_at", { ascending: false });
+    const { data, error } = await supabase.from("lucid_app_submissions").select("id,app_id,name,description,category,version,package_key,source_key,icon_key,status,rejection_reason,submitted_at,reviewed_at,reviewer_id,package_size,store_images").order("submitted_at", { ascending: false });
     if (error) throw error;
     return data || [];
 }
@@ -80,7 +80,7 @@ async function getReviewQueue() {
     const user = await getCurrentUser();
     const role = String(user?.app_metadata?.role || "").toLowerCase();
     if (!user || !["admin", "reviewer"].includes(role)) throw new Error("Reviewer access is required.");
-    const { data, error } = await supabase.from("lucid_app_submissions").select("id,app_id,developer_id,name,description,category,version,package_key,source_key,icon_key,status,rejection_reason,submitted_at,reviewed_at,package_size").eq("status", "pending").order("submitted_at", { ascending: true });
+    const { data, error } = await supabase.from("lucid_app_submissions").select("id,app_id,developer_id,name,description,category,version,package_key,source_key,icon_key,status,rejection_reason,submitted_at,reviewed_at,package_size,store_images").eq("status", "pending").order("submitted_at", { ascending: true });
     if (error) throw error;
     return data || [];
 }
