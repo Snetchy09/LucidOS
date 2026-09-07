@@ -58,17 +58,35 @@ async function setupAccount() {
     const plus = ["pro", "premium", "subscriber"].includes(plan);
     const card = document.createElement("section");
     card.className = "account-plan-card";
-    card.innerHTML = `<div><span class="account-plan-label">LUCID PLUS</span><h3>${plus ? "Plus plan" : "Free plan"}</h3><p>${plus ? "Larger publishing limits and Lucid developer features." : "100 MB publishing limit and access to the Lucid Store."}</p></div><button type="button" class="account-plan-button">View plans</button>`;
+    card.innerHTML = `<div><span class="account-plan-label">LUCID PLUS</span><h3>${plus ? "Plus plan" : "Free plan"}</h3><p>${plus ? "1 GB publishing limit and larger developer features." : "100 MB publishing limit and access to the Lucid Store."}</p></div><button type="button" class="account-plan-button">${plus ? "Manage Plus" : "Upgrade to Plus"}</button>`;
     save.closest(".setting-row")?.insertAdjacentElement("afterend", card);
-    card.querySelector(".account-plan-button").addEventListener("click", showPlans);
+    card.querySelector(".account-plan-button").addEventListener("click", () => showPlans(plus));
 }
-function showPlans() {
+function showPlans(plus) {
     if (document.querySelector(".lucid-plans-overlay")) return;
     const overlay = document.createElement("div");
     overlay.className = "lucid-account-overlay lucid-plans-overlay";
-    overlay.innerHTML = `<div class="lucid-plans-dialog"><button class="lucid-dialog-close" type="button">×</button><div class="account-plan-label">LUCID PLUS</div><h2>Choose your plan</h2><div class="lucid-plan-grid"><div class="lucid-plan"><h3>Free</h3><strong>100 MB</strong><span>Publishing limit</span><b>Available now</b></div><div class="lucid-plan lucid-plan-featured"><h3>Plus</h3><strong>1 GB</strong><span>Larger app publishing limit</span><b>Payment setup required</b></div></div><p class="settings-hint">Your plan is enforced by the publishing service. Payment activation still needs a connected billing provider.</p></div>`;
+    overlay.innerHTML = `<div class="lucid-plans-dialog"><button class="lucid-dialog-close" type="button">×</button><div class="account-plan-label">LUCID PLUS</div><h2>${plus ? "Your Plus plan" : "Choose your plan"}</h2><div class="lucid-plan-grid"><div class="lucid-plan"><h3>Free</h3><strong>100 MB</strong><span>Publishing limit</span><b>${plus ? "Included" : "Current plan"}</b></div><div class="lucid-plan lucid-plan-featured"><h3>Plus</h3><strong>1 GB</strong><span>Larger app publishing limit</span><button class="account-plan-button" id="lucid-plus-action">${plus ? "Open billing" : "Upgrade to Plus"}</button></div></div><p class="settings-hint">Payments are handled securely by Lemon Squeezy. Lucid only receives subscription status through signed webhooks.</p><div class="lucid-account-message" id="lucid-billing-message"></div></div>`;
     document.body.appendChild(overlay);
     const close = () => overlay.remove();
     overlay.querySelector(".lucid-dialog-close").addEventListener("click", close);
     overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
+    overlay.querySelector("#lucid-plus-action")?.addEventListener("click", async () => {
+        const button = overlay.querySelector("#lucid-plus-action");
+        const message = overlay.querySelector("#lucid-billing-message");
+        button.disabled = true;
+        try {
+            const user = await getCurrentUser();
+            const { data } = await supabase.auth.getSession();
+            const token = data.session?.access_token;
+            if (!token || !user) throw new Error("Sign in to manage Lucid Plus.");
+            const response = await fetch("https://lucid-backend.vercel.app/api/create-checkout", { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.error || `Checkout failed (${response.status}).`);
+            window.location.href = result.url;
+        } catch (error) {
+            message.textContent = error.message || "Unable to open checkout.";
+            button.disabled = false;
+        }
+    });
 }
