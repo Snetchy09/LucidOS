@@ -1,5 +1,5 @@
 # Lucid Script
-Lucid Script is the native language for building LucidOS applications and 2D games. It keeps the syntax small while providing state, functions, UI, graphics, keyboard and mouse input, storage, files, audio and a real game loop.
+Lucid Script is the native language for building LucidOS applications and 2D games. It keeps the syntax small while providing state, functions, UI, graphics, keyboard and mouse input, storage, files, audio, timers and a real game loop.
 ## App structure
 ```lucid
 app "Hello"
@@ -85,12 +85,15 @@ let color = random.pick(colors)
 let now = time.now()
 let hour = time.hour()
 let rounded = math.round(4.7)
+let upper = string.upper(name)
+let length = string.length(name)
 clipboard.copy(name)
 window.open("https://example.com")
 audio.beep(600, 0.08)
+timer.after(1000, "wake")
 ```
 ## 2D games
-A `game` block creates a canvas scene with a frame loop.
+A `game` block creates a canvas scene with a real frame loop.
 ```lucid
 app "Box Game"
 window {
@@ -115,7 +118,6 @@ window {
         gameText "Score: {score}" {
             x 20
             y 34
-            size 24
             color "#ffffff"
         }
         onUpdate {
@@ -151,25 +153,25 @@ window {
 }
 ```
 ## Game objects
-`box` supports `x`, `y`, `width`, `height`, `color`.
-`circle` supports `x`, `y`, `radius`, `color`.
-`sprite` supports `x`, `y`, `width`, `height`, `src`.
-`gameText` supports `x`, `y`, `size`, `color`.
-`line` supports `x1`, `y1`, `x2`, `y2`, `width`, `color`.
+`box` supports `x`, `y`, `width`, `height`, `color`, `stroke`, `lineWidth`, `opacity`, `visible` and `z`.
+`circle` supports `x`, `y`, `radius`, `color`, `stroke`, `lineWidth`, `opacity`, `visible` and `z`.
+`sprite` supports `x`, `y`, `width`, `height`, `src`, `opacity`, `visible` and `z`.
+`gameText` supports `x`, `y`, `size`, `color`, `font`, `opacity`, `visible` and `z`.
+`line` supports `x`, `y`, `width`, `height`, `color` and `lineWidth`.
+Inside entity blocks, `size` is reserved as an entity property and canvas size is written as `size width, height` directly inside `game`.
 ## Game API
 `game.key(key)` checks a held keyboard key.
 `game.width()` and `game.height()` return canvas dimensions.
-`game.mouseX` and `game.mouseY` return the latest pointer position.
-`game.move(name, x, y)` moves an entity.
+`game.mouseX()` and `game.mouseY()` return the latest pointer position.
+`game.move(name, x, y)` moves an entity by a delta.
+`game.position(name)` returns an entity position object.
 `game.get(name, property, fallback)` reads entity state.
 `game.set(name, property, value)` changes entity state.
-`game.collides(a, b)` checks circle, box and mixed collisions.
-`game.distance(a, b)` returns distance between entity centers.
+`game.collides(a, b)` checks box, circle and mixed collisions.
 `game.remove(name)` removes an entity.
-`game.clear()` removes all entities.
-`game.pause()`, `game.resume()` and `game.togglePause()` control the loop.
+`game.pause()`, `game.resume()` and `game.toggle()` control the loop.
 ## Game events
-`onUpdate` runs every frame and receives `event.delta` and `event.dt` in seconds.
+`onUpdate` runs every frame and receives `event.delta` in seconds.
 `onKeyDown` and `onKeyUp` receive `event.key` and `event.code`.
 `onMouseDown` and `onMouseUp` receive `event.x`, `event.y` and `event.button`.
 ## Building
