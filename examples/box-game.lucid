@@ -21,7 +21,6 @@ window {
         gameText "Score: {score}" {
             x 20
             y 34
-            size 24
             color "#ffffff"
         }
         onUpdate {
