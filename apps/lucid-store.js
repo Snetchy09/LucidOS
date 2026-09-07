@@ -29,10 +29,9 @@ function renderApps(root, category) {
         const rating = Number(app.average_rating || 0);
         const reviews = Number(app.review_count || 0);
         const downloads = Number(app.download_count || 0);
-        card.innerHTML = `<div class="store-app-icon">${escapeHTML(app.icon)}</div><div class="store-app-content"><div class="store-app-top"><h2>${escapeHTML(app.name)}</h2><span class="store-app-version">v${escapeHTML(app.version)}</span></div><div class="store-app-category">${escapeHTML(app.category)}</div><p>${escapeHTML(app.description || "A Lucid OS application.")}</p><div class="store-app-meta"><span class="store-rating">${rating ? `★ ${rating.toFixed(1)}` : "—"}${reviews ? ` (${reviews})` : ""}</span><span>${downloads} ${downloads === 1 ? "install" : "installs"}</span></div><div class="store-app-footer"><span class="store-app-status">${app.type === "core" ? "System app" : app.installed ? "Installed" : "Available"}</span><span class="store-app-actions"><button class="store-reviews" type="button">Reviews</button><button class="store-install" data-app="${escapeHTML(app.id)}" ${app.type === "core" ? "disabled" : ""}>${app.type === "core" ? "Included" : app.installed ? "Remove" : "Install"}</button></span></div></div>`;
-        const actionButton = card.querySelector(".store-install");
-        if (actionButton && app.type !== "core") actionButton.addEventListener("click", async () => { if (app.id === "paint") { if (isAppInstalled(app.id)) uninstallApp(app.id); else installApp(app.id); } else if (isAppInstalled(app.id)) uninstallApp(app.id); else if (installExternalApp(app)) await recordAppDownload(app.id, app.version); });
-        card.querySelector(".store-reviews").addEventListener("click", () => showReviews(app));
+        card.innerHTML = `<div class="store-app-icon">${escapeHTML(app.icon)}</div><div class="store-app-content"><div class="store-app-top"><h2>${escapeHTML(app.name)}</h2><span class="store-app-version">v${escapeHTML(app.version)}</span></div><div class="store-app-category">${escapeHTML(app.category)}</div><p>${escapeHTML(app.description || "A Lucid OS application.")}</p><div class="store-app-meta"><span>${rating ? `★ ${rating.toFixed(1)}` : "—"}${reviews ? ` (${reviews})` : ""}</span><span>${downloads} ${downloads === 1 ? "install" : "installs"}</span></div><button type="button" class="store-open-app">View app</button></div>`;
+        card.addEventListener("click", event => { if (!event.target.closest("button")) openAppDetails(app); });
+        card.querySelector(".store-open-app").addEventListener("click", () => openAppDetails(app));
         grid.appendChild(card);
     });
 }
@@ -50,30 +49,41 @@ async function loadStoreCatalog(windowElement) {
         renderApps(root, "All");
     }
 }
-async function showReviews(app) {
-    const reviews = await getAppReviews(app.id).catch(() => []);
+async function openAppDetails(app) {
     const user = await getCurrentUser();
-    const plan = String(user?.app_metadata?.plan || user?.app_metadata?.subscription || "free").toLowerCase();
-    const plus = ["pro", "premium", "subscriber"].includes(plan);
+    const reviews = await getAppReviews(app.id).catch(() => []);
+    const installed = isAppInstalled(app.id);
+    const rating = Number(app.average_rating || 0);
+    const reviewCount = Number(app.review_count || 0);
     const overlay = document.createElement("div");
-    overlay.className = "lucid-account-overlay lucid-store-review-overlay";
-    overlay.innerHTML = `<div class="lucid-plans-dialog"><button class="lucid-dialog-close" type="button">×</button><div class="account-plan-label">${escapeHTML(app.name)}</div><h2>Reviews</h2><div class="store-review-list">${reviews.length ? reviews.map(review => `<article class="store-review"><div class="store-review-head"><strong>${"★".repeat(review.rating)}${"☆".repeat(5-review.rating)}</strong><span>${new Date(review.created_at).toLocaleDateString()}</span></div>${review.review_text || review.review ? `<div class="store-review-text">${escapeHTML(review.review_text || review.review)}</div>` : ""}</article>`).join("") : '<div class="store-empty">No reviews yet.</div>'}</div>${user ? `<div class="store-review-form"><select class="store-review-rating"><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select>${plus ? '<textarea class="store-review-input" maxlength="1000" placeholder="Write a comment..."></textarea>' : '<div class="store-review-plus-note">Plus members can add a written comment. Anyone signed in can leave a rating.</div>'}<button class="account-plan-button">Save rating</button></div>` : '<p class="store-empty">Sign in to rate this app.</p>'}</div>`;
+    overlay.className = "lucid-account-overlay lucid-store-detail-overlay";
+    overlay.innerHTML = `<div class="lucid-store-detail" role="dialog" aria-modal="true"><button class="lucid-dialog-close" type="button">×</button><div class="store-detail-hero"><div class="store-detail-icon">${escapeHTML(app.icon || "◇")}</div><div><div class="account-plan-label">${escapeHTML(app.category || "Other")}</div><h2>${escapeHTML(app.name)}</h2><p>${escapeHTML(app.description || "A Lucid OS application.")}</p><div class="store-detail-rating">${rating ? `★ ${rating.toFixed(1)}` : "No rating"}${reviewCount ? ` · ${reviewCount} review${reviewCount === 1 ? "" : "s"}` : ""}</div></div></div><div class="store-detail-preview">${app.store_images?.length ? app.store_images.map(image => `<img src="${escapeHTML(image)}" alt="${escapeHTML(app.name)} screenshot">`).join("") : app.icon_url ? `<img src="${escapeHTML(app.icon_url)}" alt="${escapeHTML(app.name)} preview">` : '<div class="store-detail-no-preview">No preview images were provided for this app.</div>'}</div><div class="store-detail-actions"><button type="button" class="store-detail-install">${app.type === "core" ? "Included" : installed ? "Uninstall" : "Install"}</button><button type="button" class="store-detail-update" ${!installed || app.type === "core" ? "disabled" : ""}>Update</button><button type="button" class="store-detail-review">Rate</button></div><section class="store-detail-reviews"><div class="store-detail-section-title"><h3>Ratings & reviews</h3><span>${reviewCount}</span></div>${reviews.length ? reviews.map(review => `<article class="store-review"><div class="store-review-head"><strong>${"★".repeat(review.rating)}${"☆".repeat(5-review.rating)}</strong><span>${new Date(review.created_at).toLocaleDateString()}</span></div>${review.review_text ? `<div class="store-review-text">${escapeHTML(review.review_text)}</div>` : ""}</article>`).join("") : '<div class="store-empty">No ratings yet.</div>'}</section></div>`;
     document.body.appendChild(overlay);
     const close = () => overlay.remove();
     overlay.querySelector(".lucid-dialog-close").addEventListener("click", close);
     overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
-    overlay.querySelector(".store-review-form button")?.addEventListener("click", async () => {
-        const button = overlay.querySelector(".store-review-form button");
+    overlay.querySelector(".store-detail-install").addEventListener("click", async () => {
+        const button = overlay.querySelector(".store-detail-install");
+        if (app.type === "core") return;
+        if (isAppInstalled(app.id)) { uninstallApp(app.id); button.textContent = "Install"; overlay.querySelector(".store-detail-update").disabled = true; }
+        else { const installedNow = app.id === "paint" ? installApp(app.id) : installExternalApp(app); if (installedNow) { button.textContent = "Uninstall"; overlay.querySelector(".store-detail-update").disabled = false; } }
+    });
+    overlay.querySelector(".store-detail-update").addEventListener("click", () => alert("No newer version is available yet."));
+    overlay.querySelector(".store-detail-review").addEventListener("click", () => showRatingDialog(app, user, overlay));
+}
+async function showRatingDialog(app, user, parent) {
+    const existing = parent.querySelector(".store-rating-dialog");
+    if (existing) existing.remove();
+    const dialog = document.createElement("div");
+    dialog.className = "store-rating-dialog";
+    const plus = ["pro", "premium", "subscriber"].includes(String(user?.app_metadata?.plan || user?.app_metadata?.subscription || "free").toLowerCase());
+    dialog.innerHTML = `<div class="store-rating-dialog-inner"><h3>Rate ${escapeHTML(app.name)}</h3><select class="store-review-rating"><option value="5">★★★★★</option><option value="4">★★★★☆</option><option value="3">★★★☆☆</option><option value="2">★★☆☆☆</option><option value="1">★☆☆☆☆</option></select>${plus ? '<textarea class="store-review-input" maxlength="1000" placeholder="Write a comment..."></textarea>' : '<p class="store-comment-note">Written comments are available to Plus members. You can still leave a rating.</p>'}<div class="store-rating-dialog-actions"><button type="button" class="store-rating-cancel">Cancel</button><button type="button" class="store-rating-save">Save rating</button></div></div>`;
+    parent.querySelector(".lucid-store-detail").appendChild(dialog);
+    dialog.querySelector(".store-rating-cancel").addEventListener("click", () => dialog.remove());
+    dialog.querySelector(".store-rating-save").addEventListener("click", async () => {
+        const button = dialog.querySelector(".store-rating-save");
         button.disabled = true;
-        try {
-            const rating = overlay.querySelector(".store-review-rating").value;
-            const comment = plus ? overlay.querySelector(".store-review-input").value : "";
-            await saveAppReview(app.id, rating, comment);
-            close();
-        } catch (error) {
-            alert(error.message || "Could not save rating.");
-            button.disabled = false;
-        }
+        try { await saveAppReview(app.id, dialog.querySelector(".store-review-rating").value, plus ? dialog.querySelector(".store-review-input").value : ""); dialog.remove(); openAppDetails(app); } catch (error) { alert(error.message || "Could not save rating."); button.disabled = false; }
     });
 }
 function escapeHTML(text) { return String(text ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
