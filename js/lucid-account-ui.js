@@ -5,7 +5,7 @@ setupAuth();
 setupAccount();
 if (supabase) supabase.auth.onAuthStateChange(event => { if (event === "PASSWORD_RECOVERY") showPasswordReset(); refreshAccountUI(); });
 function setupAuth() {
-    if (!window.lucidAuth) window.lucidAuth = { open: showAuthDialog };
+    window.lucidAuth = { open: showAuthDialog };
     document.querySelectorAll(".studio-auth").forEach(section => {
         if (section.dataset.universalAccount === "true") return;
         section.dataset.universalAccount = "true";
@@ -39,6 +39,7 @@ async function submitAuth(signup, overlay) {
     const message = overlay.querySelector("#lucid-auth-message");
     if (!email || !password) { message.textContent = "Enter your email and password."; return; }
     if (password.length < 8) { message.textContent = "Your password must be at least 8 characters."; return; }
+    if (signup && (!overlay.querySelector("#lucid-auth-username").value.trim() || !overlay.querySelector("#lucid-auth-display-name").value.trim())) { message.textContent = "Enter a username and display name."; return; }
     try {
         message.textContent = signup ? "Creating account..." : "Signing in...";
         const result = signup ? await supabase.auth.signUp({ email, password, options: { data: { username: overlay.querySelector("#lucid-auth-username").value.trim(), display_name: overlay.querySelector("#lucid-auth-display-name").value.trim() } } }) : await supabase.auth.signInWithPassword({ email, password });
@@ -78,28 +79,29 @@ function showPasswordReset() {
 async function setupAccount() {
     const page = document.querySelector('.settings-page[data-page-content="account"]');
     if (!page || page.dataset.accountReady === "true") return;
-    const save = page.querySelector(".save-account");
-    if (!save) return;
-    page.dataset.accountReady = "true";
     const user = await getCurrentUser();
-    const description = page.querySelector("h2 + p");
-    if (description) description.textContent = user?.email || "Your Lucid account";
+    page.dataset.accountReady = "true";
+    const authCard = page.querySelector(".account-auth-card");
+    const authDetail = page.querySelector(".account-auth-detail");
+    const authButton = page.querySelector(".account-auth-button");
+    const planCard = page.querySelector(".account-plan-card");
+    if (!authCard || !authDetail || !authButton || !planCard) return;
     const plan = String(user?.app_metadata?.plan || user?.app_metadata?.subscription || "free").toLowerCase();
     const plus = ["pro", "premium", "subscriber"].includes(plan);
-    const card = document.createElement("section");
-    card.className = "account-plan-card";
-    card.innerHTML = `<div><span class="account-plan-label">LUCID PLUS</span><h3>${plus ? "Plus plan" : "Free plan"}</h3><p>${plus ? "1 GB publishing limit and larger developer features." : "100 MB publishing limit and access to the Lucid Store."}</p></div><button type="button" class="account-plan-button">${plus ? "Manage Plus" : "Upgrade to Plus"}</button>`;
-    save.closest(".setting-row")?.insertAdjacentElement("afterend", card);
-    card.querySelector(".account-plan-button").addEventListener("click", async () => {
-        const user = await getCurrentUser();
-        if (!user) { await showAuthDialog("signup"); return; }
-        showPlans(plus);
-    });
-    const access = document.createElement("section");
-    access.className = "account-auth-card";
-    access.innerHTML = user ? `<div><strong>Lucid Account</strong><small>Signed in as ${escapeHTML(user.email || "your account")}</small></div><button type="button" class="account-auth-button">Sign out</button>` : `<div><strong>Lucid Account</strong><small>Sign in or create an account to use Lucid Store, Lucid Studio, reviews, and subscriptions.</small></div><button type="button" class="account-auth-button">Sign in / Create account</button>`;
-    card.insertAdjacentElement("beforebegin", access);
-    access.querySelector(".account-auth-button").addEventListener("click", async () => { if (user) { await supabase.auth.signOut(); refreshAccountUI(); document.dispatchEvent(new CustomEvent("lucid-account-changed")); } else showAuthDialog("signup"); });
+    if (user) {
+        authDetail.textContent = `Signed in as ${user.email || "your account"}`;
+        authButton.textContent = "Sign out";
+        authButton.onclick = async () => { await supabase.auth.signOut(); refreshAccountUI(); document.dispatchEvent(new CustomEvent("lucid-account-changed")); };
+    } else {
+        authDetail.textContent = "Sign in or create an account to use LucidOS services.";
+        authButton.textContent = "Sign in / Create account";
+        authButton.onclick = () => showAuthDialog("signup");
+    }
+    planCard.querySelector("h3").textContent = plus ? "Plus plan" : "Free plan";
+    planCard.querySelector("p").textContent = plus ? "1 GB publishing limit and larger developer features." : "100 MB publishing limit and access to the Lucid Store.";
+    const planButton = planCard.querySelector(".account-plan-button");
+    planButton.textContent = plus ? "Manage Plus" : "Upgrade to Plus";
+    planButton.onclick = async () => { const currentUser = await getCurrentUser(); if (!currentUser) { await showAuthDialog("signup"); return; } showPlans(plus); };
 }
 function showPlans(plus) {
     if (document.querySelector(".lucid-plans-overlay")) return;
