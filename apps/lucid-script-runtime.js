@@ -1,1 +1,1 @@
-LOADING_FROM_FILE
+@/home/workdir/artifacts/lucid-script-runtime.js
