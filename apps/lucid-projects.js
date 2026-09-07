@@ -37,7 +37,42 @@ function createProject({ name = "Untitled App", language = "lucid-script" } = {}
 window {
     title "${cleanName}"
 
-    text "Welcome to Lucid Script!"
+    let name = "Lucid developer"
+    let enabled = false
+    let color = "Silver"
+
+    heading "Hello, {name}"
+    text "Feature enabled: {enabled}"
+    text "Favorite color: {color}"
+
+    input "Type your name" {
+        onInput {
+            set name = event.value
+        }
+    }
+
+    checkbox "Enable feature" {
+        onChange {
+            set enabled = event.checked
+        }
+    }
+
+    select "Choose a color" {
+        option "Silver"
+        option "Blue"
+        option "Purple"
+        option "Green"
+        onChange {
+            set color = event.value
+        }
+    }
+
+    button "Save name" {
+        onClick {
+            storage.set("name", name)
+            notification.show("Saved!")
+        }
+    }
 }
 `,
         version: 1,
