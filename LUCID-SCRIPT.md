@@ -1,18 +1,11 @@
 # Lucid Script
-Lucid Script is the native language for building Lucid OS applications and 2D games. It keeps the syntax small while providing state, functions, UI, graphics, keyboard and mouse input, storage, files, audio, timers and a real game loop.
-## App
+Lucid Script is the native language for building LucidOS applications and 2D games. It keeps the syntax small while providing state, functions, UI, graphics, keyboard and mouse input, storage, files, audio and a real game loop.
+## App structure
 ```lucid
-app "Notes"
+app "Hello"
 window {
-    title "Notes"
-    heading "My Notes"
-    let note = ""
-    input "Write something" {
-        onInput {
-            set note = event.value
-        }
-    }
-    text "{note}"
+    title "Hello"
+    text "Hello from Lucid!"
 }
 ```
 ## Values
@@ -20,21 +13,22 @@ window {
 let name = "Lucid"
 let score = 10
 let enabled = true
-let nothing = null
-let colors = ["Red", "Green", "Blue"]
-let player = { name: "Nova", level: 4 }
-set score = score + 5
+let empty = null
+let colors = ["red", "green", "blue"]
+let player = { name: "Nova", score: 20 }
+text player.name
+text colors[0]
 ```
-Supported expressions include numbers, strings, booleans, arrays, objects, arithmetic, comparisons, `&&`, `||`, `!`, member access and array indexing.
-## Conditions and loops
+Strings support `{name}` and `{player.score}` interpolation.
+## Logic
 ```lucid
-if score >= 10 {
-    text "Great!"
+if score > 10 {
+    text "High score"
 } else {
-    text "Keep going"
+    text "Keep playing"
 }
-repeat 5 {
-    notification.show("Hello")
+repeat 3 {
+    notification.show("Again")
 }
 each color in colors {
     text color
@@ -45,62 +39,58 @@ each color in colors {
 function add(a, b) {
     return a + b
 }
-let result = add(4, 8)
-text "Result: {result}"
+let total = add(5, 7)
+text total
 ```
-## UI
+## Interface
 ```lucid
-window {
-    title "Controls"
-    heading "Settings"
-    text "Hello"
-    input "Username" {
-        onInput {
-            set username = event.value
-        }
+heading "Profile"
+text "Welcome, {name}"
+input "Your name" {
+    onInput {
+        set name = event.value
     }
-    checkbox "Notifications" {
-        onChange {
-            set notifications = event.checked
-        }
+}
+checkbox "Enabled" {
+    onChange {
+        set enabled = event.checked
     }
-    select "Theme" {
-        option "Dark"
-        option "Light"
-        option "Dream"
-        onChange {
-            set theme = event.value
-        }
+}
+select "Pick a color" {
+    option "Red"
+    option "Blue"
+    option "Green"
+    onChange {
+        set color = event.value
     }
-    button "Save" {
-        onClick {
-            notification.show("Saved")
-        }
-    }
-    image "https://example.com/image.png" {
-        alt "Example"
+}
+button "Save" {
+    onClick {
+        storage.set("name", name)
+        notification.show("Saved")
     }
 }
 ```
-Events expose `event.value`, `event.checked`, `event.key`, `event.code`, `event.x`, `event.y`, `event.button`, and `event.delta` where applicable.
-## Storage, files and utilities
+Event handlers receive an `event` object. Use `event.value`, `event.checked`, `event.key`, `event.code`, `event.x`, `event.y`, `event.delta` and `event.dt` where appropriate.
+## System APIs
 ```lucid
-storage.set("highScore", 120)
-let score = storage.get("highScore", 0)
-storage.remove("highScore")
-files.write("settings.txt", "dark")
-let mode = files.read("settings.txt")
-let value = random.integer(1, 100)
-let picked = random.pick(["Red", "Green", "Blue"])
+notification.show("Hello")
+files.write("note.txt", "Hello")
+let contents = files.read("note.txt")
+storage.set("score", score)
+let saved = storage.get("score", 0)
+storage.remove("score")
+let number = random.integer(1, 100)
+let color = random.pick(colors)
 let now = time.now()
-let upper = string.upper("lucid")
+let hour = time.hour()
 let rounded = math.round(4.7)
-audio.beep(600, 0.08)
-clipboard.copy("Lucid")
+clipboard.copy(name)
 window.open("https://example.com")
+audio.beep(600, 0.08)
 ```
-## 2D Games
-`game` creates a real canvas with an animation loop, entities, keyboard input, mouse input, movement, collision and drawing.
+## 2D games
+A `game` block creates a canvas scene with a frame loop.
 ```lucid
 app "Box Game"
 window {
@@ -108,113 +98,81 @@ window {
     let score = 0
     game {
         size 640, 360
-        background "#11131a"
+        background "#10131a"
         box "player" {
             x 80
-            y 150
+            y 160
             width 40
             height 40
             color "#ffffff"
         }
-        box "coin" {
-            x 400
-            y 150
-            width 24
-            height 24
+        circle "coin" {
+            x 480
+            y 180
+            radius 14
             color "#ffd84d"
         }
         gameText "Score: {score}" {
             x 20
-            y 35
+            y 34
             size 24
             color "#ffffff"
         }
         onUpdate {
             if game.key("ArrowRight") {
-                game.move("player", 240 * event.delta, 0)
+                game.move("player", 260 * event.delta, 0)
             }
             if game.key("ArrowLeft") {
-                game.move("player", -240 * event.delta, 0)
+                game.move("player", -260 * event.delta, 0)
             }
             if game.key("ArrowUp") {
-                game.move("player", 0, -240 * event.delta)
+                game.move("player", 0, -260 * event.delta)
             }
             if game.key("ArrowDown") {
-                game.move("player", 0, 240 * event.delta)
+                game.move("player", 0, 260 * event.delta)
             }
             if game.collides("player", "coin") {
                 set score = score + 1
-                game.set("coin", "x", random.integer(40, 580))
-                game.set("coin", "y", random.integer(60, 300))
-                audio.beep(700, 0.06)
+                game.set("coin", "x", random.integer(30, 610))
+                game.set("coin", "y", random.integer(70, 330))
+                audio.beep(720, 0.05)
             }
         }
         onKeyDown {
             if event.key == "Space" {
-                audio.beep(900, 0.04)
+                game.set("player", "color", "#55ddff")
             }
+        }
+        onMouseDown {
+            game.set("player", "x", event.x)
+            game.set("player", "y", event.y)
         }
     }
 }
 ```
-## Game entities
-`box` draws a rectangle, `circle` draws a circle, `sprite` draws an image, `gameText` draws canvas text and `line` draws a line. Entity properties include `x`, `y`, `width`, `height`, `radius`, `color`, `fill`, `stroke`, `lineWidth`, `size`, `font`, `opacity`, `visible`, `z`, `src` and `gravity`.
-## Game loop
-`onUpdate` runs every animation frame. `event.delta` is the elapsed time in seconds since the previous frame, so movement can be frame-independent.
-```lucid
-onUpdate {
-    game.move("player", 100 * event.delta, 0)
-}
-```
-## Keyboard and mouse
-```lucid
-onKeyDown {
-    if event.key == "ArrowRight" {
-        notification.show("Right")
-    }
-}
-onMouseDown {
-    notification.show("Mouse: " + event.x + ", " + event.y)
-}
-```
-Use `game.key("ArrowRight")` inside `onUpdate` for continuous input.
-## Collision and entities
-```lucid
-if game.collides("player", "enemy") {
-    set health = health - 1
-}
-game.move("player", 5, 0)
-game.set("player", "color", "#ff5577")
-let x = game.get("player", "x", 0)
-let position = game.position("player")
-game.remove("coin")
-```
-## Sprites and gravity
-```lucid
-sprite "hero" {
-    x 100
-    y 100
-    width 64
-    height 64
-    src "https://example.com/hero.png"
-}
-box "ball" {
-    x 100
-    y 40
-    width 30
-    height 30
-    gravity 700
-}
-```
-## Pause and timers
-```lucid
-function ding() {
-    audio.beep(500, 0.05)
-}
-timer.after(1000, "ding")
-game.pause()
-game.resume()
-game.toggle()
-```
-## Build
-Lucid Studio builds a `lucid-app` manifest containing app id, name, version, description, language and permissions. A normal project uses `main.lucid`. The same language can be used for utilities, dashboards, creative tools, interactive interfaces, arcade games, mazes, simple platformers and other 2D experiences.
+## Game objects
+`box` supports `x`, `y`, `width`, `height`, `color`.
+`circle` supports `x`, `y`, `radius`, `color`.
+`sprite` supports `x`, `y`, `width`, `height`, `src`.
+`gameText` supports `x`, `y`, `size`, `color`.
+`line` supports `x1`, `y1`, `x2`, `y2`, `width`, `color`.
+## Game API
+`game.key(key)` checks a held keyboard key.
+`game.width()` and `game.height()` return canvas dimensions.
+`game.mouseX` and `game.mouseY` return the latest pointer position.
+`game.move(name, x, y)` moves an entity.
+`game.get(name, property, fallback)` reads entity state.
+`game.set(name, property, value)` changes entity state.
+`game.collides(a, b)` checks circle, box and mixed collisions.
+`game.distance(a, b)` returns distance between entity centers.
+`game.remove(name)` removes an entity.
+`game.clear()` removes all entities.
+`game.pause()`, `game.resume()` and `game.togglePause()` control the loop.
+## Game events
+`onUpdate` runs every frame and receives `event.delta` and `event.dt` in seconds.
+`onKeyDown` and `onKeyUp` receive `event.key` and `event.code`.
+`onMouseDown` and `onMouseUp` receive `event.x`, `event.y` and `event.button`.
+## Building
+Lucid Studio validates a project by running the script, generates a Lucid application manifest and exports a `.lucidpkg` package containing the manifest and `main.lucid`.
+## Design
+There are no semicolons, classes, imports or constructors. Lucid Script is meant to be easy to read while still being capable of real interactive software.
