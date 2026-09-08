@@ -92,6 +92,26 @@ const defaultPositions = [
     { x: 38, y: 38 },
     { x: 62, y: 38 }
 ];
+function buildDesktopApps() {
+    const container = document.getElementById("desktop-apps");
+    if (!container) return;
+    container.innerHTML = "";
+    const installedApps = getInstalledApps();
+    const positions = loadDesktopPositions();
+    installedApps.forEach((app, index) => {
+        const button = document.createElement("button");
+        button.className = "desktop-app";
+        button.innerHTML = `<span class="desktop-app-icon">${app.icon}</span><span class="desktop-app-name">${escapeHTML(app.name)}</span>`;
+        const saved = positions[app.id];
+        const position = saved || defaultPositions[index % defaultPositions.length];
+        button.style.left = "50%";
+        button.style.top = "50%";
+        button.dataset.targetX = position.x;
+        button.dataset.targetY = position.y;
+        setupDesktopApp(button, app);
+        container.appendChild(button);
+    });
+}
 function shuffleApps(apps) {
     const result = Array.from(apps);
     for (let i = result.length - 1; i > 0; i--) {
