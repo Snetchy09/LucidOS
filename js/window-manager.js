@@ -49,25 +49,5 @@ function setupSettingsTaskbar() {
     });
     taskbarApps.prepend(button);
 }
-function setupOrbLauncherBridge() {
-    const startButton = document.getElementById("start-button");
-    if (!startButton) return;
-    let replaying = false;
-    startButton.addEventListener("click", () => {
-        if (replaying || !document.querySelector(".window")) return;
-        const originalQuerySelector = document.querySelector;
-        replaying = true;
-        document.querySelector = function(selector) {
-            if (selector === ".window") return null;
-            return originalQuerySelector.call(document, selector);
-        };
-        try {
-            startButton.click();
-        } finally {
-            document.querySelector = originalQuerySelector;
-            replaying = false;
-        }
-    });
-}
-window.addEventListener("load", () => { setupSettingsTaskbar(); setupOrbLauncherBridge(); });
+window.addEventListener("load", () => { setupSettingsTaskbar(); });
 export { createWindow };
