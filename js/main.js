@@ -211,12 +211,24 @@ function moveAppsToOrb() {
     });
 }
 
+function isOrbObscured() {
+    const orb = document.getElementById("start-button");
+    if (!orb) return false;
+    const r = orb.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const top = document.elementFromPoint(cx, cy);
+    return !!(top && top !== orb && !orb.contains(top) && top.closest(".window"));
+}
+
 function openLucidLauncher() {
     if (launcherOpen) return;
     const desktop = document.getElementById("desktop");
+    if (!desktop) return;
     launcherOpen = true;
     desktop.classList.add("lucid-launcher-open");
     moveAppsToSavedPositions();
+    desktop.dispatchEvent(new CustomEvent("lucid-launcher-toggle", { detail: { open: true } }));
 }
 
 function closeLucidLauncher() {
@@ -224,7 +236,8 @@ function closeLucidLauncher() {
     const desktop = document.getElementById("desktop");
     launcherOpen = false;
     moveAppsToOrb();
-    setTimeout(() => desktop.classList.remove("lucid-launcher-open"), 700);
+    desktop.dispatchEvent(new CustomEvent("lucid-launcher-toggle", { detail: { open: false } }));
+    setTimeout(() => { if (!launcherOpen) desktop.classList.remove("lucid-launcher-open"); }, 700);
 }
 
 function setupDesktopApp(element, app) {
