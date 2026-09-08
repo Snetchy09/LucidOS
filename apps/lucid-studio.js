@@ -467,8 +467,12 @@ function openLucidScriptEditor(root, project = null) {
     const saveButton = root.querySelector("#studio-save");
     const statusElement = root.querySelector("#studio-editor-status");
     const lineNumbers = root.querySelector("#lucid-line-numbers");
+    let autoSaveTimer = null;
+    let lastLineCount = -1;
+    let lineNumbersRaf = 0;
     codeEditor.value = project.source || "";
     updateLineNumbers();
+
     function updateLineNumbers() {
         const value = codeEditor.value;
         let lineCount = 1;
@@ -479,6 +483,7 @@ function openLucidScriptEditor(root, project = null) {
         for (let i = 0; i < lineCount; i++) parts[i] = i + 1;
         lineNumbers.textContent = parts.join("\n");
     }
+
     function saveCurrentStudioProject() { saveProjectSource(project.id, codeEditor.value); project = getProject(project.id); if (statusElement) statusElement.textContent = "Saved"; saveButton?.classList.add("studio-saved"); setTimeout(() => saveButton?.classList.remove("studio-saved"), 700); }
     root.querySelector("#studio-back-projects")?.addEventListener("click", () => { stopActiveRuntime(root); saveCurrentStudioProject(); renderStudioProjects(root); });
     root.querySelector("#studio-editor-docs")?.addEventListener("click", () => { stopActiveRuntime(root); saveCurrentStudioProject(); renderLucidScriptDocs(root); });
@@ -486,9 +491,6 @@ function openLucidScriptEditor(root, project = null) {
     root.querySelector("#studio-run")?.addEventListener("click", async () => { saveCurrentStudioProject(); await runStudioCode(root); });
     root.querySelector("#studio-build")?.addEventListener("click", async () => { saveCurrentStudioProject(); await buildLucidProject(root, project); });
     saveButton?.addEventListener("click", saveCurrentStudioProject);
-    let autoSaveTimer = null;
-    let lastLineCount = -1;
-    let lineNumbersRaf = 0;
     codeEditor.addEventListener("input", () => { if (!lineNumbersRaf) lineNumbersRaf = requestAnimationFrame(() => { lineNumbersRaf = 0; updateLineNumbers(); }); if (statusElement) statusElement.textContent = "Unsaved changes"; clearTimeout(autoSaveTimer); autoSaveTimer = setTimeout(() => saveCurrentStudioProject(), 700); });
     codeEditor.addEventListener("scroll", () => { if (lineNumbers.scrollTop !== codeEditor.scrollTop) lineNumbers.scrollTop = codeEditor.scrollTop; }, { passive: true });
     codeEditor.addEventListener("keydown", event => {
