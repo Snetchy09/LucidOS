@@ -55,7 +55,7 @@ function saveDesktopPosition(appId, x, y) {
     localStorage.setItem(DESKTOP_POSITIONS_KEY, JSON.stringify(positions));
 }
 function escapeHTML(text) {
-    return String(text ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+    return String(text ?? "").replaceAll("&", "&").replaceAll("<", "<").replaceAll(">", ">").replaceAll('"', """).replaceAll("'", "&#039;");
 }
 function launchLucidApp(app) {
     closeLucidLauncher();
@@ -166,6 +166,7 @@ function moveAppsToOrb() {
 function openLucidLauncher() {
     if (launcherOpen) return;
     const desktop = document.getElementById("desktop");
+    if (!desktop) return;
     launcherOpen = true;
     desktop.classList.add("lucid-launcher-open");
     moveAppsToSavedPositions();
@@ -259,7 +260,6 @@ const startButton = document.getElementById("start-button");
 if (startButton) {
     const desktop = document.getElementById("desktop");
     desktop.addEventListener("click", event => {
-        if (document.querySelector(".window")) return;
         if (event.target.closest(".desktop-app")) return;
         const rect = desktop.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
@@ -272,7 +272,6 @@ if (startButton) {
     });
     startButton.addEventListener("click", event => {
         event.stopPropagation();
-        if (document.querySelector(".window")) return;
         if (launcherOpen) closeLucidLauncher();
         else openLucidLauncher();
     });
