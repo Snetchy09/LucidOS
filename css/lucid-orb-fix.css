@@ -1,11 +1,58 @@
-/* Orb stays clickable but never covers app windows */
 #start-button {
     z-index: 50;
 }
-
-/* Icons show when launcher is open; windows stack above */
 #desktop.lucid-launcher-open .desktop-app {
     pointer-events: auto;
     opacity: 1;
     transform: translate3d(-50%, -50%, 0) scale(1);
+}
+#desktop.lucid-launcher-open #lucid-atmosphere {
+    opacity: 1;
+    background:
+        radial-gradient(circle at 50% 50%,
+            rgba(0, 0, 0, 1) 0%,
+            rgba(0, 0, 0, 0.92) 6%,
+            rgba(255, 255, 255, 0.18) 9%,
+            rgba(220, 220, 230, 0.12) 11%,
+            rgba(40, 30, 60, 0.55) 28%,
+            rgba(8, 8, 14, 0.88) 55%,
+            rgba(3, 3, 6, 0.96) 100%);
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+#desktop.lucid-launcher-open .lucid-orb {
+    transform: scale(1.12);
+    border-color: rgba(255, 255, 255, 0.35);
+    background:
+        radial-gradient(circle at 50% 50%, #000 0%, #0a0a0c 38%, #2a2a32 68%, #8a8498 100%);
+    box-shadow:
+        0 0 0 2px rgba(255, 255, 255, 0.12),
+        0 0 28px rgba(255, 255, 255, 0.16),
+        0 0 60px rgba(0, 0, 0, 0.9),
+        inset 0 0 18px rgba(0, 0, 0, 0.85);
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.7s ease, background 0.7s ease;
+}
+#desktop.lucid-launcher-open #desktop-apps::before,
+#desktop.lucid-launcher-open #desktop-apps::after {
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow:
+        0 0 12px rgba(255, 255, 255, 0.5),
+        42px -90px rgba(255, 255, 255, 0.35),
+        -80px 50px rgba(200, 200, 220, 0.28),
+        95px 70px rgba(255, 255, 255, 0.22),
+        -100px -70px rgba(180, 180, 200, 0.2),
+        0 110px rgba(255, 255, 255, 0.18),
+        0 -110px rgba(255, 255, 255, 0.18);
+    animation: lucid-event-horizon 3.2s ease-in-out infinite;
+}
+@keyframes lucid-event-horizon {
+    0%, 100% {
+        opacity: 0.2;
+        transform: scale(0.55) rotate(0deg);
+    }
+    50% {
+        opacity: 0.85;
+        transform: scale(1.45) rotate(18deg);
+    }
 }
