@@ -55,7 +55,7 @@ function saveDesktopPosition(appId, x, y) {
     localStorage.setItem(DESKTOP_POSITIONS_KEY, JSON.stringify(positions));
 }
 function escapeHTML(text) {
-    return String(text ?? "").replaceAll("&", "&").replaceAll("<", "<").replaceAll(">", ">").replaceAll('"', """).replaceAll("'", "&#039;");
+    return String(text ?? "").replaceAll("&", "&" + "amp;").replaceAll("<", "&" + "lt;").replaceAll(">", "&" + "gt;").replaceAll('"', "&" + "quot;").replaceAll("'", "&#039;");
 }
 function launchLucidApp(app) {
     closeLucidLauncher();
