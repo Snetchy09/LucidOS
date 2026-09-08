@@ -207,12 +207,14 @@ function openLucidLauncher() {
     launcherOpen = true;
     desktop.classList.add("lucid-launcher-open");
     moveAppsToSavedPositions();
+    desktop.dispatchEvent(new CustomEvent("lucid-launcher-toggle", { detail: { open: true } }));
 }
 function closeLucidLauncher() {
     if (!launcherOpen) return;
     const desktop = document.getElementById("desktop");
     launcherOpen = false;
     moveAppsToVoid();
+    desktop.dispatchEvent(new CustomEvent("lucid-launcher-toggle", { detail: { open: false } }));
     setTimeout(() => {
         if (!launcherOpen) desktop.classList.remove("lucid-launcher-open");
     }, 1050);
