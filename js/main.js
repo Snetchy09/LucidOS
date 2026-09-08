@@ -1,4 +1,5 @@
 import { createFilesApp } from "../apps/files.js";
+import "./studio-publish.js";
 import { createStoreApp } from "../apps/lucid-store.js";
 import { createMediaApp } from "../apps/media.js";
 import { createLucidPaint } from "../apps/lucid-paint.js";
