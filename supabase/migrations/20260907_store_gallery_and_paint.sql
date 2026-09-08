@@ -1,0 +1,3 @@
+alter table public.lucid_apps add column if not exists store_images text[] not null default '{}';
+alter table public.lucid_app_submissions add column if not exists store_images text[] not null default '{}';
+insert into public.lucid_apps (id,name,description,icon,icon_url,category,version,app_type,status,developer_id,package_key,entry_point,store_images) values ('paint','Lucid Paint','Paint, pixel art, and simple animations.','🎨',null,'Creative','1.0.0','optional','approved',null,null,null,'{}') on conflict (id) do update set name=excluded.name,description=excluded.description,icon=excluded.icon,category=excluded.category,version=excluded.version,status='approved';

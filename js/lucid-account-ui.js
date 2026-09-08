@@ -1,81 +1,98 @@
 import { supabase, getCurrentUser } from "./lucid-store-api.js";
-import { isAppInstalled, installApp, uninstallApp } from "./app-registry.js";
-const observer = new MutationObserver(() => {
-    setupAuth();
-    setupAccount();
-    setupStore();
-});
+const observer = new MutationObserver(() => { setupAuth(); setupAccount(); });
 observer.observe(document.body, { childList: true, subtree: true });
 setupAuth();
 setupAccount();
-setupStore();
-if (supabase) {
-    supabase.auth.onAuthStateChange(event => {
-        if (event === "PASSWORD_RECOVERY") showPasswordReset();
-    });
-}
+loadLemon();
+if (supabase) supabase.auth.onAuthStateChange(event => { if (event === "PASSWORD_RECOVERY") showPasswordReset(); refreshAccountUI(); });
 function setupAuth() {
-    document.querySelectorAll(".studio-auth-form").forEach(form => {
-        const password = form.querySelector("#studio-password");
-        const submit = form.querySelector("#studio-auth-submit");
-        if (!password || !submit || form.querySelector(".studio-forgot-password")) return;
-        if (password.autocomplete !== "current-password") return;
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "studio-forgot-password";
-        button.textContent = "Forgot password?";
-        button.addEventListener("click", () => sendReset(form));
-        submit.insertAdjacentElement("afterend", button);
+    window.lucidAuth = { open: showAuthDialog };
+    document.querySelectorAll(".studio-auth").forEach(section => {
+        if (section.dataset.universalAccount === "true") return;
+        section.dataset.universalAccount = "true";
+        section.innerHTML = `<div class="studio-auth-card"><div class="account-plan-label">LUCID ACCOUNT</div><h2>Use your Lucid account</h2><p>Sign in or create your account to use Lucid Studio.</p><button type="button" class="lucid-account-primary">Open Account</button></div>`;
+        section.querySelector(".lucid-account-primary").addEventListener("click", () => showAuthDialog("signin"));
     });
 }
-async function sendReset(form) {
-    const email = form.querySelector("#studio-email")?.value.trim();
-    const message = form.querySelector("#studio-auth-message");
-    if (!email) {
-        message.textContent = "Enter your email first.";
-        return;
-    }
-    if (!supabase) {
-        message.textContent = "Account recovery is unavailable right now.";
-        return;
-    }
+function refreshAccountUI() { document.querySelectorAll('.settings-page[data-page-content="account"]').forEach(page => { page.dataset.accountReady = ""; setupAccount(); }); }
+function loadLemon() {
+    if (window.LemonSqueezy) return;
+    if (document.querySelector('script[data-lucid-lemon]')) return;
+    const script = document.createElement("script");
+    script.src = "https://app.lemonsqueezy.com/js/lemon.js";
+    script.defer = true;
+    script.dataset.lucidLemon = "true";
+    document.head.appendChild(script);
+}
+function setupLemonEvents() {
+    if (!window.LemonSqueezy || window.lucidLemonEventsReady) return false;
+    window.lucidLemonEventsReady = true;
+    window.LemonSqueezy.Setup({ eventHandler: data => { if (data?.event === "Checkout.Success") handleCheckoutSuccess(); } });
+    return true;
+}
+async function waitForLemon() {
+    loadLemon();
+    for (let i = 0; i < 30; i++) { if (setupLemonEvents()) return true; await new Promise(resolve => setTimeout(resolve, 200)); }
+    return false;
+}
+async function showAuthDialog(mode = "signin") {
+    if (document.querySelector(".lucid-auth-overlay")) return;
+    const overlay = document.createElement("div");
+    overlay.className = "lucid-account-overlay lucid-auth-overlay";
+    overlay.innerHTML = `<div class="lucid-account-dialog lucid-auth-dialog"><button class="lucid-dialog-close" type="button">×</button><div class="account-plan-label">LUCID ACCOUNT</div><div class="studio-auth-tabs"><button type="button" class="studio-auth-tab" data-mode="signup">Create account</button><button type="button" class="studio-auth-tab" data-mode="signin">Sign in</button></div><div class="lucid-auth-form"></div></div>`;
+    document.body.appendChild(overlay);
+    const render = currentMode => {
+        const signup = currentMode === "signup";
+        overlay.querySelectorAll(".studio-auth-tab").forEach(button => button.classList.toggle("active", button.dataset.mode === currentMode));
+        overlay.querySelector(".lucid-auth-form").innerHTML = `<h2>${signup ? "Create your Lucid account" : "Welcome back"}</h2>${signup ? '<label>Username<input id="lucid-auth-username" type="text" maxlength="32" autocomplete="username"></label><label>Display name<input id="lucid-auth-display-name" type="text" maxlength="48"></label>' : ""}<label>Email<input id="lucid-auth-email" type="email" autocomplete="email"></label><label>Password<input id="lucid-auth-password" type="password" autocomplete="${signup ? "new-password" : "current-password"}"></label>${signup ? '<div class="studio-security-warning"><strong>Security notice</strong><span>Use a unique password that you do not use on other websites.</span></div>' : '<button type="button" class="studio-forgot-password">Forgot password?</button>'}<button type="button" class="lucid-account-primary" id="lucid-auth-submit">${signup ? "Create account" : "Sign in"}</button><div class="lucid-account-message" id="lucid-auth-message"></div>`;
+        overlay.querySelector("#lucid-auth-submit").addEventListener("click", () => submitAuth(signup, overlay));
+        overlay.querySelector(".studio-forgot-password")?.addEventListener("click", () => sendReset(overlay));
+    };
+    overlay.querySelectorAll(".studio-auth-tab").forEach(button => button.addEventListener("click", () => render(button.dataset.mode)));
+    const close = () => overlay.remove();
+    overlay.querySelector(".lucid-dialog-close").addEventListener("click", close);
+    overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
+    render(mode);
+}
+async function submitAuth(signup, overlay) {
+    const email = overlay.querySelector("#lucid-auth-email").value.trim();
+    const password = overlay.querySelector("#lucid-auth-password").value;
+    const message = overlay.querySelector("#lucid-auth-message");
+    if (!email || !password) { message.textContent = "Enter your email and password."; return; }
+    if (password.length < 8) { message.textContent = "Your password must be at least 8 characters."; return; }
+    if (signup && (!overlay.querySelector("#lucid-auth-username").value.trim() || !overlay.querySelector("#lucid-auth-display-name").value.trim())) { message.textContent = "Enter a username and display name."; return; }
+    try {
+        message.textContent = signup ? "Creating account..." : "Signing in...";
+        const result = signup ? await supabase.auth.signUp({ email, password, options: { data: { username: overlay.querySelector("#lucid-auth-username").value.trim(), display_name: overlay.querySelector("#lucid-auth-display-name").value.trim() } } }) : await supabase.auth.signInWithPassword({ email, password });
+        if (result.error) throw result.error;
+        if (signup && !result.data.session) { message.textContent = "Account created. Check your email to confirm your account."; return; }
+        overlay.remove();
+        refreshAccountUI();
+        document.dispatchEvent(new CustomEvent("lucid-account-changed"));
+    } catch (error) { message.textContent = error.message || "Unable to complete account access."; }
+}
+async function sendReset(overlay) {
+    const email = overlay.querySelector("#lucid-auth-email").value.trim();
+    const message = overlay.querySelector("#lucid-auth-message");
+    if (!email) { message.textContent = "Enter your email first."; return; }
     message.textContent = "Sending reset link...";
-    const redirectTo = "https://snetchy09.github.io/LucidOS/";
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: "https://snetchy09.github.io/LucidOS/" });
     message.textContent = error ? error.message : "If that email has an account, a reset link has been sent.";
 }
 function showPasswordReset() {
     if (document.querySelector(".lucid-password-reset")) return;
     const overlay = document.createElement("div");
     overlay.className = "lucid-account-overlay lucid-password-reset";
-    overlay.innerHTML = `
-        <div class="lucid-account-dialog">
-            <h2>Choose a new password</h2>
-            <p>Set a new password for your Lucid account.</p>
-            <label>New password<input id="lucid-new-password" type="password" autocomplete="new-password"></label>
-            <label>Confirm password<input id="lucid-confirm-password" type="password" autocomplete="new-password"></label>
-            <div class="lucid-account-message"></div>
-            <button class="lucid-account-primary" id="lucid-save-password">Change password</button>
-        </div>
-    `;
+    overlay.innerHTML = `<div class="lucid-account-dialog"><h2>Choose a new password</h2><p>Set a new password for your Lucid account.</p><label>New password<input id="lucid-new-password" type="password" autocomplete="new-password"></label><label>Confirm password<input id="lucid-confirm-password" type="password" autocomplete="new-password"></label><div class="lucid-account-message"></div><button class="lucid-account-primary" id="lucid-save-password">Change password</button></div>`;
     document.body.appendChild(overlay);
     overlay.querySelector("#lucid-save-password").addEventListener("click", async () => {
         const password = overlay.querySelector("#lucid-new-password").value;
         const confirm = overlay.querySelector("#lucid-confirm-password").value;
         const message = overlay.querySelector(".lucid-account-message");
-        if (password.length < 8) {
-            message.textContent = "Your password must be at least 8 characters.";
-            return;
-        }
-        if (password !== confirm) {
-            message.textContent = "The passwords do not match.";
-            return;
-        }
+        if (password.length < 8) { message.textContent = "Your password must be at least 8 characters."; return; }
+        if (password !== confirm) { message.textContent = "The passwords do not match."; return; }
         const { error } = await supabase.auth.updateUser({ password });
-        if (error) {
-            message.textContent = error.message;
-            return;
-        }
+        if (error) { message.textContent = error.message; return; }
         message.textContent = "Password changed. You can sign in with it now.";
         setTimeout(() => overlay.remove(), 1200);
     });
@@ -83,69 +100,78 @@ function showPasswordReset() {
 async function setupAccount() {
     const page = document.querySelector('.settings-page[data-page-content="account"]');
     if (!page || page.dataset.accountReady === "true") return;
-    const save = page.querySelector(".save-account");
-    if (!save) return;
-    page.dataset.accountReady = "true";
     const user = await getCurrentUser();
-    const description = page.querySelector("h2 + p");
-    if (description) description.textContent = user?.email || "Your Lucid account";
-    const card = document.createElement("section");
-    card.className = "account-plan-card";
-    card.innerHTML = `
-        <div>
-            <span class="account-plan-label">LUCID PLUS</span>
-            <h3>Free plan</h3>
-            <p>100 MB publishing limit and access to the Lucid Store.</p>
-        </div>
-        <button type="button" class="account-plan-button">View plans</button>
-    `;
-    save.closest(".setting-row")?.insertAdjacentElement("afterend", card);
-    card.querySelector(".account-plan-button").addEventListener("click", showPlans);
+    page.dataset.accountReady = "true";
+    const authCard = page.querySelector(".account-auth-card");
+    const authDetail = page.querySelector(".account-auth-detail");
+    const authButton = page.querySelector(".account-auth-button");
+    const planCard = page.querySelector(".account-plan-card");
+    if (!authCard || !authDetail || !authButton || !planCard) return;
+    const plus = hasPlus(user);
+    if (user) {
+        authDetail.textContent = `Signed in as ${user.email || "your account"}`;
+        authButton.textContent = "Sign out";
+        authButton.onclick = async () => { await supabase.auth.signOut(); refreshAccountUI(); document.dispatchEvent(new CustomEvent("lucid-account-changed")); };
+    } else {
+        authDetail.textContent = "Sign in or create an account to use LucidOS services.";
+        authButton.textContent = "Sign in / Create account";
+        authButton.onclick = () => showAuthDialog("signup");
+    }
+    planCard.querySelector("h3").textContent = plus ? "Plus plan" : "Free plan";
+    planCard.querySelector("p").textContent = plus ? "1 GB publishing limit and larger developer features." : "100 MB publishing limit and access to the Lucid Store.";
+    const planButton = planCard.querySelector(".account-plan-button");
+    planButton.textContent = plus ? "Manage Plus" : "Upgrade to Plus";
+    planButton.onclick = async () => { const currentUser = await getCurrentUser(); if (!currentUser) { await showAuthDialog("signup"); return; } showPlans(hasPlus(currentUser)); };
 }
-function showPlans() {
+function hasPlus(user) { const plan = String(user?.app_metadata?.plan || user?.app_metadata?.subscription || "free").toLowerCase(); return ["pro", "premium", "subscriber"].includes(plan); }
+function showPlans(plus) {
     if (document.querySelector(".lucid-plans-overlay")) return;
     const overlay = document.createElement("div");
     overlay.className = "lucid-account-overlay lucid-plans-overlay";
-    overlay.innerHTML = `
-        <div class="lucid-plans-dialog">
-            <button class="lucid-dialog-close" type="button">×</button>
-            <div class="account-plan-label">LUCID PLUS</div>
-            <h2>Choose your plan</h2>
-            <div class="lucid-plan-grid">
-                <div class="lucid-plan"><h3>Free</h3><strong>100 MB</strong><span>Publishing limit</span><b>Current plan</b></div>
-                <div class="lucid-plan lucid-plan-featured"><h3>Plus</h3><strong>More space</strong><span>For larger Lucid apps</span><b>Billing coming soon</b></div>
-            </div>
-        </div>
-    `;
+    overlay.innerHTML = `<div class="lucid-plans-dialog"><button class="lucid-dialog-close" type="button">×</button><div class="account-plan-label">LUCID PLUS</div><h2>${plus ? "Your Plus plan" : "Choose your plan"}</h2><div class="lucid-plan-grid"><div class="lucid-plan"><h3>Free</h3><strong>100 MB</strong><span>Publishing limit</span><b>${plus ? "Included" : "Current plan"}</b></div><div class="lucid-plan lucid-plan-featured"><h3>Plus</h3><strong>1 GB</strong><span>Larger app publishing limit</span><button class="account-plan-button" id="lucid-plus-action">${plus ? "Manage Plus" : "Upgrade to Plus"}</button></div></div><div class="lucid-billing-status" id="lucid-billing-status"><span></span><div><strong>Secure checkout</strong><small>Powered by Lemon Squeezy. Lucid never handles your card details.</small></div></div><div class="lucid-account-message" id="lucid-billing-message"></div></div>`;
     document.body.appendChild(overlay);
-    overlay.querySelector(".lucid-dialog-close").addEventListener("click", () => overlay.remove());
-    overlay.addEventListener("click", event => { if (event.target === overlay) overlay.remove(); });
+    const close = () => overlay.remove();
+    overlay.querySelector(".lucid-dialog-close").addEventListener("click", close);
+    overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
+    if (!plus) overlay.querySelector("#lucid-plus-action")?.addEventListener("click", () => startCheckout(overlay));
 }
-function setupStore() {
-    const root = document.querySelector(".lucid-store");
-    const grid = root?.querySelector("#store-grid");
-    if (!root || !grid || grid.querySelector("[data-lucid-paint]")) return;
-    const installed = isAppInstalled("paint");
-    const card = document.createElement("article");
-    card.className = "store-app-card";
-    card.dataset.lucidPaint = "true";
-    card.dataset.category = "Creative";
-    card.innerHTML = `
-        <div class="store-app-icon">🎨</div>
-        <div class="store-app-content">
-            <div class="store-app-top"><h2>Lucid Paint</h2><span class="store-app-version">v1.0.0</span></div>
-            <div class="store-app-category">Creative</div>
-            <p>Paint, pixel art, and simple animations.</p>
-            <div class="store-app-footer"><span class="store-app-status">${installed ? "Installed" : "Available"}</span><button class="store-install">${installed ? "Remove" : "Install"}</button></div>
-        </div>
-    `;
-    const button = card.querySelector(".store-install");
-    button.addEventListener("click", () => {
-        if (isAppInstalled("paint")) uninstallApp("paint");
-        else installApp("paint");
-        const active = isAppInstalled("paint");
-        button.textContent = active ? "Remove" : "Install";
-        card.querySelector(".store-app-status").textContent = active ? "Installed" : "Available";
-    });
-    grid.prepend(card);
+async function startCheckout(overlay) {
+    const button = overlay.querySelector("#lucid-plus-action");
+    const message = overlay.querySelector("#lucid-billing-message");
+    const status = overlay.querySelector("#lucid-billing-status");
+    button.disabled = true;
+    button.textContent = "Preparing checkout…";
+    message.textContent = "Securing your checkout…";
+    try {
+        const user = await getCurrentUser();
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+        if (!token || !user) { await showAuthDialog("signup"); overlay.remove(); return; }
+        const response = await fetch("https://lucid-backend.vercel.app/api/create-checkout", { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || `Checkout failed (${response.status}).`);
+        const ready = await waitForLemon();
+        if (!ready) throw new Error("The secure checkout could not load. Please try again.");
+        status.classList.add("active");
+        message.textContent = "Checkout ready. Your payment stays inside LucidOS.";
+        button.textContent = "Checkout open";
+        window.LemonSqueezy.Url.Open(result.url);
+    } catch (error) { message.textContent = error.message || "Unable to open checkout."; button.textContent = "Upgrade to Plus"; button.disabled = false; status.classList.remove("active"); }
 }
+async function handleCheckoutSuccess() {
+    document.querySelectorAll("#lucid-plus-action").forEach(button => { button.disabled = true; button.textContent = "Verifying Plus…"; });
+    const message = document.querySelector("#lucid-billing-message");
+    if (message) message.textContent = "Payment confirmed. Waiting for Lucid to receive the subscription status…";
+    for (let i = 0; i < 12; i++) {
+        try {
+            await supabase.auth.refreshSession();
+            const user = await getCurrentUser();
+            if (hasPlus(user)) { document.querySelector(".lucid-plans-overlay")?.remove(); refreshAccountUI(); document.dispatchEvent(new CustomEvent("lucid-account-changed")); return; }
+        } catch {}
+        await new Promise(resolve => setTimeout(resolve, 2500));
+    }
+    if (message) message.textContent = "Payment succeeded. Plus activation is still syncing—close this window and reopen Account in a moment.";
+    document.querySelectorAll("#lucid-plus-action").forEach(button => { button.disabled = false; button.textContent = "Check Plus status"; button.onclick = handlePlanRefresh; });
+}
+async function handlePlanRefresh() { await supabase.auth.refreshSession(); document.querySelector(".lucid-plans-overlay")?.remove(); refreshAccountUI(); }
+function escapeHTML(text) { return String(text ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }

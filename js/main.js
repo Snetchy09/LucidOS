@@ -333,6 +333,7 @@ if (startButton) {
 
     startButton.addEventListener("click", event => {
         event.stopPropagation();
+        if (isOrbObscured()) return;
         if (launcherOpen) closeLucidLauncher();
         else openLucidLauncher();
     });

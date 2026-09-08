@@ -1,0 +1,23 @@
+name: Optimize performance
+on:
+  workflow_dispatch:
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply performance tweaks
+        run: python3 scripts/optimize-perf.py
+      - name: Commit if needed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add apps/lucid-studio.js js/main.js css/lucid-studio.css
+          if git diff --staged --quiet; then
+            echo "Already optimized"
+          else
+            git commit -m "Make Studio typing smoother without changing the UI"
+            git push
+          fi

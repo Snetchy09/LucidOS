@@ -1,0 +1,13 @@
+#start-button{z-index:50;touch-action:manipulation}
+#desktop.lucid-launcher-open .desktop-app{pointer-events:auto;opacity:1;transform:translate3d(-50%,-50%,0) scale(1)}
+#desktop.lucid-launcher-open #lucid-atmosphere{opacity:1;background:radial-gradient(circle at 50% 48%,rgba(28,40,70,.18),rgba(5,8,15,.62) 42%,rgba(1,3,7,.94) 100%),radial-gradient(circle at 20% 15%,rgba(90,120,180,.08),transparent 26%),#02050b;transition:opacity .7s cubic-bezier(.16,1,.3,1)}
+#desktop.lucid-launcher-open .lucid-orb{transform:scale(1.025);border-color:rgba(180,205,235,.18);background:radial-gradient(circle at 34% 26%,#53627a 0%,#293343 34%,#111722 66%,#05080e 100%);box-shadow:0 0 0 1px rgba(190,215,245,.035),0 0 42px rgba(88,118,165,.13),0 14px 40px rgba(0,0,0,.55),inset 0 1px 9px rgba(255,255,255,.07);transition:transform .75s cubic-bezier(.16,1,.3,1),box-shadow .75s cubic-bezier(.16,1,.3,1),background .75s ease,border-color .75s ease}
+#desktop.lucid-launcher-open .lucid-orb-eye{border-color:rgba(235,242,252,.7);opacity:.62;transition:opacity .7s ease}
+#desktop.lucid-launcher-open #desktop-apps::before,#desktop.lucid-launcher-open #desktop-apps::after{width:1px;height:1px;background:rgba(175,200,235,.28);box-shadow:34px -76px rgba(150,180,220,.14),-72px 42px rgba(170,195,230,.12),92px 58px rgba(190,210,235,.11),-88px -55px rgba(135,165,210,.10),8px 101px rgba(160,190,225,.08),-20px -108px rgba(180,205,235,.08),118px -18px rgba(150,180,220,.06);animation:lucid-liminal-dust 6.8s ease-in-out infinite}
+#desktop.lucid-launcher-open #desktop-apps::after{animation-delay:-3.4s;transform:scale(.72)}
+#lucid-atmosphere .lucid-watch-eye{position:absolute;width:12px;height:6px;margin:-3px 0 0 -6px;border:1px solid rgba(238,244,255,.7);border-radius:50%;opacity:0;transform:scale(.45);filter:drop-shadow(0 0 5px rgba(170,205,255,.12));transition:opacity .8s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1);animation:lucid-watch-blink var(--blink,2.4s) ease-in-out infinite;pointer-events:none}
+#lucid-atmosphere .lucid-watch-eye::after{content:"";position:absolute;left:50%;top:50%;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:50%;background:rgba(250,253,255,.8);box-shadow:0 0 5px rgba(180,210,255,.28)}
+#lucid-atmosphere .lucid-watch-eye-visible{opacity:.72;transform:scale(1)}
+#lucid-atmosphere .lucid-watch-eye[data-late="1"]{opacity:.78;transform:scale(1);width:13px;height:7px}
+@keyframes lucid-watch-blink{0%,87%,100%{transform:scaleY(1)}91%,95%{transform:scaleY(.08)}}
+@keyframes lucid-liminal-dust{0%,100%{opacity:.12;transform:scale(.88)}50%{opacity:.34;transform:scale(1.12)}}

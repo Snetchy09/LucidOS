@@ -1,0 +1,69 @@
+app "Box Collector"
+window {
+    title "Box Collector"
+    let score = 0
+    game {
+        size 640, 360
+        background "#10131a"
+        box "player" {
+            x 80
+            y 160
+            width 40
+            height 40
+            color "#ffffff"
+        }
+        circle "coin" {
+            x 480
+            y 180
+            radius 14
+            color "#ffd84d"
+        }
+        gameText "Score: {score}" {
+            x 20
+            y 34
+            color "#ffffff"
+        }
+        onUpdate {
+            if game.key("ArrowRight") {
+                game.move("player", 260 * event.delta, 0)
+            }
+            if game.key("ArrowLeft") {
+                game.move("player", -260 * event.delta, 0)
+            }
+            if game.key("ArrowUp") {
+                game.move("player", 0, -260 * event.delta)
+            }
+            if game.key("ArrowDown") {
+                game.move("player", 0, 260 * event.delta)
+            }
+            if game.collides("player", "coin") {
+                set score = score + 1
+                game.set("coin", "x", random.integer(30, 610))
+                game.set("coin", "y", random.integer(70, 330))
+                audio.beep(720, 0.05)
+            }
+            if game.get("player", "x", 0) < 0 {
+                game.set("player", "x", 0)
+            }
+            if game.get("player", "x", 0) > game.width() - 40 {
+                game.set("player", "x", game.width() - 40)
+            }
+            if game.get("player", "y", 0) < 0 {
+                game.set("player", "y", 0)
+            }
+            if game.get("player", "y", 0) > game.height() - 40 {
+                game.set("player", "y", game.height() - 40)
+            }
+        }
+        onKeyDown {
+            if event.key == "Space" {
+                game.set("player", "color", random.pick(["#ffffff", "#55ddff", "#ff6688", "#aaff66"]))
+                audio.beep(900, 0.04)
+            }
+        }
+        onMouseDown {
+            game.set("player", "x", event.x)
+            game.set("player", "y", event.y)
+        }
+    }
+}
