@@ -1,4 +1,4 @@
-let highestZIndex = 100;
+let highestZIndex = 2000;
 function createWindow(title, content) {
     const windowElement = document.createElement("div");
     windowElement.className = "window";
