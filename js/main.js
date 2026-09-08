@@ -42,6 +42,19 @@ updateClock();
 setInterval(updateClock, 1000);
 const DESKTOP_POSITIONS_KEY = "lucid-desktop-positions";
 let launcherOpen = false;
+function isOrbObscured() {
+    const orb = document.getElementById("start-button");
+    if (!orb) return false;
+    const r = orb.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const windows = document.querySelectorAll(".window:not(.minimized)");
+    for (const win of windows) {
+        const wr = win.getBoundingClientRect();
+        if (cx >= wr.left && cx <= wr.right && cy >= wr.top && cy <= wr.bottom) return true;
+    }
+    return false;
+}
 function loadDesktopPositions() {
     try {
         return JSON.parse(localStorage.getItem(DESKTOP_POSITIONS_KEY)) || {};
@@ -112,26 +125,28 @@ function moveAppsToSavedPositions() {
         const targetPY = targetY / 100 * rect.height;
         const dx = targetPX - centerX;
         const dy = targetPY - centerY;
-        const distance = Math.hypot(dx, dy);
+        const distance = Math.hypot(dx, dy) || 1;
         const finalAngle = Math.atan2(dy, dx);
         const direction = index % 2 === 0 ? 1 : -1;
-        const orbitAngle = direction * 0.9;
-        const delay = index * 35;
+        const delay = index * 48;
         app.style.left = `${targetX}%`;
         app.style.top = `${targetY}%`;
         const startX = centerX - targetPX;
         const startY = centerY - targetPY;
-        const midAngle = finalAngle - orbitAngle;
-        const midRadius = distance * 0.55;
-        const midX = centerX + Math.cos(midAngle) * midRadius;
-        const midY = centerY + Math.sin(midAngle) * midRadius;
-        const midTranslateX = midX - targetPX;
-        const midTranslateY = midY - targetPY;
+        const swirl1 = finalAngle - direction * 2.4;
+        const swirl2 = finalAngle - direction * 1.1;
+        const r1 = distance * 0.18;
+        const r2 = distance * 0.62;
+        const m1x = centerX + Math.cos(swirl1) * r1 - targetPX;
+        const m1y = centerY + Math.sin(swirl1) * r1 - targetPY;
+        const m2x = centerX + Math.cos(swirl2) * r2 - targetPX;
+        const m2y = centerY + Math.sin(swirl2) * r2 - targetPY;
         app.animate([
-            { transform: `translate3d(-50%, -50%, 0) translate3d(${startX}px, ${startY}px, 0) scale(0.08) rotate(${direction * -30}deg)`, opacity: 0 },
-            { transform: `translate3d(-50%, -50%, 0) translate3d(${midTranslateX}px, ${midTranslateY}px, 0) scale(0.68) rotate(${direction * 22}deg)`, opacity: 0.8, offset: 0.52 },
-            { transform: "translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1) rotate(0deg)", opacity: 1 }
-        ], { duration: 820, delay, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "forwards" });
+            { transform: `translate3d(-50%, -50%, 0) translate3d(${startX}px, ${startY}px, 0) scale(0) rotate(${direction * -120}deg)`, opacity: 0, filter: "blur(8px)" },
+            { transform: `translate3d(-50%, -50%, 0) translate3d(${m1x}px, ${m1y}px, 0) scale(0.25) rotate(${direction * -40}deg)`, opacity: 0.35, filter: "blur(4px)", offset: 0.28 },
+            { transform: `translate3d(-50%, -50%, 0) translate3d(${m2x}px, ${m2y}px, 0) scale(0.75) rotate(${direction * 18}deg)`, opacity: 0.9, filter: "blur(0px)", offset: 0.62 },
+            { transform: "translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1) rotate(0deg)", opacity: 1, filter: "blur(0px)" }
+        ], { duration: 1100, delay, easing: "cubic-bezier(0.12, 0.8, 0.2, 1)", fill: "forwards" });
     });
 }
 function moveAppsToOrb() {
@@ -147,20 +162,18 @@ function moveAppsToOrb() {
         const centerY = rect.height / 2;
         const dx = centerX - targetPX;
         const dy = centerY - targetPY;
-        const distance = Math.hypot(dx, dy);
+        const distance = Math.hypot(dx, dy) || 1;
         const angle = Math.atan2(dy, dx);
         const direction = index % 2 === 0 ? 1 : -1;
-        const orbitAngle = angle + direction * 0.9;
-        const midRadius = distance * 0.55;
-        const midX = centerX + Math.cos(orbitAngle) * midRadius;
-        const midY = centerY + Math.sin(orbitAngle) * midRadius;
-        const midTranslateX = midX - targetPX;
-        const midTranslateY = midY - targetPY;
+        const swirl = angle + direction * 1.8;
+        const midRadius = distance * 0.4;
+        const midX = centerX + Math.cos(swirl) * midRadius - targetPX;
+        const midY = centerY + Math.sin(swirl) * midRadius - targetPY;
         app.animate([
-            { transform: "translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1) rotate(0deg)", opacity: 1 },
-            { transform: `translate3d(-50%, -50%, 0) translate3d(${midTranslateX}px, ${midTranslateY}px, 0) scale(0.68) rotate(${direction * -22}deg)`, opacity: 0.75, offset: 0.48 },
-            { transform: `translate3d(-50%, -50%, 0) translate3d(${dx}px, ${dy}px, 0) scale(0.08) rotate(${direction * 30}deg)`, opacity: 0 }
-        ], { duration: 620, delay: index * 22, easing: "cubic-bezier(0.7, 0, 0.84, 0)", fill: "forwards" });
+            { transform: "translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1) rotate(0deg)", opacity: 1, filter: "blur(0px)" },
+            { transform: `translate3d(-50%, -50%, 0) translate3d(${midX}px, ${midY}px, 0) scale(0.45) rotate(${direction * -50}deg)`, opacity: 0.55, filter: "blur(2px)", offset: 0.45 },
+            { transform: `translate3d(-50%, -50%, 0) translate3d(${dx}px, ${dy}px, 0) scale(0) rotate(${direction * 140}deg)`, opacity: 0, filter: "blur(10px)" }
+        ], { duration: 900, delay: index * 28, easing: "cubic-bezier(0.55, 0, 0.9, 0.25)", fill: "forwards" });
     });
 }
 function openLucidLauncher() {
@@ -176,7 +189,7 @@ function closeLucidLauncher() {
     const desktop = document.getElementById("desktop");
     launcherOpen = false;
     moveAppsToOrb();
-    setTimeout(() => desktop.classList.remove("lucid-launcher-open"), 700);
+    setTimeout(() => desktop.classList.remove("lucid-launcher-open"), 950);
 }
 function setupDesktopApp(element, app) {
     let dragging = false;
@@ -261,6 +274,7 @@ if (startButton) {
     const desktop = document.getElementById("desktop");
     desktop.addEventListener("click", event => {
         if (event.target.closest(".desktop-app")) return;
+        if (isOrbObscured()) return;
         const rect = desktop.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
@@ -272,6 +286,7 @@ if (startButton) {
     });
     startButton.addEventListener("click", event => {
         event.stopPropagation();
+        if (isOrbObscured()) return;
         if (launcherOpen) closeLucidLauncher();
         else openLucidLauncher();
     });
