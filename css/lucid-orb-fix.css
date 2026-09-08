@@ -1,6 +1,9 @@
+/* Orb stays clickable but never covers app windows */
 #start-button {
-    z-index: 600;
+    z-index: 50;
 }
+
+/* Icons show when launcher is open; windows stack above */
 #desktop.lucid-launcher-open .desktop-app {
     pointer-events: auto;
     opacity: 1;
