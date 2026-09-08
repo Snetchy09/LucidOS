@@ -1,53 +1,74 @@
-const publishUrl = import.meta.env.VITE_LUCID_PUBLISH_API_URL || "https://lucid-publish.onrender.com";
-
+const publishUrl = import.meta.env.VITE_LUCID_PUBLISH_API_URL || "https://lucid-backend.vercel.app";
 async function publishLucidPackage({ accessToken, appId, name, version, description, category, blob }) {
     if (!publishUrl) throw new Error("Lucid publishing service is not configured.");
     if (!accessToken) throw new Error("You must be signed in to publish an app.");
     if (!(blob instanceof Blob)) throw new TypeError("The app package is invalid.");
-
-    let response;
+    const cleanBase = publishUrl.replace(/\/$/, "");
+    let initResponse;
     try {
-        response = await fetch(`${publishUrl.replace(/\/$/, "")}/publish`, {
+        initResponse = await fetch(`${cleanBase}/api/publish-init`, {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/octet-stream",
-                "X-Lucid-App-Id": appId,
-                "X-Lucid-App-Name": name,
-                "X-Lucid-Version": version,
-                "X-Lucid-Description": description || "",
-                "X-Lucid-Category": category || ""
+                "Content-Type": "application/json"
             },
+            body: JSON.stringify({ appId, name, version, description, category, size: blob.size })
+        });
+    } catch (error) {
+        throw new Error("The Lucid publishing service could not be reached. Check network and CORS configuration.");
+    }
+    let initResult = {};
+    try {
+        initResult = await initResponse.json();
+    } catch {}
+    if (!initResponse.ok) {
+        const error = new Error(initResult.error || `Initialization failed (${initResponse.status}).`);
+        error.maxBytes = initResult.maxBytes;
+        error.plan = initResult.plan;
+        throw error;
+    }
+    const { uploadUrl, key } = initResult;
+    if (!uploadUrl || !key) {
+        throw new Error("Invalid response from publishing initialization.");
+    }
+    let uploadResponse;
+    try {
+        uploadResponse = await fetch(uploadUrl, {
+            method: "PUT",
+            headers: { "Content-Type": "application/octet-stream" },
             body: blob
         });
     } catch (error) {
-        const message = error instanceof TypeError
-            ? "The Lucid publishing service could not be reached. Check the publishing service and CORS configuration."
-            : error.message || "Unable to reach the Lucid publishing service.";
-        throw new Error(message);
+        throw new Error("Failed to upload the application package to storage.");
     }
-
-    let result = null;
+    if (!uploadResponse.ok) {
+        throw new Error(`Package storage upload failed (${uploadResponse.status}).`);
+    }
+    let completeResponse;
     try {
-        result = await response.json();
-    } catch {
-        result = {};
+        completeResponse = await fetch(`${cleanBase}/api/publish-complete`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ appId, name, version, description, category, key, size: blob.size })
+        });
+    } catch (error) {
+        throw new Error("Failed to finalize publication record.");
     }
-
-    if (!response.ok) {
-        const error = new Error(result.error || `Publishing failed (${response.status}).`);
-        error.maxBytes = result.maxBytes;
-        error.plan = result.plan;
-        throw error;
+    let completeResult = {};
+    try {
+        completeResult = await completeResponse.json();
+    } catch {}
+    if (!completeResponse.ok) {
+        throw new Error(completeResult.error || `Finalization failed (${completeResponse.status}).`);
     }
-
-    return result;
+    return completeResult;
 }
-
 async function gzipBlob(blob) {
     if (!("CompressionStream" in window)) return blob;
     const stream = blob.stream().pipeThrough(new CompressionStream("gzip"));
     return new Response(stream).blob();
 }
-
 export { publishLucidPackage, gzipBlob };
