@@ -42,6 +42,7 @@ updateClock();
 setInterval(updateClock, 1000);
 const DESKTOP_POSITIONS_KEY = "lucid-desktop-positions";
 let launcherOpen = false;
+let launcherAnimation = 0;
 function isOrbObscured() {
     const orb = document.getElementById("start-button");
     if (!orb) return false;
@@ -111,37 +112,84 @@ function buildDesktopApps() {
         container.appendChild(button);
     });
 }
+function shuffleApps(apps) {
+    const result = Array.from(apps);
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+}
+function createVoidOrigin(rect, targetX, targetY) {
+    const side = Math.floor(Math.random() * 4);
+    let x;
+    let y;
+    if (side === 0) {
+        x = Math.random() * rect.width;
+        y = -rect.height * (0.35 + Math.random() * 0.45);
+    } else if (side === 1) {
+        x = rect.width + rect.width * (0.2 + Math.random() * 0.6);
+        y = Math.random() * rect.height;
+    } else if (side === 2) {
+        x = Math.random() * rect.width;
+        y = rect.height + rect.height * (0.2 + Math.random() * 0.6);
+    } else {
+        x = -rect.width * (0.2 + Math.random() * 0.6);
+        y = Math.random() * rect.height;
+    }
+    return {
+        x: x - targetX,
+        y: y - targetY
+    };
+}
 function moveAppsToSavedPositions() {
     const container = document.getElementById("desktop-apps");
     if (!container) return;
+    launcherAnimation += 1;
+    const animationId = launcherAnimation;
     const rect = container.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const apps = container.querySelectorAll(".desktop-app");
-    apps.forEach((app, index) => {
-        const targetX = Number(app.dataset.targetX);
-        const targetY = Number(app.dataset.targetY);
-        const targetPX = targetX / 100 * rect.width;
-        const targetPY = targetY / 100 * rect.height;
-        const startX = centerX - targetPX;
-        const startY = centerY - targetPY;
-        const delay = index * 70;
-        app.style.left = `${targetX}%`;
-        app.style.top = `${targetY}%`;
-        app.animate([
-            { transform: `translate3d(-50%, -50%, 0) translate3d(${startX}px, ${startY}px, 0) scale(0.4)`, opacity: 0, filter: "saturate(0.4) brightness(0.7)" },
-            { transform: `translate3d(-50%, -50%, 0) translate3d(${startX * 0.35}px, ${startY * 0.35}px, 0) scale(0.85)`, opacity: 0.55, filter: "saturate(0.55) brightness(0.85)", offset: 0.45 },
-            { transform: "translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1)", opacity: 1, filter: "saturate(0.7) brightness(0.95)" }
-        ], { duration: 1400, delay, easing: "cubic-bezier(0.22, 0.61, 0.36, 1)", fill: "forwards" });
-    });
+    const apps = shuffleApps([...container.querySelectorAll(".desktop-app")]);
+    let cursor = 0;
+    let group = 0;
+    while (cursor < apps.length) {
+        const batchSize = Math.min(1 + Math.floor(Math.random() * 2), apps.length - cursor);
+        for (let i = 0; i < batchSize; i++) {
+            const app = apps[cursor + i];
+            const targetX = Number(app.dataset.targetX);
+            const targetY = Number(app.dataset.targetY);
+            const targetPX = targetX / 100 * rect.width;
+            const targetPY = targetY / 100 * rect.height;
+            const origin = createVoidOrigin(rect, targetPX, targetPY);
+            const driftX = origin.x * (0.08 + Math.random() * 0.05);
+            const driftY = origin.y * (0.08 + Math.random() * 0.05);
+            const delay = group * (220 + Math.random() * 170) + i * 55;
+            app.style.left = `${targetX}%`;
+            app.style.top = `${targetY}%`;
+            app.animate([
+                { transform: `translate3d(-50%, -50%, 0) translate3d(${origin.x}px, ${origin.y}px, 0) scale(${0.7 + Math.random() * 0.12})`, opacity: 0 },
+                { transform: `translate3d(-50%, -50%, 0) translate3d(${driftX}px, ${driftY}px, 0) scale(0.96)`, opacity: 0.62, offset: 0.58 },
+                { transform: "translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1)", opacity: 1 }
+            ], { duration: 1150 + Math.random() * 250, delay, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "forwards" });
+        }
+        cursor += batchSize;
+        group += 1;
+    }
+    setTimeout(() => {
+        if (animationId !== launcherAnimation || !launcherOpen) return;
+        apps.forEach(app => {
+            app.style.opacity = "";
+        });
+    }, group * 430 + 1500);
 }
 function moveAppsToOrb() {
-    const apps = document.querySelectorAll(".desktop-app");
+    launcherAnimation += 1;
+    const container = document.getElementById("desktop-apps");
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const apps = shuffleApps([...container.querySelectorAll(".desktop-app")]);
     apps.forEach((app, index) => {
         const targetX = Number(app.dataset.targetX);
         const targetY = Number(app.dataset.targetY);
-        const container = document.getElementById("desktop-apps");
-        const rect = container.getBoundingClientRect();
         const targetPX = targetX / 100 * rect.width;
         const targetPY = targetY / 100 * rect.height;
         const centerX = rect.width / 2;
@@ -149,10 +197,10 @@ function moveAppsToOrb() {
         const dx = centerX - targetPX;
         const dy = centerY - targetPY;
         app.animate([
-            { transform: "translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1)", opacity: 1, filter: "saturate(0.7) brightness(0.95)" },
-            { transform: `translate3d(-50%, -50%, 0) translate3d(${dx * 0.4}px, ${dy * 0.4}px, 0) scale(0.8)`, opacity: 0.4, filter: "saturate(0.4) brightness(0.75)", offset: 0.5 },
-            { transform: `translate3d(-50%, -50%, 0) translate3d(${dx}px, ${dy}px, 0) scale(0.35)`, opacity: 0, filter: "saturate(0.2) brightness(0.5)" }
-        ], { duration: 1100, delay: index * 45, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" });
+            { transform: "translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1)", opacity: 1 },
+            { transform: `translate3d(-50%, -50%, 0) translate3d(${dx * 0.28}px, ${dy * 0.28}px, 0) scale(0.88)`, opacity: 0.48, offset: 0.5 },
+            { transform: `translate3d(-50%, -50%, 0) translate3d(${dx}px, ${dy}px, 0) scale(0.55)`, opacity: 0 }
+        ], { duration: 720 + Math.random() * 260, delay: index * 35, easing: "cubic-bezier(0.7, 0, 0.84, 0)", fill: "forwards" });
     });
 }
 function openLucidLauncher() {
@@ -168,7 +216,9 @@ function closeLucidLauncher() {
     const desktop = document.getElementById("desktop");
     launcherOpen = false;
     moveAppsToOrb();
-    setTimeout(() => desktop.classList.remove("lucid-launcher-open"), 1200);
+    setTimeout(() => {
+        if (!launcherOpen) desktop.classList.remove("lucid-launcher-open");
+    }, 1200);
 }
 function setupDesktopApp(element, app) {
     let dragging = false;
