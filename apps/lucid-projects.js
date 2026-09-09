@@ -1,4 +1,3 @@
-import { saveUserFile } from "../js/filesystem.js";
 const PROJECTS_KEY = "lucid-studio-projects-v1";
 const ACTIVE_PROJECT_KEY = "lucid-studio-active-project";
 function readProjects() {
@@ -14,7 +13,6 @@ function readProjects() {
 }
 function writeProjects(projects) {
     localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
-    saveUserFile(["Documents", "Lucid Projects"], "projects.json", JSON.stringify(projects, null, 2), "application/json").catch(error => console.warn("Lucid project file save failed:", error));
 }
 function generateProjectId() { return "project-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8); }
 function createProject({ name = "Untitled App", language = "lucid-script" } = {}) {
