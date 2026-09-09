@@ -6,6 +6,7 @@ windowElement.className = "window";
 windowElement.style.zIndex = ++highestZIndex;
 windowElement.innerHTML = `<div class="title-bar"><div class="window-title">${title}</div><div class="window-controls"><button class="window-control minimize-button">−</button><button class="window-control maximize-button">□</button><button class="window-control close-button">×</button></div></div><div class="window-content">${content}</div>`;
 document.getElementById("desktop").appendChild(windowElement);
+window.dispatchEvent(new CustomEvent("lucid-window-created", { detail: { element: windowElement, title } }));
 const taskbarApps = document.getElementById("taskbar-apps");
 const taskbarButton = document.createElement("button");
 taskbarButton.className = "taskbar-app";
