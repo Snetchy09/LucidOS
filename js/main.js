@@ -15,344 +15,45 @@ import { createBrowser } from "../apps/browser.js";
 import { getLucidLevel } from "./lucid-state.js";
 import { initializeAppRegistry, getInstalledApps, registerAppLauncher, getAppLauncher } from "./app-registry.js";
 import { createLucidStudio } from "../apps/lucid-studio.js";
-
-console.log("Lucid level:", getLucidLevel());
-
+console.log("Lucid level:",getLucidLevel());
 await loadFileSystem();
 initializeAppRegistry();
-
-registerAppLauncher("lucid-studio", createLucidStudio);
-registerAppLauncher("files", createFilesApp);
-registerAppLauncher("settings", createSettingsApp);
-registerAppLauncher("terminal", createTerminal);
-registerAppLauncher("store", createStoreApp);
-registerAppLauncher("calculator", createCalculator);
-registerAppLauncher("media", createMediaApp);
-registerAppLauncher("paint", createLucidPaint);
-registerAppLauncher("notes", createNotes);
-registerAppLauncher("calendar", createCalendar);
-registerAppLauncher("text-editor", createTextEditor);
-registerAppLauncher("browser", createBrowser);
-
-function updateClock() {
-    const clock = document.getElementById("clock");
-    if (!clock) return;
-
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    clock.textContent = `${hours}:${minutes}`;
-}
-
-updateClock();
-setInterval(updateClock, 1000);
-
-const DESKTOP_POSITIONS_KEY = "lucid-desktop-positions";
-let launcherOpen = false;
-
-function loadDesktopPositions() {
-    try {
-        return JSON.parse(localStorage.getItem(DESKTOP_POSITIONS_KEY)) || {};
-    } catch {
-        return {};
-    }
-}
-
-function saveDesktopPosition(appId, x, y) {
-    const positions = loadDesktopPositions();
-    positions[appId] = { x, y };
-    localStorage.setItem(DESKTOP_POSITIONS_KEY, JSON.stringify(positions));
-}
-
-function escapeHTML(text) {
-    return String(text ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-function launchLucidApp(app) {
-    closeLucidLauncher();
-
-    const launcher = getAppLauncher(app.id);
-    if (!launcher) {
-        console.warn(`Lucid: app ${app.id} has no launcher`);
-        return;
-    }
-    launcher();
-}
-
-const defaultPositions = [
-    { x: 50, y: 20 },
-    { x: 30, y: 26 },
-    { x: 70, y: 26 },
-    { x: 23, y: 45 },
-    { x: 77, y: 45 },
-    { x: 28, y: 67 },
-    { x: 72, y: 67 },
-    { x: 50, y: 76 },
-    { x: 38, y: 38 },
-    { x: 62, y: 38 }
-];
-
-function buildDesktopApps() {
-    const container = document.getElementById("desktop-apps");
-    if (!container) return;
-
-    container.innerHTML = "";
-
-    const installedApps = getInstalledApps();
-    const positions = loadDesktopPositions();
-
-    installedApps.forEach((app, index) => {
-        const button = document.createElement("button");
-        button.className = "desktop-app";
-        button.innerHTML = `
-            <span class="desktop-app-icon">${app.icon}</span>
-            <span class="desktop-app-name">${escapeHTML(app.name)}</span>
-        `;
-
-        const saved = positions[app.id];
-        const position = saved || defaultPositions[index % defaultPositions.length];
-
-        button.style.left = "50%";
-        button.style.top = "50%";
-        button.dataset.targetX = position.x;
-        button.dataset.targetY = position.y;
-
-        setupDesktopApp(button, app);
-        container.appendChild(button);
-    });
-}
-
-function moveAppsToSavedPositions() {
-    const container = document.getElementById("desktop-apps");
-    if (!container) return;
-
-    const rect = container.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const apps = container.querySelectorAll(".desktop-app");
-
-    apps.forEach((app, index) => {
-        const targetX = Number(app.dataset.targetX);
-        const targetY = Number(app.dataset.targetY);
-        const targetPX = targetX / 100 * rect.width;
-        const targetPY = targetY / 100 * rect.height;
-        const dx = targetPX - centerX;
-        const dy = targetPY - centerY;
-        const distance = Math.hypot(dx, dy);
-        const finalAngle = Math.atan2(dy, dx);
-        const direction = index % 2 === 0 ? 1 : -1;
-        const orbitAngle = direction * 0.9;
-        const delay = index * 35;
-
-        app.style.left = `${targetX}%`;
-        app.style.top = `${targetY}%`;
-
-        const startX = centerX - targetPX;
-        const startY = centerY - targetPY;
-        const midAngle = finalAngle - orbitAngle;
-        const midRadius = distance * 0.55;
-        const midX = centerX + Math.cos(midAngle) * midRadius;
-        const midY = centerY + Math.sin(midAngle) * midRadius;
-        const midTranslateX = midX - targetPX;
-        const midTranslateY = midY - targetPY;
-
-        app.animate([
-            { transform: `translate3d(-50%, -50%, 0) translate3d(${startX}px, ${startY}px, 0) scale(0.08) rotate(${direction * -30}deg)`, opacity: 0 },
-            { transform: `translate3d(-50%, -50%, 0) translate3d(${midTranslateX}px, ${midTranslateY}px, 0) scale(0.68) rotate(${direction * 22}deg)`, opacity: 0.8, offset: 0.52 },
-            { transform: "translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1) rotate(0deg)", opacity: 1 }
-        ], {
-            duration: 820,
-            delay,
-            easing: "cubic-bezier(0.16, 1, 0.3, 1)",
-            fill: "forwards"
-        });
-    });
-}
-
-function moveAppsToOrb() {
-    const apps = document.querySelectorAll(".desktop-app");
-
-    apps.forEach((app, index) => {
-        const targetX = Number(app.dataset.targetX);
-        const targetY = Number(app.dataset.targetY);
-        const container = document.getElementById("desktop-apps");
-        const rect = container.getBoundingClientRect();
-        const targetPX = targetX / 100 * rect.width;
-        const targetPY = targetY / 100 * rect.height;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const dx = centerX - targetPX;
-        const dy = centerY - targetPY;
-        const distance = Math.hypot(dx, dy);
-        const angle = Math.atan2(dy, dx);
-        const direction = index % 2 === 0 ? 1 : -1;
-        const orbitAngle = angle + direction * 0.9;
-        const midRadius = distance * 0.55;
-        const midX = centerX + Math.cos(orbitAngle) * midRadius;
-        const midY = centerY + Math.sin(orbitAngle) * midRadius;
-        const midTranslateX = midX - targetPX;
-        const midTranslateY = midY - targetPY;
-
-        app.animate([
-            { transform: "translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1) rotate(0deg)", opacity: 1 },
-            { transform: `translate3d(-50%, -50%, 0) translate3d(${midTranslateX}px, ${midTranslateY}px, 0) scale(0.68) rotate(${direction * -22}deg)`, opacity: 0.75, offset: 0.48 },
-            { transform: `translate3d(-50%, -50%, 0) translate3d(${dx}px, ${dy}px, 0) scale(0.08) rotate(${direction * 30}deg)`, opacity: 0 }
-        ], {
-            duration: 620,
-            delay: index * 22,
-            easing: "cubic-bezier(0.7, 0, 0.84, 0)",
-            fill: "forwards"
-        });
-    });
-}
-
-function isOrbObscured() {
-    const orb = document.getElementById("start-button");
-    if (!orb) return false;
-    const r = orb.getBoundingClientRect();
-    const cx = r.left + r.width / 2;
-    const cy = r.top + r.height / 2;
-    const top = document.elementFromPoint(cx, cy);
-    return !!(top && top !== orb && !orb.contains(top) && top.closest(".window"));
-}
-
-function openLucidLauncher() {
-    if (launcherOpen) return;
-    const desktop = document.getElementById("desktop");
-    if (!desktop) return;
-    launcherOpen = true;
-    desktop.classList.add("lucid-launcher-open");
-    moveAppsToSavedPositions();
-    desktop.dispatchEvent(new CustomEvent("lucid-launcher-toggle", { detail: { open: true } }));
-}
-
-function closeLucidLauncher() {
-    if (!launcherOpen) return;
-    const desktop = document.getElementById("desktop");
-    launcherOpen = false;
-    moveAppsToOrb();
-    desktop.dispatchEvent(new CustomEvent("lucid-launcher-toggle", { detail: { open: false } }));
-    setTimeout(() => { if (!launcherOpen) desktop.classList.remove("lucid-launcher-open"); }, 700);
-}
-
-function setupDesktopApp(element, app) {
-    let dragging = false;
-    let moved = false;
-    let startPointerX = 0;
-    let startPointerY = 0;
-    let startLeft = 0;
-    let startTop = 0;
-
-    element.addEventListener("pointerdown", event => {
-        if (!launcherOpen || event.button !== 0) return;
-        dragging = true;
-        moved = false;
-        startPointerX = event.clientX;
-        startPointerY = event.clientY;
-        startLeft = parseFloat(element.dataset.targetX);
-        startTop = parseFloat(element.dataset.targetY);
-        element.setPointerCapture(event.pointerId);
-        event.preventDefault();
-    });
-
-    element.addEventListener("pointermove", event => {
-        if (!dragging) return;
-        const desktop = document.getElementById("desktop-apps");
-        const rect = desktop.getBoundingClientRect();
-        const dx = event.clientX - startPointerX;
-        const dy = event.clientY - startPointerY;
-
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) moved = true;
-
-        let x = startLeft + (dx / rect.width) * 100;
-        let y = startTop + (dy / rect.height) * 100;
-        x = Math.max(8, Math.min(92, x));
-        y = Math.max(10, Math.min(88, y));
-
-        element.dataset.targetX = x;
-        element.dataset.targetY = y;
-        element.style.left = `${x}%`;
-        element.style.top = `${y}%`;
-    });
-
-    element.addEventListener("pointerup", () => {
-        if (!dragging) return;
-        dragging = false;
-        if (moved) saveDesktopPosition(app.id, Number(element.dataset.targetX), Number(element.dataset.targetY));
-    });
-
-    element.addEventListener("click", event => {
-        if (moved) {
-            event.preventDefault();
-            moved = false;
-            return;
-        }
-        launchLucidApp(app);
-    });
-}
-
-function applyWallpaper(url) {
-    const desktop = document.getElementById("desktop");
-    if (!desktop) return;
-
-    const cleanUrl = String(url || "").trim();
-    if (!cleanUrl) {
-        desktop.style.removeProperty("background-image");
-        desktop.style.removeProperty("background-size");
-        desktop.style.removeProperty("background-position");
-        desktop.style.removeProperty("background-repeat");
-        return;
-    }
-
-    desktop.style.backgroundImage = `url("${cleanUrl.replaceAll('"', '\\"')}")`;
-    desktop.style.backgroundSize = "cover";
-    desktop.style.backgroundPosition = "center";
-    desktop.style.backgroundRepeat = "no-repeat";
-}
-
+registerAppLauncher("lucid-studio",createLucidStudio);
+registerAppLauncher("files",createFilesApp);
+registerAppLauncher("settings",createSettingsApp);
+registerAppLauncher("terminal",createTerminal);
+registerAppLauncher("store",createStoreApp);
+registerAppLauncher("calculator",createCalculator);
+registerAppLauncher("media",createMediaApp);
+registerAppLauncher("paint",createLucidPaint);
+registerAppLauncher("notes",createNotes);
+registerAppLauncher("calendar",createCalendar);
+registerAppLauncher("text-editor",createTextEditor);
+registerAppLauncher("browser",createBrowser);
+function updateClock(){const clock=document.getElementById("clock");if(!clock)return;const now=new Date();clock.textContent=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`}
+updateClock();setInterval(updateClock,1000);
+const DESKTOP_POSITIONS_KEY="lucid-desktop-positions";
+let launcherOpen=false;
+function loadDesktopPositions(){try{return JSON.parse(localStorage.getItem(DESKTOP_POSITIONS_KEY))||{}}catch{return{}}}
+function saveDesktopPosition(appId,x,y){const positions=loadDesktopPositions();positions[appId]={x,y};localStorage.setItem(DESKTOP_POSITIONS_KEY,JSON.stringify(positions));}
+function escapeHTML(text){return String(text??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function isImageIcon(icon){return /^(data:image\/(png|jpeg|webp|gif);base64,|https?:\/\/)/i.test(String(icon||""))}
+function renderAppIcon(container,icon){container.textContent="";const value=String(icon||"◇");if(isImageIcon(value)){const image=document.createElement("img");image.src=value;image.alt="";image.loading="lazy";container.appendChild(image)}else container.textContent=value}
+async function launchLucidApp(app){closeLucidLauncher();const launcher=getAppLauncher(app.id);if(launcher){launcher();return;}if(app.external){try{const module=await import("./lucid-community-runtime.js");module.launchCommunityApp(app);}catch(error){console.error("Lucid community app launch:",error);alert(error.message||"This community app could not be launched.");}return;}console.warn(`Lucid: app ${app.id} has no launcher`)}
+const defaultPositions=[{x:50,y:20},{x:30,y:26},{x:70,y:26},{x:23,y:45},{x:77,y:45},{x:28,y:67},{x:72,y:67},{x:50,y:76},{x:38,y:38},{x:62,y:38}];
+function buildDesktopApps(){const container=document.getElementById("desktop-apps");if(!container)return;container.innerHTML="";const installedApps=getInstalledApps();const positions=loadDesktopPositions();installedApps.forEach((app,index)=>{const button=document.createElement("button");button.className="desktop-app";button.innerHTML='<span class="desktop-app-icon"></span><span class="desktop-app-name"></span>';renderAppIcon(button.querySelector(".desktop-app-icon"),app.icon);button.querySelector(".desktop-app-name").textContent=app.name;const saved=positions[app.id];const position=saved||defaultPositions[index%defaultPositions.length];button.style.left="50%";button.style.top="50%";button.dataset.targetX=position.x;button.dataset.targetY=position.y;setupDesktopApp(button,app);container.appendChild(button)})}
+function moveAppsToSavedPositions(){const container=document.getElementById("desktop-apps");if(!container)return;const rect=container.getBoundingClientRect(),centerX=rect.width/2,centerY=rect.height/2;container.querySelectorAll(".desktop-app").forEach((app,index)=>{const targetX=Number(app.dataset.targetX),targetY=Number(app.dataset.targetY),targetPX=targetX/100*rect.width,targetPY=targetY/100*rect.height,dx=targetPX-centerX,dy=targetPY-centerY,distance=Math.hypot(dx,dy),finalAngle=Math.atan2(dy,dx),direction=index%2===0?1:-1,midAngle=finalAngle-direction*.9,midRadius=distance*.55,midX=centerX+Math.cos(midAngle)*midRadius,midY=centerY+Math.sin(midAngle)*midRadius;app.style.left=`${targetX}%`;app.style.top=`${targetY}%`;app.animate([{transform:`translate3d(-50%,-50%,0) translate3d(${centerX-targetPX}px,${centerY-targetPY}px,0) scale(.08) rotate(${direction*-30}deg)`,opacity:0},{transform:`translate3d(-50%,-50%,0) translate3d(${midX-targetPX}px,${midY-targetPY}px,0) scale(.68) rotate(${direction*22}deg)`,opacity:.8,offset:.52},{transform:"translate3d(-50%,-50%,0) translate3d(0,0,0) scale(1) rotate(0deg)",opacity:1}],{duration:820,delay:index*35,easing:"cubic-bezier(.16,1,.3,1)",fill:"forwards"})})}
+function moveAppsToOrb(){document.querySelectorAll(".desktop-app").forEach((app,index)=>{const targetX=Number(app.dataset.targetX),targetY=Number(app.dataset.targetY),container=document.getElementById("desktop-apps"),rect=container.getBoundingClientRect(),targetPX=targetX/100*rect.width,targetPY=targetY/100*rect.height,centerX=rect.width/2,centerY=rect.height/2,dx=centerX-targetPX,dy=centerY-targetPY,distance=Math.hypot(dx,dy),angle=Math.atan2(dy,dx),direction=index%2===0?1:-1,orbitAngle=angle+direction*.9,midRadius=distance*.55,midX=centerX+Math.cos(orbitAngle)*midRadius,midY=centerY+Math.sin(orbitAngle)*midRadius;app.animate([{transform:"translate3d(-50%,-50%,0) translate3d(0,0,0) scale(1) rotate(0deg)",opacity:1},{transform:`translate3d(-50%,-50%,0) translate3d(${midX-targetPX}px,${midY-targetPY}px,0) scale(.68) rotate(${direction*-22}deg)`,opacity:.75,offset:.48},{transform:`translate3d(-50%,-50%,0) translate3d(${dx}px,${dy}px,0) scale(.08) rotate(${direction*30}deg)`,opacity:0}],{duration:620,delay:index*22,easing:"cubic-bezier(.7,0,.84,0)",fill:"forwards"})})}
+function isOrbObscured(){const orb=document.getElementById("start-button");if(!orb)return false;const r=orb.getBoundingClientRect(),top=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return !!(top&&top!==orb&&!orb.contains(top)&&top.closest(".window"))}
+function openLucidLauncher(){if(launcherOpen)return;const desktop=document.getElementById("desktop");if(!desktop)return;launcherOpen=true;desktop.classList.add("lucid-launcher-open");moveAppsToSavedPositions();desktop.dispatchEvent(new CustomEvent("lucid-launcher-toggle",{detail:{open:true}}))}
+function closeLucidLauncher(){if(!launcherOpen)return;const desktop=document.getElementById("desktop");launcherOpen=false;moveAppsToOrb();desktop.dispatchEvent(new CustomEvent("lucid-launcher-toggle",{detail:{open:false}}));setTimeout(()=>{if(!launcherOpen)desktop.classList.remove("lucid-launcher-open")},700)}
+function setupDesktopApp(element,app){let dragging=false,moved=false,startPointerX=0,startPointerY=0,startLeft=0,startTop=0;element.addEventListener("pointerdown",event=>{if(!launcherOpen||event.button!==0)return;dragging=true;moved=false;startPointerX=event.clientX;startPointerY=event.clientY;startLeft=parseFloat(element.dataset.targetX);startTop=parseFloat(element.dataset.targetY);element.setPointerCapture(event.pointerId);event.preventDefault()});element.addEventListener("pointermove",event=>{if(!dragging)return;const desktop=document.getElementById("desktop-apps"),rect=desktop.getBoundingClientRect(),dx=event.clientX-startPointerX,dy=event.clientY-startPointerY;if(Math.abs(dx)>5||Math.abs(dy)>5)moved=true;let x=startLeft+dx/rect.width*100,y=startTop+dy/rect.height*100;x=Math.max(8,Math.min(92,x));y=Math.max(10,Math.min(88,y));element.dataset.targetX=x;element.dataset.targetY=y;element.style.left=`${x}%`;element.style.top=`${y}%`});element.addEventListener("pointerup",()=>{if(!dragging)return;dragging=false;if(moved)saveDesktopPosition(app.id,Number(element.dataset.targetX),Number(element.dataset.targetY))});element.addEventListener("click",event=>{if(moved){event.preventDefault();moved=false;return}launchLucidApp(app)})}
+function applyWallpaper(url){const desktop=document.getElementById("desktop");if(!desktop)return;const cleanUrl=String(url||"").trim();if(!cleanUrl){desktop.style.removeProperty("background-image");desktop.style.removeProperty("background-size");desktop.style.removeProperty("background-position");desktop.style.removeProperty("background-repeat");return}desktop.style.backgroundImage=`url("${cleanUrl.replaceAll('"','\\"')}")`;desktop.style.backgroundSize="cover";desktop.style.backgroundPosition="center";desktop.style.backgroundRepeat="no-repeat"}
 buildDesktopApps();
-loadSettings().then(settings => applyWallpaper(settings.wallpaper)).catch(error => console.warn("Lucid: could not load wallpaper settings", error));
-
-window.addEventListener("lucid-settings-changed", event => {
-    if (event.detail?.wallpaper !== undefined) applyWallpaper(event.detail.wallpaper);
-});
-
-window.addEventListener("lucid-app-installed", () => buildDesktopApps());
-window.addEventListener("lucid-app-uninstalled", () => buildDesktopApps());
-
-const startButton = document.getElementById("start-button");
-
-if (startButton) {
-    const desktop = document.getElementById("desktop");
-
-    desktop.addEventListener("click", event => {
-        if (event.target.closest(".desktop-app")) return;
-
-        const rect = desktop.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const distance = Math.hypot(event.clientX - centerX, event.clientY - centerY);
-
-        if (distance <= 65) {
-            if (launcherOpen) closeLucidLauncher();
-            else openLucidLauncher();
-        }
-    });
-
-    startButton.addEventListener("click", event => {
-        event.stopPropagation();
-        if (isOrbObscured()) return;
-        if (launcherOpen) closeLucidLauncher();
-        else openLucidLauncher();
-    });
-}
-
-document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && launcherOpen) closeLucidLauncher();
-});
+loadSettings().then(settings=>applyWallpaper(settings.wallpaper)).catch(error=>console.warn("Lucid: could not load wallpaper settings",error));
+window.addEventListener("lucid-settings-changed",event=>{if(event.detail?.wallpaper!==undefined)applyWallpaper(event.detail.wallpaper)});
+window.addEventListener("lucid-app-installed",()=>buildDesktopApps());
+window.addEventListener("lucid-app-uninstalled",()=>buildDesktopApps());
+const startButton=document.getElementById("start-button");
+if(startButton){const desktop=document.getElementById("desktop");desktop.addEventListener("click",event=>{if(event.target.closest(".desktop-app"))return;const rect=desktop.getBoundingClientRect(),centerX=rect.left+rect.width/2,centerY=rect.top+rect.height/2;if(Math.hypot(event.clientX-centerX,event.clientY-centerY)<=65){if(launcherOpen)closeLucidLauncher();else openLucidLauncher()}});startButton.addEventListener("click",event=>{event.stopPropagation();if(isOrbObscured())return;if(launcherOpen)closeLucidLauncher();else openLucidLauncher()})}
+document.addEventListener("keydown",event=>{if(event.key==="Escape"&&launcherOpen)closeLucidLauncher()});
