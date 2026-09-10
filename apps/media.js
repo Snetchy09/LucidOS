@@ -41,12 +41,27 @@ function createMediaApp() {
                     </div>
                 </section>
                 <section class="media-page hidden" id="media-studio-page">
-                    <div class="media-studio-header">
-                        <div><h1>Studio</h1><p>Make a simple beat and save it to Music.</p></div>
-                        <div class="media-studio-controls"><label>BPM<input class="media-bpm" id="media-bpm" type="number" min="40" max="240" value="120"></label><button id="studio-play">▶ Play</button><button id="studio-clear">Clear</button><button id="studio-save">Save</button></div>
-                    </div>
-                    <div class="sequencer" id="sequencer"></div>
-                    <div class="studio-help">Your beat pattern is stored with the rest of your files.</div>
+                <div class="media-studio-header">
+                <div><h1>Music Studio</h1><p>Create beats, basslines, melodies and full arrangements.</p></div>
+                <div class="media-studio-controls"><label>BPM<input class="media-bpm" id="media-bpm" type="number" min="40" max="240" value="120"></label><label>Swing<input id="studio-swing" type="range" min="0" max="50" value="0"></label><button id="studio-play">▶ Play</button><button id="studio-clear">Clear</button><button id="studio-save">Save</button><button id="studio-export">Export WAV</button></div>
+                </div>
+                <div class="studio-toolbar">
+                <button class="studio-tool active" data-tool="sequence">Sequencer</button>
+                <button class="studio-tool" data-tool="melody">Melody</button>
+                <button class="studio-tool" data-tool="mixer">Mixer</button>
+                </div>
+                <div class="studio-section" id="studio-sequence">
+                <div class="studio-track-labels" id="studio-track-labels"></div>
+                <div class="sequencer" id="sequencer"></div>
+                </div>
+                <div class="studio-section hidden" id="studio-melody">
+                <div class="melody-controls"><label>Scale<select id="melody-scale"><option value="major">Major</option><option value="minor">Minor</option><option value="pentatonic">Pentatonic</option><option value="chromatic">Chromatic</option></select></label><label>Root<select id="melody-root"><option value="C">C</option><option value="C#">C#</option><option value="D">D</option><option value="D#">D#</option><option value="E">E</option><option value="F">F</option><option value="F#">F#</option><option value="G">G</option><option value="G#">G#</option><option value="A">A</option><option value="A#">A#</option><option value="B">B</option></select></label></div>
+                <div class="melody-grid" id="melody-grid"></div>
+                </div>
+                <div class="studio-section hidden" id="studio-mixer">
+                <div class="mixer" id="studio-mixer-panel"></div>
+                </div>
+                <div class="studio-status" id="studio-status">Ready</div>
                 </section>
             </main>
         </div>
@@ -131,7 +146,14 @@ function setupMedia(windowElement) {
     createSequencer(root);
     root.querySelector("#studio-play").addEventListener("click", () => toggleStudio(root));
     root.querySelector("#studio-clear").addEventListener("click", clearStudio);
-    root.querySelector("#studio-save").addEventListener("click", () => saveStudio(root));
+    root.querySelector("#studio-save").addEventListener("click",()=>saveStudio(root));
+    root.querySelector("#studio-export").addEventListener("click",()=>exportStudioWav(root));
+    root.querySelectorAll(".studio-tool").forEach(button=>button.addEventListener("click",()=>{
+    root.querySelectorAll(".studio-tool").forEach(item=>item.classList.remove("active"));
+    root.querySelectorAll(".studio-section").forEach(section=>section.classList.add("hidden"));
+    button.classList.add("active");
+    root.querySelector(`#studio-${button.dataset.tool}`).classList.remove("hidden");
+    }));
 
     document.addEventListener("keydown", event => {
         if (event.target.matches("input, textarea")) return;
@@ -260,76 +282,178 @@ function updatePlayer(root) {
 }
 
 function createSequencer(root) {
-    const sequencer = root.querySelector("#sequencer");
-    ["Kick", "Snare", "Hi-Hat", "Bass"].forEach(instrument => {
-        const row = document.createElement("div");
-        row.className = "sequencer-row";
-        row.dataset.instrument = instrument;
-        row.innerHTML = `<div class="sequencer-name">${instrument}</div><div class="sequencer-grid"></div>`;
-        const grid = row.querySelector(".sequencer-grid");
-        for (let step = 0; step < 16; step++) {
-            const button = document.createElement("button");
-            button.className = "sequencer-step";
-            button.dataset.step = step;
-            button.addEventListener("click", () => button.classList.toggle("active"));
-            grid.appendChild(button);
-        }
-        sequencer.appendChild(row);
-    });
+const sequencer=root.querySelector("#sequencer");
+const tracks=[{name:"Kick",type:"drum",volume:.9},{name:"Snare",type:"drum",volume:.65},{name:"Hi-Hat",type:"hat",volume:.45},{name:"Clap",type:"clap",volume:.5},{name:"Bass",type:"bass",volume:.6},{name:"Lead",type:"lead",volume:.5},{name:"Pad",type:"pad",volume:.35}];
+sequencer.innerHTML="";
+tracks.forEach(track=>{
+const row=document.createElement("div");
+row.className="sequencer-row";
+row.dataset.instrument=track.name;
+row.dataset.volume=track.volume;
+row.innerHTML=`<div class="sequencer-name">${track.name}</div><div class="sequencer-grid"></div>`;
+const grid=row.querySelector(".sequencer-grid");
+for(let step=0;step<32;step++){
+const button=document.createElement("button");
+button.className="sequencer-step";
+button.dataset.step=step;
+button.addEventListener("click",()=>{
+button.classList.toggle("active");
+playStudioSound(track.name,root);
+});
+grid.appendChild(button);
+}
+sequencer.appendChild(row);
+});
+createMelodyEditor(root);
+createMixer(root);
 }
 
 function toggleStudio(root) {
-    initializeAudio();
-    if (audioContext.state === "suspended") audioContext.resume();
-    const button = root.querySelector("#studio-play");
-    if (studioTimer) {
-        clearInterval(studioTimer);
-        studioTimer = null;
-        button.textContent = "▶ Play";
-        return;
-    }
-    studioStep = 0;
-    const bpm = Math.max(40, Math.min(240, Number(root.querySelector("#media-bpm").value) || 120));
-    studioTimer = setInterval(() => playStudioStep(root), 60000 / bpm / 4);
-    button.textContent = "■ Stop";
-    playStudioStep(root);
+initializeAudio();
+if(audioContext.state==="suspended") audioContext.resume();
+const button=root.querySelector("#studio-play");
+if(studioTimer){
+clearInterval(studioTimer);
+studioTimer=null;
+root.querySelectorAll(".sequencer-step").forEach(step=>step.classList.remove("playing"));
+button.textContent="▶ Play";
+setStudioStatus(root,"Stopped");
+return;
 }
-
+studioStep=0;
+const bpm=Math.max(40,Math.min(240,Number(root.querySelector("#media-bpm").value)||120));
+const swing=Number(root.querySelector("#studio-swing").value)||0;
+const base=60000/bpm/4;
+studioTimer=setInterval(()=>{
+playStudioStep(root);
+studioStep=(studioStep+1)%32;
+},base*(studioStep%2===1?1+swing/100:1));
+button.textContent="■ Stop";
+setStudioStatus(root,"Playing");
+playStudioStep(root);
+}
 function playStudioStep(root) {
-    const steps = root.querySelectorAll(".sequencer-step");
-    steps.forEach(step => step.classList.toggle("playing", Number(step.dataset.step) === studioStep));
-    steps.forEach(step => {
-        if (Number(step.dataset.step) !== studioStep || !step.classList.contains("active")) return;
-        playStudioSound(step.closest(".sequencer-row")?.dataset.instrument);
-    });
-    studioStep = (studioStep + 1) % 16;
+const steps=root.querySelectorAll(".sequencer-step");
+steps.forEach(step=>step.classList.toggle("playing",Number(step.dataset.step)===studioStep));
+root.querySelectorAll(".sequencer-row").forEach(row=>{
+const step=row.querySelector(`.sequencer-step[data-step="${studioStep}"]`);
+if(step?.classList.contains("active")) playStudioSound(row.dataset.instrument,root);
+});
 }
 
-function playStudioSound(instrument) {
-    if (!instrument) return;
-    initializeAudio();
-    const now = audioContext.currentTime;
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-    oscillator.connect(gain);
-    gain.connect(audioGain || audioContext.destination);
+function playStudioSound(instrument,root) {
+if(!instrument)return;
+initializeAudio();
+const now=audioContext.currentTime;
+const gain=audioContext.createGain();
+const row=root?.querySelector(`.sequencer-row[data-instrument="${instrument}"]`);
+const volume=Number(row?.dataset.volume)||.5;
+gain.gain.value=volume;
+gain.connect(audioGain||audioContext.destination);
+if(instrument==="Kick"){
+const oscillator=audioContext.createOscillator();
+oscillator.type="sine";
+oscillator.frequency.setValueAtTime(150,now);
+oscillator.frequency.exponentialRampToValueAtTime(42,now+.18);
+gain.gain.setValueAtTime(volume,now);
+gain.gain.exponentialRampToValueAtTime(.001,now+.2);
+oscillator.connect(gain);
+oscillator.start(now);
+oscillator.stop(now+.21);
+return;
+}
+if(instrument==="Snare"||instrument==="Clap"||instrument==="Hi-Hat"){
+const buffer=audioContext.createBuffer(1,audioContext.sampleRate*.15,audioContext.sampleRate);
+const data=buffer.getChannelData(0);
+for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
+const source=audioContext.createBufferSource();
+const filter=audioContext.createBiquadFilter();
+filter.type="highpass";
+filter.frequency.value=instrument==="Hi-Hat"?5000:1200;
+source.buffer=buffer;
+source.connect(filter);
+filter.connect(gain);
+gain.gain.setValueAtTime(volume,now);
+gain.gain.exponentialRampToValueAtTime(.001,now+.14);
+source.start(now);
+return;
+}
+const oscillator=audioContext.createOscillator();
+oscillator.connect(gain);
+if(instrument==="Bass"){
+oscillator.type="sawtooth";
+oscillator.frequency.value=55;
+}else if(instrument==="Lead"){
+oscillator.type="triangle";
+oscillator.frequency.value=261.63;
+}else{
+oscillator.type="sine";
+oscillator.frequency.value=130.81;
+}
+gain.gain.setValueAtTime(volume,now);
+gain.gain.exponentialRampToValueAtTime(.001,now+.35);
+oscillator.start(now);
+oscillator.stop(now+.36);
+}
 
-    if (instrument === "Kick") {
-        oscillator.type = "sine";
-        oscillator.frequency.setValueAtTime(140, now);
-        oscillator.frequency.exponentialRampToValueAtTime(45, now + 0.14);
-    } else if (instrument === "Bass") {
-        oscillator.type = "sawtooth";
-        oscillator.frequency.value = 65;
-    } else {
-        oscillator.type = "square";
-        oscillator.frequency.value = instrument === "Snare" ? 180 : 900;
-    }
-
-    gain.gain.setValueAtTime(instrument === "Kick" ? 0.8 : 0.18, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-    oscillator.start(now);
-    oscillator.stop(now + 0.13);
+function createMelodyEditor(root){
+const grid=root.querySelector("#melody-grid");
+const notes=["C5","B4","A4","G4","F4","E4","D4","C4"];
+grid.innerHTML="";
+notes.forEach(note=>{
+const row=document.createElement("div");
+row.className="melody-row";
+row.innerHTML=`<span>${note}</span><div></div>`;
+const cells=row.querySelector("div");
+for(let i=0;i<32;i++){
+const cell=document.createElement("button");
+cell.className="melody-cell";
+cell.dataset.step=i;
+cell.dataset.note=note;
+cell.addEventListener("click",()=>{
+cells.querySelectorAll(".melody-cell").forEach(item=>item.classList.remove("active"));
+cell.classList.add("active");
+playMelodyNote(note,root);
+});
+cells.appendChild(cell);
+}
+grid.appendChild(row);
+});
+}
+function playMelodyNote(note,root){
+initializeAudio();
+const frequencies={C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,C5:523.25};
+const oscillator=audioContext.createOscillator();
+const gain=audioContext.createGain();
+oscillator.type="triangle";
+oscillator.frequency.value=frequencies[note]||440;
+gain.gain.setValueAtTime(.25,audioContext.currentTime);
+gain.gain.exponentialRampToValueAtTime(.001,audioContext.currentTime+.5);
+oscillator.connect(gain);
+gain.connect(audioGain||audioContext.destination);
+oscillator.start();
+oscillator.stop(audioContext.currentTime+.51);
+}
+function createMixer(root){
+const panel=root.querySelector("#studio-mixer-panel");
+panel.innerHTML="";
+root.querySelectorAll(".sequencer-row").forEach(row=>{
+const name=row.dataset.instrument;
+const control=document.createElement("div");
+control.className="mixer-channel";
+control.innerHTML=`<strong>${name}</strong><input type="range" min="0" max="1" step=".01" value="${row.dataset.volume}"><span>${Math.round(Number(row.dataset.volume)*100)}%</span>`;
+const slider=control.querySelector("input");
+const value=control.querySelector("span");
+slider.addEventListener("input",()=>{
+row.dataset.volume=slider.value;
+value.textContent=`${Math.round(Number(slider.value)*100)}%`;
+});
+panel.appendChild(control);
+});
+}
+function setStudioStatus(root,text){
+const status=root.querySelector("#studio-status");
+if(status)status.textContent=text;
 }
 
 function clearStudio() {
@@ -337,11 +461,94 @@ function clearStudio() {
 }
 
 async function saveStudio(root) {
-    const name = prompt("Save beat as:", "My Beat.lucidbeat");
-    if (!name) return;
-    const pattern = [...root.querySelectorAll(".sequencer-row")].map(row => ({ instrument: row.dataset.instrument, steps: [...row.querySelectorAll(".sequencer-step")].map(step => step.classList.contains("active")) }));
-    const data = JSON.stringify({ bpm: Number(root.querySelector("#media-bpm").value) || 120, pattern }, null, 2);
-    await saveUserFile(["Music"], name.endsWith(".lucidbeat") ? name : `${name}.lucidbeat`, data, "application/json");
+const name=prompt("Save song as:","My Song.lucidbeat");
+if(!name)return;
+const rows=[...root.querySelectorAll(".sequencer-row")].map(row=>({instrument:row.dataset.instrument,volume:Number(row.dataset.volume),steps:[...row.querySelectorAll(".sequencer-step")].map(step=>step.classList.contains("active"))}));
+const melody=[...root.querySelectorAll(".melody-cell.active")].map(cell=>({step:Number(cell.dataset.step),note:cell.dataset.note}));
+const data=JSON.stringify({version:2,name:name,bpm:Number(root.querySelector("#media-bpm").value)||120,swing:Number(root.querySelector("#studio-swing").value)||0,tracks:rows,melody},null,2);
+await saveUserFile(["Music"],name.endsWith(".lucidbeat")?name:`${name}.lucidbeat`,data,"application/json");
+setStudioStatus(root,"Saved");
+}
+
+async function exportStudioWav(root){
+const bpm=Math.max(40,Math.min(240,Number(root.querySelector("#media-bpm").value)||120));
+const duration=8;
+const sampleRate=44100;
+const offline=new OfflineAudioContext(2,sampleRate*duration,sampleRate);
+const master=offline.createGain();
+master.gain.value=.8;
+master.connect(offline.destination);
+const rows=[...root.querySelectorAll(".sequencer-row")];
+rows.forEach(row=>{
+const instrument=row.dataset.instrument;
+const volume=Number(row.dataset.volume)||.5;
+[...row.querySelectorAll(".sequencer-step.active")].forEach(step=>{
+const time=Number(step.dataset.step)*(60/bpm/4);
+scheduleOfflineSound(offline,master,instrument,volume,time);
+});
+});
+const buffer=await offline.startRendering();
+const wav=audioBufferToWav(buffer);
+const blob=new Blob([wav],{type:"audio/wav"});
+const url=URL.createObjectURL(blob);
+const link=document.createElement("a");
+link.href=url;
+link.download="LucidSong.wav";
+link.click();
+URL.revokeObjectURL(url);
+setStudioStatus(root,"WAV exported");
+}
+function scheduleOfflineSound(context,destination,instrument,volume,time){
+const gain=context.createGain();
+gain.gain.value=volume;
+gain.connect(destination);
+if(instrument==="Kick"){
+const oscillator=context.createOscillator();
+oscillator.type="sine";
+oscillator.frequency.setValueAtTime(150,time);
+oscillator.frequency.exponentialRampToValueAtTime(42,time+.18);
+gain.gain.setValueAtTime(volume,time);
+gain.gain.exponentialRampToValueAtTime(.001,time+.2);
+oscillator.connect(gain);
+oscillator.start(time);
+oscillator.stop(time+.21);
+return;
+}
+const oscillator=context.createOscillator();
+oscillator.type=instrument==="Bass"?"sawtooth":instrument==="Lead"?"triangle":"sine";
+oscillator.frequency.value=instrument==="Bass"?55:instrument==="Lead"?261.63:130.81;
+gain.gain.setValueAtTime(volume,time);
+gain.gain.exponentialRampToValueAtTime(.001,time+.3);
+oscillator.connect(gain);
+oscillator.start(time);
+oscillator.stop(time+.31);
+}
+function audioBufferToWav(buffer){
+const channels=buffer.numberOfChannels;
+const length=buffer.length*channels*2+44;
+const arrayBuffer=new ArrayBuffer(length);
+const view=new DataView(arrayBuffer);
+let offset=0;
+const writeString=value=>{for(let i=0;i<value.length;i++)view.setUint8(offset++,value.charCodeAt(i));};
+writeString("RIFF");
+view.setUint32(offset,36+buffer.length*channels*2,true);offset+=4;
+writeString("WAVE");
+writeString("fmt ");
+view.setUint32(offset,16,true);offset+=4;
+view.setUint16(offset,1,true);offset+=2;
+view.setUint16(offset,channels,true);offset+=2;
+view.setUint32(offset,buffer.sampleRate,true);offset+=4;
+view.setUint32(offset,buffer.sampleRate*channels*2,true);offset+=4;
+view.setUint16(offset,channels*2,true);offset+=2;
+view.setUint16(offset,16,true);offset+=2;
+writeString("data");
+view.setUint32(offset,buffer.length*channels*2,true);offset+=4;
+for(let i=0;i<buffer.length;i++)for(let channel=0;channel<channels;channel++){
+let sample=Math.max(-1,Math.min(1,buffer.getChannelData(channel)[i]));
+view.setInt16(offset,sample<0?sample*0x8000:sample*0x7fff,true);
+offset+=2;
+}
+return arrayBuffer;
 }
 
 function formatTime(seconds) {
