@@ -1,0 +1,98 @@
+/*generic buttons/inputs used across windows*/
+
+.window button {
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:9px;
+    background:rgba(255,255,255,.055);
+    color:var(--text);
+    transition:background .15s ease,border-color .15s ease,transform .15s ease;
+}
+
+.window button:hover:not(:disabled) {
+    background:rgba(255,255,255,.09);
+    border-color:rgba(255,255,255,.13);
+}
+
+.window button:active:not(:disabled) {
+    transform:translateY(1px);
+}
+
+.window button:disabled {
+    opacity:.45;
+    cursor:default;
+}
+
+.window input,
+.window textarea,
+.window select {
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:9px;
+    background:rgba(5,7,11,.55);
+    color:var(--text);
+}
+
+.window input::placeholder,
+.window textarea::placeholder {
+    color:var(--muted);
+}
+
+.window select option {
+    background:#15171c;
+    color:#e7e8ec;
+}
+
+.lucid-dialog-close {
+    position:absolute;
+    top:12px;
+    right:12px;
+    width:30px;
+    height:30px;
+    padding:0!important;
+}
+
+button {
+    font:inherit;
+    appearance:none;
+    -webkit-appearance:none;
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:9px;
+    background:rgba(255,255,255,.055);
+    color:var(--text,#e7e8ec);
+    padding:0 11px;
+    min-height:32px;
+    cursor:pointer;
+    transition:background .15s ease,border-color .15s ease,transform .12s ease,color .15s ease;
+}
+
+button:hover:not(:disabled) {
+    background:rgba(255,255,255,.09);
+    border-color:rgba(255,255,255,.14);
+}
+
+button:active:not(:disabled) {
+    transform:translateY(1px);
+}
+
+button:focus-visible {
+    outline:2px solid rgba(155,140,205,.6);
+    outline-offset:1px;
+}
+
+button:disabled {
+    opacity:.45;
+    cursor:not-allowed;
+    background:rgba(255,255,255,.025);
+    color:var(--muted,#777c87);
+}
+
+input[type=button],
+input[type=submit] {
+    font:inherit;
+    appearance:none;
+    -webkit-appearance:none;
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:9px;
+    background:rgba(255,255,255,.055);
+    color:var(--text,#e7e8ec);
+    min-height:32px;
+}
