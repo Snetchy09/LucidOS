@@ -39,7 +39,6 @@ function updateClock() {
     const clock = document.getElementById("clock");
     if (!clock) return;
     const now = new Date();
-    // clock.textContent = now.toLocaleTimeString();
     clock.textContent = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 }
 updateClock();
@@ -53,6 +52,36 @@ function loadDesktopPositions() {
         return {};
     }
 }
+function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
+}
+function enterFullscreen() {
+    const el = document.documentElement;
+
+    if (el.requestFullscreen) {
+        el.requestFullscreen().catch(err => console.warn("Fullscreen failed:", err));
+    } else if (el.webkitRequestFullscreen) { //for safari
+        el.webkitRequestFullscreen();
+    }
+}
+function exitFullscreen() {
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+    }
+}
+function toggleFullscreen() {
+    if (isFullscreen()) {
+        exitFullscreen();
+    } else {
+        enterFullscreen();
+    }
+}
+
+window.lucidToggleFullscreen = toggleFullscreen;
+window.lucidEnterFullscreen = enterFullscreen;
+window.lucidExitFullscreen = exitFullscreen;
 function saveDesktopPosition(appId, x, y) {
     const positions = loadDesktopPositions();
     positions[appId] = { x, y };
@@ -353,5 +382,5 @@ if (startButton) {
     });
 }
 document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && launcherOpen) closeLucidLauncher();
+    if (event.key === "Escape") { if (launcherOpen) { closeLucidLauncher(); } }
 });
