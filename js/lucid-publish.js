@@ -1,13 +1,259 @@
 import { getCurrentUser } from "./lucid-store-api.js";
-const publishUrl=import.meta.env.VITE_LUCID_PUBLISH_API_URL||"https://lucid-backend.vercel.app";
-const iconChoices=["🧩","🎮","🎨","🎵","📚","🧮","📝","🌐","🔧","💡","🚀","🌙","⭐","🛠️","📦","🖥️","🗂️","🎯","🧠","✨"];
-function cleanText(value,fallback,max){const text=String(value??"").trim().slice(0,max);return text||fallback;}
-function slugify(text){return String(text).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,50)||"lucid-app";}
-function bytesAreGzip(buffer){const bytes=new Uint8Array(buffer);return bytes.length>1&&bytes[0]===0x1f&&bytes[1]===0x8b;}
-function escapeHTML(text){return String(text??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
-function fileToDataUrl(file){return new Promise((resolve,reject)=>{if(!file||!file.type.startsWith("image/"))return reject(new Error("Choose an image file."));if(file.size>64*1024)return reject(new Error("Custom icons must be 64 KB or smaller."));const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||""));reader.onerror=()=>reject(new Error("Could not read the icon file."));reader.readAsDataURL(file);});}
-async function showPublishDialog(defaults){const user=await getCurrentUser();const plan=String(user?.app_metadata?.plan||user?.app_metadata?.subscription||"free").toLowerCase();const plus=["pro","premium","subscriber"].includes(plan);return new Promise((resolve,reject)=>{const overlay=document.createElement("div");overlay.className="lucid-publish-dialog-overlay";overlay.innerHTML=`<div class="lucid-publish-dialog" role="dialog" aria-modal="true"><header><div><span>PUBLISH APP</span><h2>Store details</h2><p>Choose how your application appears in Lucid Store.</p></div><button type="button" data-close aria-label="Close">×</button></header><label>App name<input data-name maxlength="120"></label><label>Description<textarea data-description maxlength="500" rows="4"></textarea></label><div class="lucid-publish-grid"><label>Version<input data-version maxlength="40"></label><label>Category<select data-category><option>Utilities</option><option>Productivity</option><option>Internet</option><option>Media</option><option>Creative</option><option>Games</option><option>System</option><option>Other</option></select></label></div><section class="lucid-icon-picker"><div><strong>App icon</strong><small>${plus?"Choose a LucidOS emoji or upload a custom image icon.":"Choose a LucidOS emoji. Custom icons are available with Lucid Plus."}</small></div><div class="lucid-icon-options">${iconChoices.map((icon,index)=>`<button type="button" class="lucid-icon-choice${index===0?" active":""}" data-icon="${icon}">${icon}</button>`).join("")}</div>${plus?'<label class="lucid-custom-icon">Custom icon <input type="file" data-custom-icon accept="image/png,image/jpeg,image/webp,image/gif"><small>PNG, JPG, WEBP or GIF · max 64 KB</small></label>':""}</section><div class="lucid-publish-actions"><button type="button" data-cancel>Cancel</button><button type="button" class="lucid-publish-primary" data-publish>Publish</button></div><div class="lucid-publish-message" data-message></div></div>`;document.body.appendChild(overlay);const name=overlay.querySelector("[data-name]"),description=overlay.querySelector("[data-description]"),version=overlay.querySelector("[data-version]"),category=overlay.querySelector("[data-category]"),message=overlay.querySelector("[data-message]");name.value=defaults.name;description.value=defaults.description;version.value=defaults.version;category.value=defaults.category||"Other";let selectedIcon=iconChoices[0];overlay.querySelectorAll(".lucid-icon-choice").forEach(button=>button.addEventListener("click",()=>{selectedIcon=button.dataset.icon;overlay.querySelectorAll(".lucid-icon-choice").forEach(item=>item.classList.toggle("active",item===button));}));const close=()=>{overlay.remove();reject(new Error("Publishing cancelled."));};overlay.querySelector("[data-close]").addEventListener("click",close);overlay.querySelector("[data-cancel]").addEventListener("click",close);overlay.addEventListener("click",event=>{if(event.target===overlay)close()});overlay.querySelector("[data-publish]").addEventListener("click",async()=>{const appName=cleanText(name.value,"",120);if(!appName){name.focus();return;}const button=overlay.querySelector("[data-publish]");button.disabled=true;try{let icon=selectedIcon;const file=overlay.querySelector("[data-custom-icon]")?.files?.[0];if(file)icon=await fileToDataUrl(file);overlay.remove();resolve({name:appName,description:cleanText(description.value,"A Lucid OS application.",500),version:cleanText(version.value,"1.0.0",40),category:category.value||"Other",icon});}catch(error){message.textContent=error.message||"Could not prepare icon.";button.disabled=false;}});setTimeout(()=>name.focus(),0);});}
-async function patchPackageMetadata(blob,metadata){try{let jsonBlob=blob;if(bytesAreGzip(await blob.arrayBuffer())){if(!("DecompressionStream" in window))throw new Error("This browser cannot prepare the package for publishing.");jsonBlob=await new Response(blob.stream().pipeThrough(new DecompressionStream("gzip"))).blob();}const data=JSON.parse(await jsonBlob.text());data.manifest={...(data.manifest||{}),id:slugify(metadata.name),name:metadata.name,description:metadata.description,version:metadata.version,category:metadata.category,icon:metadata.icon||"◇"};const json=new Blob([JSON.stringify(data)],{type:"application/json"});return gzipBlob(json);}catch(error){if(error.message==="This browser cannot prepare the package for publishing.")throw error;throw new Error("The app package could not be prepared for publishing.");}}
-async function publishLucidPackage({accessToken,appId,name,version,description,category,blob}){if(!publishUrl)throw new Error("Lucid publishing service is not configured.");if(!accessToken)throw new Error("You must be signed in to publish an app.");if(!(blob instanceof Blob))throw new TypeError("The app package is invalid.");const metadata=await showPublishDialog({name:cleanText(name,"Untitled App",120),description:cleanText(description,"A Lucid OS application.",500),version:cleanText(version,"1.0.0",40),category:category||"Other"});const finalAppId=slugify(metadata.name);const finalBlob=await patchPackageMetadata(blob,metadata);const cleanBase=publishUrl.replace(/\/$/,"");let initResponse;try{initResponse=await fetch(`${cleanBase}/api/publish-init`,{method:"POST",headers:{Authorization:`Bearer ${accessToken}`,"Content-Type":"application/json"},body:JSON.stringify({appId:finalAppId,name:metadata.name,version:metadata.version,description:metadata.description,category:metadata.category,icon:metadata.icon,size:finalBlob.size})});}catch{throw new Error("The Lucid publishing service could not be reached. Check network and CORS configuration.");}let initResult={};try{initResult=await initResponse.json();}catch{}if(!initResponse.ok){const error=new Error(initResult.error||`Initialization failed (${initResponse.status}).`);error.maxBytes=initResult.maxBytes;error.plan=initResult.plan;error.retryAfter=initResult.retryAfter;throw error;}const{uploadUrl,key}=initResult;if(!uploadUrl||!key)throw new Error("Invalid response from publishing initialization.");let uploadResponse;try{uploadResponse=await fetch(uploadUrl,{method:"PUT",headers:{"Content-Type":"application/octet-stream"},body:finalBlob});}catch{throw new Error("Failed to upload the application package to storage.");}if(!uploadResponse.ok)throw new Error(`Package storage upload failed (${uploadResponse.status}).`);let completeResponse;try{completeResponse=await fetch(`${cleanBase}/api/publish-complete`,{method:"POST",headers:{Authorization:`Bearer ${accessToken}`,"Content-Type":"application/json"},body:JSON.stringify({appId:finalAppId,name:metadata.name,version:metadata.version,description:metadata.description,category:metadata.category,icon:metadata.icon,key,size:finalBlob.size})});}catch{throw new Error("Failed to finalize publication record.");}let completeResult={};try{completeResult=await completeResponse.json();}catch{}if(!completeResponse.ok)throw new Error(completeResult.error||`Finalization failed (${completeResponse.status}).`);return completeResult;}
-async function gzipBlob(blob){if(!("CompressionStream" in window))return blob;return new Response(blob.stream().pipeThrough(new CompressionStream("gzip"))).blob();}
-export{publishLucidPackage,gzipBlob};
+const publishUrl = import.meta.env.VITE_LUCID_PUBLISH_API_URL || "https://lucid-backend.vercel.app";
+const iconChoices = [
+    "🧩",
+    "🎮",
+    "🎨",
+    "🎵",
+    "📚",
+    "🧮",
+    "📝",
+    "🌐",
+    "🔧",
+    "💡",
+    "🚀",
+    "🌙",
+    "⭐",
+    "🛠️",
+    "📦",
+    "🖥️",
+    "🗂️",
+    "🎯",
+    "🧠",
+    "✨",
+];
+function cleanText(value, fallback, max) {
+    const text = String(value ?? "")
+        .trim()
+        .slice(0, max);
+    return text || fallback;
+}
+function slugify(text) {
+    return (
+        String(text)
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")
+            .slice(0, 50) || "lucid-app"
+    );
+}
+function bytesAreGzip(buffer) {
+    const bytes = new Uint8Array(buffer);
+    return bytes.length > 1 && bytes[0] === 0x1f && bytes[1] === 0x8b;
+}
+function escapeHTML(text) {
+    return String(text ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+        if (!file || !file.type.startsWith("image/"))
+            return reject(new Error("Choose an image file."));
+        if (file.size > 64 * 1024)
+            return reject(new Error("Custom icons must be 64 KB or smaller."));
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("Could not read the icon file."));
+        reader.readAsDataURL(file);
+    });
+}
+async function showPublishDialog(defaults) {
+    const user = await getCurrentUser();
+    const plan = String(
+        user?.app_metadata?.plan || user?.app_metadata?.subscription || "free",
+    ).toLowerCase();
+    const plus = ["pro", "premium", "subscriber"].includes(plan);
+    return new Promise((resolve, reject) => {
+        const overlay = document.createElement("div");
+        overlay.className = "lucid-publish-dialog-overlay";
+        overlay.innerHTML = `<div class="lucid-publish-dialog" role="dialog" aria-modal="true"><header><div><span>PUBLISH APP</span><h2>Store details</h2><p>Choose how your application appears in Lucid Store.</p></div><button type="button" data-close aria-label="Close">×</button></header><label>App name<input data-name maxlength="120"></label><label>Description<textarea data-description maxlength="500" rows="4"></textarea></label><div class="lucid-publish-grid"><label>Version<input data-version maxlength="40"></label><label>Category<select data-category><option>Utilities</option><option>Productivity</option><option>Internet</option><option>Media</option><option>Creative</option><option>Games</option><option>System</option><option>Other</option></select></label></div><section class="lucid-icon-picker"><div><strong>App icon</strong><small>${plus ? "Choose a LucidOS emoji or upload a custom image icon." : "Choose a LucidOS emoji. Custom icons are available with Lucid Plus."}</small></div><div class="lucid-icon-options">${iconChoices.map((icon, index) => `<button type="button" class="lucid-icon-choice${index === 0 ? " active" : ""}" data-icon="${icon}">${icon}</button>`).join("")}</div>${plus ? '<label class="lucid-custom-icon">Custom icon <input type="file" data-custom-icon accept="image/png,image/jpeg,image/webp,image/gif"><small>PNG, JPG, WEBP or GIF · max 64 KB</small></label>' : ""}</section><div class="lucid-publish-actions"><button type="button" data-cancel>Cancel</button><button type="button" class="lucid-publish-primary" data-publish>Publish</button></div><div class="lucid-publish-message" data-message></div></div>`;
+        document.body.appendChild(overlay);
+        const name = overlay.querySelector("[data-name]"),
+            description = overlay.querySelector("[data-description]"),
+            version = overlay.querySelector("[data-version]"),
+            category = overlay.querySelector("[data-category]"),
+            message = overlay.querySelector("[data-message]");
+        name.value = defaults.name;
+        description.value = defaults.description;
+        version.value = defaults.version;
+        category.value = defaults.category || "Other";
+        let selectedIcon = iconChoices[0];
+        overlay.querySelectorAll(".lucid-icon-choice").forEach(button =>
+            button.addEventListener("click", () => {
+                selectedIcon = button.dataset.icon;
+                overlay
+                    .querySelectorAll(".lucid-icon-choice")
+                    .forEach(item => item.classList.toggle("active", item === button));
+            }),
+        );
+        const close = () => {
+            overlay.remove();
+            reject(new Error("Publishing cancelled."));
+        };
+        overlay.querySelector("[data-close]").addEventListener("click", close);
+        overlay.querySelector("[data-cancel]").addEventListener("click", close);
+        overlay.addEventListener("click", event => {
+            if (event.target === overlay) close();
+        });
+        overlay.querySelector("[data-publish]").addEventListener("click", async () => {
+            const appName = cleanText(name.value, "", 120);
+            if (!appName) {
+                name.focus();
+                return;
+            }
+            const button = overlay.querySelector("[data-publish]");
+            button.disabled = true;
+            try {
+                let icon = selectedIcon;
+                const file = overlay.querySelector("[data-custom-icon]")?.files?.[0];
+                if (file) icon = await fileToDataUrl(file);
+                overlay.remove();
+                resolve({
+                    name: appName,
+                    description: cleanText(description.value, "A Lucid OS application.", 500),
+                    version: cleanText(version.value, "1.0.0", 40),
+                    category: category.value || "Other",
+                    icon,
+                });
+            } catch (error) {
+                message.textContent = error.message || "Could not prepare icon.";
+                button.disabled = false;
+            }
+        });
+        setTimeout(() => name.focus(), 0);
+    });
+}
+async function patchPackageMetadata(blob, metadata) {
+    try {
+        let jsonBlob = blob;
+        if (bytesAreGzip(await blob.arrayBuffer())) {
+            if (!("DecompressionStream" in window))
+                throw new Error("This browser cannot prepare the package for publishing.");
+            jsonBlob = await new Response(
+                blob.stream().pipeThrough(new DecompressionStream("gzip")),
+            ).blob();
+        }
+        const data = JSON.parse(await jsonBlob.text());
+        data.manifest = {
+            ...(data.manifest || {}),
+            id: slugify(metadata.name),
+            name: metadata.name,
+            description: metadata.description,
+            version: metadata.version,
+            category: metadata.category,
+            icon: metadata.icon || "◇",
+        };
+        const json = new Blob([JSON.stringify(data)], { type: "application/json" });
+        return gzipBlob(json);
+    } catch (error) {
+        if (error.message === "This browser cannot prepare the package for publishing.")
+            throw error;
+        throw new Error("The app package could not be prepared for publishing.");
+    }
+}
+async function publishLucidPackage({
+    accessToken,
+    appId,
+    name,
+    version,
+    description,
+    category,
+    blob,
+}) {
+    if (!publishUrl) throw new Error("Lucid publishing service is not configured.");
+    if (!accessToken) throw new Error("You must be signed in to publish an app.");
+    if (!(blob instanceof Blob)) throw new TypeError("The app package is invalid.");
+    const metadata = await showPublishDialog({
+        name: cleanText(name, "Untitled App", 120),
+        description: cleanText(description, "A Lucid OS application.", 500),
+        version: cleanText(version, "1.0.0", 40),
+        category: category || "Other",
+    });
+    const finalAppId = slugify(metadata.name);
+    const finalBlob = await patchPackageMetadata(blob, metadata);
+    const cleanBase = publishUrl.replace(/\/$/, "");
+    let initResponse;
+    try {
+        initResponse = await fetch(`${cleanBase}/api/publish-init`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+                appId: finalAppId,
+                name: metadata.name,
+                version: metadata.version,
+                description: metadata.description,
+                category: metadata.category,
+                icon: metadata.icon,
+                size: finalBlob.size,
+            }),
+        });
+    } catch {
+        throw new Error(
+            "The Lucid publishing service could not be reached. Check network and CORS configuration.",
+        );
+    }
+    let initResult = {};
+    try {
+        initResult = await initResponse.json();
+    } catch {}
+    if (!initResponse.ok) {
+        const error = new Error(
+            initResult.error || `Initialization failed (${initResponse.status}).`,
+        );
+        error.maxBytes = initResult.maxBytes;
+        error.plan = initResult.plan;
+        error.retryAfter = initResult.retryAfter;
+        throw error;
+    }
+    const { uploadUrl, key } = initResult;
+    if (!uploadUrl || !key) throw new Error("Invalid response from publishing initialization.");
+    let uploadResponse;
+    try {
+        uploadResponse = await fetch(uploadUrl, {
+            method: "PUT",
+            headers: { "Content-Type": "application/octet-stream" },
+            body: finalBlob,
+        });
+    } catch {
+        throw new Error("Failed to upload the application package to storage.");
+    }
+    if (!uploadResponse.ok)
+        throw new Error(`Package storage upload failed (${uploadResponse.status}).`);
+    let completeResponse;
+    try {
+        completeResponse = await fetch(`${cleanBase}/api/publish-complete`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+                appId: finalAppId,
+                name: metadata.name,
+                version: metadata.version,
+                description: metadata.description,
+                category: metadata.category,
+                icon: metadata.icon,
+                key,
+                size: finalBlob.size,
+            }),
+        });
+    } catch {
+        throw new Error("Failed to finalize publication record.");
+    }
+    let completeResult = {};
+    try {
+        completeResult = await completeResponse.json();
+    } catch {}
+    if (!completeResponse.ok)
+        throw new Error(
+            completeResult.error || `Finalization failed (${completeResponse.status}).`,
+        );
+    return completeResult;
+}
+async function gzipBlob(blob) {
+    if (!("CompressionStream" in window)) return blob;
+    return new Response(blob.stream().pipeThrough(new CompressionStream("gzip"))).blob();
+}
+export { publishLucidPackage, gzipBlob };

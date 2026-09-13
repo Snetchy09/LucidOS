@@ -1,24 +1,288 @@
-import { supabase,getCurrentUser } from "./lucid-store-api.js";
+import { supabase, getCurrentUser } from "./lucid-store-api.js";
 import { getFiles } from "./filesystem.js";
-import { getActiveProject,updateProject } from "../apps/lucid-projects.js";
-import { runLucidScript,buildManifest } from "../apps/lucid-script-runtime.js";
+import { getActiveProject, updateProject } from "../apps/lucid-projects.js";
+import { runLucidScript, buildManifest } from "../apps/lucid-script-runtime.js";
 import { publishLucidPackage } from "./lucid-publish.js";
-const PUBLISH_BUTTON_CLASS="lucid-studio-publish-button",ASSETS_BUTTON_CLASS="lucid-studio-assets-button",PREVIEW_BUTTON_CLASS="lucid-studio-preview-button",GAME_BUTTON_CLASS="lucid-studio-game-button";
-let ready=false;
-function styles(){if(ready)return;ready=true;const style=document.createElement("style");style.textContent=`.studio-studio-tools{position:relative;display:flex;gap:7px;align-items:center}.studio-tools-dropdown{position:absolute;top:calc(100% + 7px);left:0;z-index:9000;display:grid;gap:5px;min-width:170px;padding:6px;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:#14171d;box-shadow:0 14px 40px rgba(0,0,0,.45)}.studio-tools-item{width:100%;min-height:34px;padding:0 10px!important;border-radius:8px!important;text-align:left}.studio-assets-list{display:grid;gap:6px;max-height:52vh;overflow:auto}.studio-asset-row{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid rgba(255,255,255,.06);border-radius:9px;background:rgba(255,255,255,.025)}.studio-asset-row input{accent-color:#8177a7}.studio-asset-info{min-width:0;flex:1}.studio-asset-info strong,.studio-asset-info small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.studio-asset-info strong{font-size:11px}.studio-asset-info small{margin-top:3px;color:var(--muted);font-size:9px}.studio-asset-icon{font-size:15px}.studio-assets-empty{padding:24px;text-align:center;color:var(--muted);font-size:11px}.lucid-publish-notice{margin:10px 0;padding:9px 11px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.025);color:var(--text-soft);font-size:10px}.lucid-publish-notice[data-error=true]{border-color:rgba(180,90,90,.24);color:#d7b0b0}`;document.head.appendChild(style)}
-function esc(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
-function key(path){return Array.isArray(path)?path.join("/"):String(path||"")}
-function collect(files,path=[]){const out=[];for(const file of files){if(file.type==="folder")out.push(...collect(file.children||[],[...path,file.name]));else out.push({name:file.name,mimeType:file.mimeType||"application/octet-stream",path:[...path,file.name],content:file.content})}return out}
-function files(){return ["Pictures","Music","Videos"].flatMap(folder=>collect(getFiles([folder]),[folder]))}
-function findAsset(path){const names=Array.isArray(path)?[...path]:String(path||"").split("/").filter(Boolean);if(names[0]==="Home")names.shift();if(!names.length)return null;let folder=[];for(let i=0;i<names.length-1;i++){const f=getFiles(folder).find(item=>item.type==="folder"&&item.name===names[i]);if(!f)return null;folder=[...folder,f.name]}return getFiles(folder).find(item=>item.type==="file"&&item.name===names.at(-1))||null}
-async function base64(content){const buffer=content instanceof Blob?await content.arrayBuffer():new TextEncoder().encode(String(content??"")).buffer;const bytes=new Uint8Array(buffer);let binary="";for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(binary)}
-async function packagePayload(project){const assets=[];for(const selected of Array.isArray(project?.assets)?project.assets:[]){const path=Array.isArray(selected)?selected:selected.path;const file=findAsset(path);if(!file)continue;assets.push({path:key(path),name:file.name,mimeType:file.mimeType||"application/octet-stream",data:await base64(file.content)})}return assets}
-function appName(code){const match=String(code||"").match(/^\s*app\s+["'](.+?)["']/m);return match?match[1]:"Untitled App"}
-function slug(text){return String(text).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,50)||"lucid-app"}
-async function publish(root){const editor=root.querySelector("#lucid-code"),status=root.querySelector("#studio-editor-status"),button=root.querySelector(`.${PUBLISH_BUTTON_CLASS}`);if(!editor||!button)return;button.disabled=true;const old=button.textContent;button.textContent="Publishing…";try{if(!supabase)throw new Error("Supabase authentication is not configured.");const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)throw new Error("Sign in before publishing.");const project=getActiveProject();const code=editor.value;const mount=document.createElement("div");mount.hidden=true;document.body.appendChild(mount);let result;try{result=runLucidScript(code,mount,{permissions:[]});}finally{result?.stop?.();mount.remove()}const name=result.appName||appName(code),manifest=buildManifest({id:slug(name),name,version:"1.0.0",description:"A Lucid OS application.",permissions:[]}),assets=await packagePayload(project),packageData={manifest,source:{"main.lucid":code},assets,scene:Array.isArray(project?.scene)?project.scene:[]};const json=new Blob([JSON.stringify(packageData)],{type:"application/json"});const published=await publishLucidPackage({accessToken:session.access_token,appId:manifest.id,name:manifest.name,version:manifest.version,description:manifest.description,category:"Other",blob:json});status.textContent=`Submitted for review · ${(published.size/1024/1024).toFixed(2)} MB`;notice(root,`“${manifest.name}” was submitted for review.`)}catch(error){console.error("Lucid publish failed:",error);status.textContent="Publish failed";notice(root,error.message||"Unable to publish this app.",true)}finally{button.disabled=false;button.textContent=old}}
-function notice(root,message,error=false){let box=root.querySelector(".lucid-publish-notice");if(!box){box=document.createElement("div");box.className="lucid-publish-notice";root.querySelector("#studio-body")?.prepend(box)}box.textContent=message;box.dataset.error=error?"true":"false";clearTimeout(box._timer);box._timer=setTimeout(()=>box.remove(),7000)}
-function icon(asset){const type=asset.mimeType||"";if(type.startsWith("image/"))return"🖼️";if(type.startsWith("audio/"))return"🎵";if(/\.lpaint$/i.test(asset.name))return"🎨";return"📄"}
-function assetDialog(root){styles();const project=getActiveProject();if(!project)return;const available=files(),selected=new Set((Array.isArray(project.assets)?project.assets:[]).map(item=>key(Array.isArray(item)?item:item.path)));const overlay=document.createElement("div");overlay.className="studio-dialog-overlay lucid-studio-assets-dialog";overlay.innerHTML=`<div class="studio-dialog" role="dialog" aria-modal="true"><div class="studio-dialog-header"><div><h2>Project Assets</h2><p>Select files to bundle with this application.</p></div><button class="studio-dialog-close">×</button></div><div class="studio-assets-list"></div><div class="studio-dialog-actions"><button class="studio-secondary-btn" data-cancel>Cancel</button><button class="studio-primary-btn" data-save>Save assets</button></div></div>`;document.body.appendChild(overlay);const list=overlay.querySelector(".studio-assets-list");if(!available.length)list.innerHTML='<div class="studio-assets-empty">No assets found in Pictures, Music or Videos.</div>';else for(const asset of available){const row=document.createElement("label");row.className="studio-asset-row";row.innerHTML=`<input type="checkbox" ${selected.has(key(asset.path))?"checked":""}><span class="studio-asset-icon">${icon(asset)}</span><span class="studio-asset-info"><strong>${esc(asset.name)}</strong><small>Home / ${esc(asset.path.join(" / "))}</small></span>`;row.querySelector("input").addEventListener("change",e=>e.target.checked?selected.add(key(asset.path)):selected.delete(key(asset.path)));list.appendChild(row)}const close=()=>overlay.remove();overlay.querySelector(".studio-dialog-close").addEventListener("click",close);overlay.querySelector("[data-cancel]").addEventListener("click",close);overlay.addEventListener("click",e=>{if(e.target===overlay)close()});overlay.querySelector("[data-save]").addEventListener("click",()=>{updateProject(project.id,{assets:available.filter(asset=>selected.has(key(asset.path))).map(asset=>({name:asset.name,mimeType:asset.mimeType,path:asset.path}))});close();notice(root,"Project assets updated.")})}
-function gameStarter(root){const editor=root.querySelector("#lucid-code");if(!editor)return;editor.value=`app "Lucid Field"\n\nwindow {\n    title "Lucid Field"\n    let score = 0\n    text "Welcome to Lucid Field"\n    text "Score: " + score\n    button "Add point" {\n        onClick {\n            set score = score + 1\n            notification.show("Score: " + score)\n        }\n    }\n    game {\n        size 640, 360\n        background "#10131a"\n        box "player" {\n            x 80\n            y 160\n            width 40\n            height 40\n            color "#ffffff"\n        }\n        onUpdate {\n            if game.key("ArrowRight") {\n                game.move("player", 220 * event.delta, 0)\n            }\n        }\n    }\n}`;editor.dispatchEvent(new Event("input"));editor.focus()}
-function attach(root){styles();const toolbar=root.querySelector(".studio-editor-actions");if(!toolbar||toolbar.dataset.publishBound)return;toolbar.dataset.publishBound="1";const wrap=document.createElement("div");wrap.className="studio-studio-tools";const toggle=document.createElement("button");toggle.className="studio-secondary-btn";toggle.textContent="Tools ▾";const menu=document.createElement("div");menu.className="studio-tools-dropdown";menu.hidden=true;const assets=document.createElement("button");assets.className=`studio-tools-item ${ASSETS_BUTTON_CLASS}`;assets.textContent="Assets";const preview=document.createElement("button");preview.className=`studio-tools-item ${PREVIEW_BUTTON_CLASS}`;preview.textContent="Live Preview";const game=document.createElement("button");game.className=`studio-tools-item ${GAME_BUTTON_CLASS}`;game.textContent="Game Starter";menu.append(assets,preview,game);wrap.append(toggle,menu);toolbar.insertBefore(wrap,toolbar.firstChild);toggle.addEventListener("click",e=>{e.stopPropagation();menu.hidden=!menu.hidden});assets.addEventListener("click",()=>{menu.hidden=true;assetDialog(root)});preview.addEventListener("click",()=>{menu.hidden=true});game.addEventListener("click",()=>{menu.hidden=true;gameStarter(root)});document.addEventListener("click",()=>menu.hidden=true);const publishButton=document.createElement("button");publishButton.className=`studio-primary-btn ${PUBLISH_BUTTON_CLASS}`;publishButton.textContent="Publish";publishButton.addEventListener("click",()=>publish(root));toolbar.appendChild(publishButton)}
-window.addEventListener("lucid-window-created",event=>{const root=event.detail?.element?.querySelector?.(".lucid-studio");if(!root)return;const observer=new MutationObserver(()=>attach(root));observer.observe(root,{childList:true,subtree:true});attach(root)});
+const PUBLISH_BUTTON_CLASS = "lucid-studio-publish-button",
+    ASSETS_BUTTON_CLASS = "lucid-studio-assets-button",
+    PREVIEW_BUTTON_CLASS = "lucid-studio-preview-button",
+    GAME_BUTTON_CLASS = "lucid-studio-game-button";
+let ready = false;
+function styles() {
+    if (ready) return;
+    ready = true;
+    const style = document.createElement("style");
+    style.textContent = `.studio-studio-tools{position:relative;display:flex;gap:7px;align-items:center}.studio-tools-dropdown{position:absolute;top:calc(100% + 7px);left:0;z-index:9000;display:grid;gap:5px;min-width:170px;padding:6px;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:#14171d;box-shadow:0 14px 40px rgba(0,0,0,.45)}.studio-tools-item{width:100%;min-height:34px;padding:0 10px!important;border-radius:8px!important;text-align:left}.studio-assets-list{display:grid;gap:6px;max-height:52vh;overflow:auto}.studio-asset-row{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid rgba(255,255,255,.06);border-radius:9px;background:rgba(255,255,255,.025)}.studio-asset-row input{accent-color:#8177a7}.studio-asset-info{min-width:0;flex:1}.studio-asset-info strong,.studio-asset-info small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.studio-asset-info strong{font-size:11px}.studio-asset-info small{margin-top:3px;color:var(--muted);font-size:9px}.studio-asset-icon{font-size:15px}.studio-assets-empty{padding:24px;text-align:center;color:var(--muted);font-size:11px}.lucid-publish-notice{margin:10px 0;padding:9px 11px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.025);color:var(--text-soft);font-size:10px}.lucid-publish-notice[data-error=true]{border-color:rgba(180,90,90,.24);color:#d7b0b0}`;
+    document.head.appendChild(style);
+}
+function esc(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+function key(path) {
+    return Array.isArray(path) ? path.join("/") : String(path || "");
+}
+function collect(files, path = []) {
+    const out = [];
+    for (const file of files) {
+        if (file.type === "folder") out.push(...collect(file.children || [], [...path, file.name]));
+        else
+            out.push({
+                name: file.name,
+                mimeType: file.mimeType || "application/octet-stream",
+                path: [...path, file.name],
+                content: file.content,
+            });
+    }
+    return out;
+}
+function files() {
+    return ["Pictures", "Music", "Videos"].flatMap(folder => collect(getFiles([folder]), [folder]));
+}
+function findAsset(path) {
+    const names = Array.isArray(path)
+        ? [...path]
+        : String(path || "")
+              .split("/")
+              .filter(Boolean);
+    if (names[0] === "Home") names.shift();
+    if (!names.length) return null;
+    let folder = [];
+    for (let i = 0; i < names.length - 1; i++) {
+        const f = getFiles(folder).find(item => item.type === "folder" && item.name === names[i]);
+        if (!f) return null;
+        folder = [...folder, f.name];
+    }
+    return (
+        getFiles(folder).find(item => item.type === "file" && item.name === names.at(-1)) || null
+    );
+}
+async function base64(content) {
+    const buffer =
+        content instanceof Blob
+            ? await content.arrayBuffer()
+            : new TextEncoder().encode(String(content ?? "")).buffer;
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i += 0x8000)
+        binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return btoa(binary);
+}
+async function packagePayload(project) {
+    const assets = [];
+    for (const selected of Array.isArray(project?.assets) ? project.assets : []) {
+        const path = Array.isArray(selected) ? selected : selected.path;
+        const file = findAsset(path);
+        if (!file) continue;
+        assets.push({
+            path: key(path),
+            name: file.name,
+            mimeType: file.mimeType || "application/octet-stream",
+            data: await base64(file.content),
+        });
+    }
+    return assets;
+}
+function appName(code) {
+    const match = String(code || "").match(/^\s*app\s+["'](.+?)["']/m);
+    return match ? match[1] : "Untitled App";
+}
+function slug(text) {
+    return (
+        String(text)
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")
+            .slice(0, 50) || "lucid-app"
+    );
+}
+async function publish(root) {
+    const editor = root.querySelector("#lucid-code"),
+        status = root.querySelector("#studio-editor-status"),
+        button = root.querySelector(`.${PUBLISH_BUTTON_CLASS}`);
+    if (!editor || !button) return;
+    button.disabled = true;
+    const old = button.textContent;
+    button.textContent = "Publishing…";
+    try {
+        if (!supabase) throw new Error("Supabase authentication is not configured.");
+        const {
+            data: { session },
+        } = await supabase.auth.getSession();
+        if (!session?.access_token) throw new Error("Sign in before publishing.");
+        const project = getActiveProject();
+        const code = editor.value;
+        const mount = document.createElement("div");
+        mount.hidden = true;
+        document.body.appendChild(mount);
+        let result;
+        try {
+            result = runLucidScript(code, mount, { permissions: [] });
+        } finally {
+            result?.stop?.();
+            mount.remove();
+        }
+        const name = result.appName || appName(code),
+            manifest = buildManifest({
+                id: slug(name),
+                name,
+                version: "1.0.0",
+                description: "A Lucid OS application.",
+                permissions: [],
+            }),
+            assets = await packagePayload(project),
+            packageData = {
+                manifest,
+                source: { "main.lucid": code },
+                assets,
+                scene: Array.isArray(project?.scene) ? project.scene : [],
+            };
+        const json = new Blob([JSON.stringify(packageData)], { type: "application/json" });
+        const published = await publishLucidPackage({
+            accessToken: session.access_token,
+            appId: manifest.id,
+            name: manifest.name,
+            version: manifest.version,
+            description: manifest.description,
+            category: "Other",
+            blob: json,
+        });
+        status.textContent = `Submitted for review · ${(published.size / 1024 / 1024).toFixed(2)} MB`;
+        notice(root, `“${manifest.name}” was submitted for review.`);
+    } catch (error) {
+        console.error("Lucid publish failed:", error);
+        status.textContent = "Publish failed";
+        notice(root, error.message || "Unable to publish this app.", true);
+    } finally {
+        button.disabled = false;
+        button.textContent = old;
+    }
+}
+function notice(root, message, error = false) {
+    let box = root.querySelector(".lucid-publish-notice");
+    if (!box) {
+        box = document.createElement("div");
+        box.className = "lucid-publish-notice";
+        root.querySelector("#studio-body")?.prepend(box);
+    }
+    box.textContent = message;
+    box.dataset.error = error ? "true" : "false";
+    clearTimeout(box._timer);
+    box._timer = setTimeout(() => box.remove(), 7000);
+}
+function icon(asset) {
+    const type = asset.mimeType || "";
+    if (type.startsWith("image/")) return "🖼️";
+    if (type.startsWith("audio/")) return "🎵";
+    if (/\.lpaint$/i.test(asset.name)) return "🎨";
+    return "📄";
+}
+function assetDialog(root) {
+    styles();
+    const project = getActiveProject();
+    if (!project) return;
+    const available = files(),
+        selected = new Set(
+            (Array.isArray(project.assets) ? project.assets : []).map(item =>
+                key(Array.isArray(item) ? item : item.path),
+            ),
+        );
+    const overlay = document.createElement("div");
+    overlay.className = "studio-dialog-overlay lucid-studio-assets-dialog";
+    overlay.innerHTML = `<div class="studio-dialog" role="dialog" aria-modal="true"><div class="studio-dialog-header"><div><h2>Project Assets</h2><p>Select files to bundle with this application.</p></div><button class="studio-dialog-close">×</button></div><div class="studio-assets-list"></div><div class="studio-dialog-actions"><button class="studio-secondary-btn" data-cancel>Cancel</button><button class="studio-primary-btn" data-save>Save assets</button></div></div>`;
+    document.body.appendChild(overlay);
+    const list = overlay.querySelector(".studio-assets-list");
+    if (!available.length)
+        list.innerHTML =
+            '<div class="studio-assets-empty">No assets found in Pictures, Music or Videos.</div>';
+    else
+        for (const asset of available) {
+            const row = document.createElement("label");
+            row.className = "studio-asset-row";
+            row.innerHTML = `<input type="checkbox" ${selected.has(key(asset.path)) ? "checked" : ""}><span class="studio-asset-icon">${icon(asset)}</span><span class="studio-asset-info"><strong>${esc(asset.name)}</strong><small>Home / ${esc(asset.path.join(" / "))}</small></span>`;
+            row.querySelector("input").addEventListener("change", e =>
+                e.target.checked ? selected.add(key(asset.path)) : selected.delete(key(asset.path)),
+            );
+            list.appendChild(row);
+        }
+    const close = () => overlay.remove();
+    overlay.querySelector(".studio-dialog-close").addEventListener("click", close);
+    overlay.querySelector("[data-cancel]").addEventListener("click", close);
+    overlay.addEventListener("click", e => {
+        if (e.target === overlay) close();
+    });
+    overlay.querySelector("[data-save]").addEventListener("click", () => {
+        updateProject(project.id, {
+            assets: available
+                .filter(asset => selected.has(key(asset.path)))
+                .map(asset => ({ name: asset.name, mimeType: asset.mimeType, path: asset.path })),
+        });
+        close();
+        notice(root, "Project assets updated.");
+    });
+}
+function gameStarter(root) {
+    const editor = root.querySelector("#lucid-code");
+    if (!editor) return;
+    editor.value = `app "Lucid Field"\n\nwindow {\n    title "Lucid Field"\n    let score = 0\n    text "Welcome to Lucid Field"\n    text "Score: " + score\n    button "Add point" {\n        onClick {\n            set score = score + 1\n            notification.show("Score: " + score)\n        }\n    }\n    game {\n        size 640, 360\n        background "#10131a"\n        box "player" {\n            x 80\n            y 160\n            width 40\n            height 40\n            color "#ffffff"\n        }\n        onUpdate {\n            if game.key("ArrowRight") {\n                game.move("player", 220 * event.delta, 0)\n            }\n        }\n    }\n}`;
+    editor.dispatchEvent(new Event("input"));
+    editor.focus();
+}
+function attach(root) {
+    styles();
+    const toolbar = root.querySelector(".studio-editor-actions");
+    if (!toolbar || toolbar.dataset.publishBound) return;
+    toolbar.dataset.publishBound = "1";
+    const wrap = document.createElement("div");
+    wrap.className = "studio-studio-tools";
+    const toggle = document.createElement("button");
+    toggle.className = "studio-secondary-btn";
+    toggle.textContent = "Tools ▾";
+    const menu = document.createElement("div");
+    menu.className = "studio-tools-dropdown";
+    menu.hidden = true;
+    const assets = document.createElement("button");
+    assets.className = `studio-tools-item ${ASSETS_BUTTON_CLASS}`;
+    assets.textContent = "Assets";
+    const preview = document.createElement("button");
+    preview.className = `studio-tools-item ${PREVIEW_BUTTON_CLASS}`;
+    preview.textContent = "Live Preview";
+    const game = document.createElement("button");
+    game.className = `studio-tools-item ${GAME_BUTTON_CLASS}`;
+    game.textContent = "Game Starter";
+    menu.append(assets, preview, game);
+    wrap.append(toggle, menu);
+    toolbar.insertBefore(wrap, toolbar.firstChild);
+    toggle.addEventListener("click", e => {
+        e.stopPropagation();
+        menu.hidden = !menu.hidden;
+    });
+    assets.addEventListener("click", () => {
+        menu.hidden = true;
+        assetDialog(root);
+    });
+    preview.addEventListener("click", () => {
+        menu.hidden = true;
+    });
+    game.addEventListener("click", () => {
+        menu.hidden = true;
+        gameStarter(root);
+    });
+    document.addEventListener("click", () => (menu.hidden = true));
+    const publishButton = document.createElement("button");
+    publishButton.className = `studio-primary-btn ${PUBLISH_BUTTON_CLASS}`;
+    publishButton.textContent = "Publish";
+    publishButton.addEventListener("click", () => publish(root));
+    toolbar.appendChild(publishButton);
+}
+window.addEventListener("lucid-window-created", event => {
+    const root = event.detail?.element?.querySelector?.(".lucid-studio");
+    if (!root) return;
+    const observer = new MutationObserver(() => attach(root));
+    observer.observe(root, { childList: true, subtree: true });
+    attach(root);
+});

@@ -57,7 +57,7 @@ Planned and tested LucidOS+ features include:
 ## How I Built It
 
 I built LucidOS as a way to experiment with making a desktop completely inside a browser , I worked on the desktop, launcher, file system, applications, Lucid script, Lucid studio, authentication, app publishing and the services used by the store, A lot of the work was also testing the project finding bugs changing things that did not work well and trying ideas for how LucidOS should feel
-I used AI tools during development, including for parts of the code and for debugging. I still did the project setup, feature decisions, testing, and the overall direction of LucidOS myself
+I used AI tools during development, for debugging and writing the code , but eventually i rewrote most of the AI work ,cleaned its leftover and understood what was going on
 
 ## Future Plans
 
