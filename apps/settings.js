@@ -51,7 +51,7 @@ function createSettingsApp(createWindow = defaultCreateWindow) {
         );
         themeSelect.addEventListener('change', async () => {
             settings.theme = themeSelect.value;
-            applyTheme(settings.theme);
+            applytheme(settings.theme);
             await saveSettings(settings);
             window.dispatchEvent(
                 new CustomEvent("lucid-settings-changed", {
