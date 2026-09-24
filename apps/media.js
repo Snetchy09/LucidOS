@@ -12,60 +12,116 @@ let studioTimer = null;
 let studioStep = 0;
 
 function createMediaApp() {
-    const content = `
-        <div class="lucid-media">
-            <aside class="media-sidebar">
-                <div class="media-logo">◉ Lucid Media</div>
-                <button class="media-nav active" data-page="library">🎵 Library</button>
-                <button class="media-nav" data-page="player">▶ Player</button>
-                <button class="media-nav" data-page="studio">🎛 Studio</button>
-                <div class="media-sidebar-bottom">
-                    <button class="media-import" id="media-import">＋ Import music</button>
-                    <input type="file" id="media-file-input" accept="audio/*" multiple hidden>
+    const content = `<div class="lucid-media">
+    <aside class="media-sidebar">
+        <div class="media-logo">◉ Lucid Media</div>
+        <button class="media-nav active" data-page="library">🎵 Library</button>
+        <button class="media-nav" data-page="player">▶ Player</button>
+        <button class="media-nav" data-page="studio">🎛 Studio</button>
+        <div class="media-sidebar-bottom">
+            <button class="media-import" id="media-import">＋ Import music</button>
+            <input type="file" id="media-file-input" accept="audio/*" multiple hidden>
+            </div>
+        </aside>
+        <main class="media-main">
+            <section class="media-page" id="media-library-page">
+                <div class="media-page-header">
+                    <h1>Library</h1>
+                    <p>Music stored in Home / Music.</p>
                 </div>
-            </aside>
-            <main class="media-main">
-                <section class="media-page" id="media-library-page">
-                    <div class="media-page-header"><h1>Library</h1><p>Music stored in Home / Music.</p></div>
-                    <div class="media-library" id="media-library"></div>
-                </section>
-                <section class="media-page hidden" id="media-player-page">
-                    <div class="media-page-header"><h1>Player</h1><p>Play files from your Lucid Music folder.</p></div>
-                    <div class="media-player">
-                        <div class="media-art">♪</div>
-                        <h2 class="media-track-title" id="media-player-title">Nothing playing</h2>
-                        <div class="media-track-artist" id="media-player-artist">Choose a track</div>
-                        <div class="media-progress"><span id="media-current-time">0:00</span><input class="media-progress-slider" id="media-progress" type="range" min="0" max="100" value="0"><span id="media-duration">0:00</span></div>
-                        <div class="media-controls"><button id="media-shuffle">🔀</button><button id="media-prev">⏮</button><button class="media-play" id="media-play">▶</button><button id="media-next">⏭</button><button id="media-repeat">🔁</button></div>
-                        <div class="media-volume">🔊 <input class="media-volume-slider" id="media-volume" type="range" min="0" max="1" step="0.01" value="1"></div>
+                <div class="media-library" id="media-library">
+                </div>
+            </section>
+            <section class="media-page hidden" id="media-player-page">
+                <div class="media-page-header">
+                    <h1>Player</h1>
+                    <p>Play files from your Lucid Music folder.</p>
+                </div>
+                <div class="media-player">
+                    <div class="media-art">♪</div>
+                    <h2 class="media-track-title" id="media-player-title">Nothing playing</h2>
+                    <div class="media-track-artist" id="media-player-artist">Choose a track</div>
+                    <div class="media-progress">
+                        <span id="media-current-time">0:00</span>
+                        <input class="media-progress-slider" id="media-progress" type="range" min="0" max="100" value="0">
+                            <span id="media-duration">0:00</span>
+                        </div>
+                        <div class="media-controls">
+                            <button id="media-shuffle">🔀</button>
+                            <button id="media-prev">⏮</button>
+                            <button class="media-play" id="media-play">▶</button>
+                            <button id="media-next">⏭</button>
+                            <button id="media-repeat">🔁</button>
+                        </div>
+                        <div class="media-volume">🔊
+                            <input class="media-volume-slider" id="media-volume" type="range" min="0" max="1" step="0.01" value="1">
+                            </div>
+                        </div>
+                    </section>
+                    <section class="media-page hidden" id="media-studio-page">
+                        <div class="media-studio-header">
+                            <div>
+                                <h1>Music Studio</h1>
+                                <p>Create beats, basslines, melodies and full arrangements.</p>
+                            </div>
+                            <div class="media-studio-controls">
+                                <label>BPM<input class="media-bpm" id="media-bpm" type="number" min="40" max="240" value="120">
+                                </label>
+                                <label>Swing<input id="studio-swing" type="range" min="0" max="50" value="0">
+                                </label>
+                                <button id="studio-play">▶ Play</button>
+                                <button id="studio-clear">Clear</button>
+                                <button id="studio-save">Save</button>
+                                <button id="studio-export">Export WAV</button>
+                            </div>
+                        </div>
+                        <div class="studio-toolbar">
+                            <button class="studio-tool active" data-tool="sequence">Sequencer</button>
+                            <button class="studio-tool" data-tool="melody">Melody</button>
+                            <button class="studio-tool" data-tool="mixer">Mixer</button>
+                        </div>
+                        <div class="studio-section" id="studio-sequence">
+                            <div class="studio-track-labels" id="studio-track-labels">
+                            </div>
+                            <div class="sequencer" id="sequencer">
+                            </div>
+                        </div>
+                        <div class="studio-section hidden" id="studio-melody">
+                            <div class="melody-controls">
+                                <label>Scale<select id="melody-scale">
+                                    <option value="major">Major</option>
+                                    <option value="minor">Minor</option>
+                                    <option value="pentatonic">Pentatonic</option>
+                                    <option value="chromatic">Chromatic</option>
+                                </select>
+                            </label>
+                            <label>Root<select id="melody-root">
+                                <option value="C">C</option>
+                                <option value="C#">C#</option>
+                                <option value="D">D</option>
+                                <option value="D#">D#</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="F#">F#</option>
+                                <option value="G">G</option>
+                                <option value="G#">G#</option>
+                                <option value="A">A</option>
+                                <option value="A#">A#</option>
+                                <option value="B">B</option>
+                            </select>
+                        </label>
                     </div>
-                </section>
-                <section class="media-page hidden" id="media-studio-page">
-                <div class="media-studio-header">
-                <div><h1>Music Studio</h1><p>Create beats, basslines, melodies and full arrangements.</p></div>
-                <div class="media-studio-controls"><label>BPM<input class="media-bpm" id="media-bpm" type="number" min="40" max="240" value="120"></label><label>Swing<input id="studio-swing" type="range" min="0" max="50" value="0"></label><button id="studio-play">▶ Play</button><button id="studio-clear">Clear</button><button id="studio-save">Save</button><button id="studio-export">Export WAV</button></div>
-                </div>
-                <div class="studio-toolbar">
-                <button class="studio-tool active" data-tool="sequence">Sequencer</button>
-                <button class="studio-tool" data-tool="melody">Melody</button>
-                <button class="studio-tool" data-tool="mixer">Mixer</button>
-                </div>
-                <div class="studio-section" id="studio-sequence">
-                <div class="studio-track-labels" id="studio-track-labels"></div>
-                <div class="sequencer" id="sequencer"></div>
-                </div>
-                <div class="studio-section hidden" id="studio-melody">
-                <div class="melody-controls"><label>Scale<select id="melody-scale"><option value="major">Major</option><option value="minor">Minor</option><option value="pentatonic">Pentatonic</option><option value="chromatic">Chromatic</option></select></label><label>Root<select id="melody-root"><option value="C">C</option><option value="C#">C#</option><option value="D">D</option><option value="D#">D#</option><option value="E">E</option><option value="F">F</option><option value="F#">F#</option><option value="G">G</option><option value="G#">G#</option><option value="A">A</option><option value="A#">A#</option><option value="B">B</option></select></label></div>
-                <div class="melody-grid" id="melody-grid"></div>
+                    <div class="melody-grid" id="melody-grid">
+                    </div>
                 </div>
                 <div class="studio-section hidden" id="studio-mixer">
-                <div class="mixer" id="studio-mixer-panel"></div>
+                    <div class="mixer" id="studio-mixer-panel">
+                    </div>
                 </div>
                 <div class="studio-status" id="studio-status">Ready</div>
-                </section>
-            </main>
-        </div>
-    `;
+            </section>
+        </main>
+    </div>`;
 
     const windowElement = createWindow("Lucid Media", content);
     setupMedia(windowElement);
@@ -194,7 +250,12 @@ function renderLibrary(root) {
         const item = document.createElement("button");
         item.className = "media-track";
         item.classList.toggle("playing", index === currentTrack && !audio.paused);
-        item.innerHTML = `<div class="media-track-icon">♪</div><div class="media-track-info"><strong>${escapeHTML(track.name)}</strong><span>Home / Music</span></div><span>▶</span>`;
+        item.innerHTML = `<div class="media-track-icon">♪</div>
+<div class="media-track-info">
+    <strong>${escapeHTML(track.name)}</strong>
+    <span>Home / Music</span>
+</div>
+<span>▶</span>`;
         item.addEventListener("click", () => playTrack(root, index));
         library.appendChild(item);
     });
@@ -290,7 +351,9 @@ const row=document.createElement("div");
 row.className="sequencer-row";
 row.dataset.instrument=track.name;
 row.dataset.volume=track.volume;
-row.innerHTML=`<div class="sequencer-name">${track.name}</div><div class="sequencer-grid"></div>`;
+row.innerHTML=`<div class="sequencer-name">${track.name}</div>
+<div class="sequencer-grid">
+</div>`;
 const grid=row.querySelector(".sequencer-grid");
 for(let step=0;step<32;step++){
 const button=document.createElement("button");
@@ -403,7 +466,9 @@ grid.innerHTML="";
 notes.forEach(note=>{
 const row=document.createElement("div");
 row.className="melody-row";
-row.innerHTML=`<span>${note}</span><div></div>`;
+row.innerHTML=`<span>${note}</span>
+<div>
+</div>`;
 const cells=row.querySelector("div");
 for(let i=0;i<32;i++){
 const cell=document.createElement("button");
@@ -441,7 +506,9 @@ root.querySelectorAll(".sequencer-row").forEach(row=>{
 const name=row.dataset.instrument;
 const control=document.createElement("div");
 control.className="mixer-channel";
-control.innerHTML=`<strong>${name}</strong><input type="range" min="0" max="1" step=".01" value="${row.dataset.volume}"><span>${Math.round(Number(row.dataset.volume)*100)}%</span>`;
+control.innerHTML=`<strong>${name}</strong>
+<input type="range" min="0" max="1" step=".01" value="${row.dataset.volume}">
+    <span>${Math.round(Number(row.dataset.volume)*100)}%</span>`;
 const slider=control.querySelector("input");
 const value=control.querySelector("span");
 slider.addEventListener("input",()=>{

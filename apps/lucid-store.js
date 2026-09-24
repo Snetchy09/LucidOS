@@ -31,7 +31,27 @@ const builtInStoreApps = [
     },
 ];
 async function createStoreApp() {
-    const content = `<div class="lucid-store"><header class="store-header"><div><div class="store-eyebrow">LUCID OS</div><h1>Lucid Store</h1><p>Discover apps for your desktop.</p></div><div class="store-header-icon">🛍</div></header><nav class="store-categories"><button class="store-category active" data-category="All">All</button><button class="store-category" data-category="Utilities">Utilities</button><button class="store-category" data-category="Productivity">Productivity</button><button class="store-category" data-category="Internet">Internet</button><button class="store-category" data-category="Media">Media</button><button class="store-category" data-category="Creative">Creative</button><button class="store-category" data-category="System">System</button></nav><main class="store-grid" id="store-grid"></main></div>`;
+    const content = `<div class="lucid-store">
+    <header class="store-header">
+        <div>
+            <div class="store-eyebrow">LUCID OS</div>
+            <h1>Lucid Store</h1>
+            <p>Discover apps for your desktop.</p>
+        </div>
+        <div class="store-header-icon">🛍</div>
+    </header>
+    <nav class="store-categories">
+        <button class="store-category active" data-category="All">All</button>
+        <button class="store-category" data-category="Utilities">Utilities</button>
+        <button class="store-category" data-category="Productivity">Productivity</button>
+        <button class="store-category" data-category="Internet">Internet</button>
+        <button class="store-category" data-category="Media">Media</button>
+        <button class="store-category" data-category="Creative">Creative</button>
+        <button class="store-category" data-category="System">System</button>
+    </nav>
+    <main class="store-grid" id="store-grid">
+    </main>
+</div>`;
     const windowElement = createWindow("Lucid Store", content);
     setupStore(windowElement)
     await loadStoreCatalog(windowElement);
@@ -81,7 +101,20 @@ function renderApps(root, category) {
         const rating = Number(app.average_rating || 0);
         const reviews = Number(app.review_count || 0)
         const downloads = Number(app.download_count || 0);
-        card.innerHTML = `<div class="store-app-icon">${escapeHTML(app.icon)}</div><div class="store-app-content"><div class="store-app-top"><h2>${escapeHTML(app.name)}</h2><span class="store-app-version">v${escapeHTML(app.version)}</span></div><div class="store-app-category">${escapeHTML(app.category)}</div><p>${escapeHTML(app.description || "A Lucid OS application.")}</p><div class="store-app-meta"><span>${rating ? `★ ${rating.toFixed(1)}` : "—"}${reviews ? ` (${reviews})` : ""}</span><span>${downloads} ${downloads === 1 ? "install" : "installs"}</span></div><button type="button" class="store-open-app">View app</button></div>`;
+        card.innerHTML = `<div class="store-app-icon">${escapeHTML(app.icon)}</div>
+<div class="store-app-content">
+    <div class="store-app-top">
+        <h2>${escapeHTML(app.name)}</h2>
+        <span class="store-app-version">v${escapeHTML(app.version)}</span>
+    </div>
+    <div class="store-app-category">${escapeHTML(app.category)}</div>
+    <p>${escapeHTML(app.description || "A Lucid OS application.")}</p>
+    <div class="store-app-meta">
+        <span>${rating ? `★ ${rating.toFixed(1)}` : "—"}${reviews ? ` (${reviews})`: ""}</span>
+<span>${downloads} ${downloads === 1 ? "install" : "installs"}</span>
+</div>
+<button type="button" class="store-open-app">View app</button>
+</div>`;
         card.addEventListener("click", event => {
             if (!event.target.closest("button")) openAppDetails(app)
         });
@@ -114,7 +147,29 @@ async function openAppDetails(app) {
     const reviewCount = Number(app.review_count || 0);
     const overlay = document.createElement("div");
     overlay.className = "lucid-account-overlay lucid-store-detail-overlay";
-    overlay.innerHTML = `<div class="lucid-store-detail" role="dialog" aria-modal="true"><button class="lucid-dialog-close" type="button">×</button><div class="store-detail-hero"><div class="store-detail-icon">${escapeHTML(app.icon || "◇")}</div><div><div class="account-plan-label">${escapeHTML(app.category || "Other")}</div><h2>${escapeHTML(app.name)}</h2><p>${escapeHTML(app.description || "A Lucid OS application.")}</p><div class="store-detail-rating">${rating ? `★ ${rating.toFixed(1)}` : "No rating"}${reviewCount ? ` · ${reviewCount} review${reviewCount === 1 ? "" : "s"}` : ""}</div></div></div><div class="store-detail-preview">${app.store_images?.length ? app.store_images.map(image => `<img src="${escapeHTML(image)}" alt="${escapeHTML(app.name)} screenshot">`).join("") : app.icon_url ? `<img src="${escapeHTML(app.icon_url)}" alt="${escapeHTML(app.name)} preview">` : '<div class="store-detail-no-preview">No preview images were provided for this app.</div>'}</div><div class="store-detail-actions"><button type="button" class="store-detail-install">${app.type === "core" ? "Included" : installed ? "Uninstall" : "Install"}</button><button type="button" class="store-detail-update" ${!installed || app.type === "core" ? "disabled" : ""}>Update</button><button type="button" class="store-detail-review">Rate</button></div><section class="store-detail-reviews"><div class="store-detail-section-title"><h3>Ratings & reviews</h3><span>${reviewCount}</span></div>${reviews.length ? reviews.map(review => `<article class="store-review"><div class="store-review-head"><strong>${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}</strong><span>${new Date(review.created_at).toLocaleDateString()}</span></div>${review.review_text ? `<div class="store-review-text">${escapeHTML(review.review_text)}</div>` : ""}</article>`).join("") : '<div class="store-empty">No ratings yet.</div>'}</section></div>`;
+    overlay.innerHTML = `<div class="lucid-store-detail" role="dialog" aria-modal="true">
+    <button class="lucid-dialog-close" type="button">×</button>
+    <div class="store-detail-hero">
+        <div class="store-detail-icon">${escapeHTML(app.icon || "◇")}</div>
+        <div>
+            <div class="account-plan-label">${escapeHTML(app.category || "Other")}</div>
+            <h2>${escapeHTML(app.name)}</h2>
+            <p>${escapeHTML(app.description || "A Lucid OS application.")}</p>
+            <div class="store-detail-rating">${rating ? `★ ${rating.toFixed(1)}` : "No rating"}${reviewCount ? ` · ${reviewCount} review${reviewCount === 1 ? "" : "s"}`: ""}</div>
+</div>
+</div>
+<div class="store-detail-preview">${app.store_images?.length ? app.store_images.map(image => `<img src="${escapeHTML(image)}" alt="${escapeHTML(app.name)} screenshot">`).join("") : app.icon_url ? `<img src="${escapeHTML(app.icon_url)}" alt="${escapeHTML(app.name)} preview">`: '<div class="store-detail-no-preview">No preview images were provided for this app.</div>'}</div>
+<div class="store-detail-actions">
+    <button type="button" class="store-detail-install">${app.type === "core" ? "Included" : installed ? "Uninstall" : "Install"}</button>
+    <button type="button" class="store-detail-update" ${!installed || app.type === "core" ? "disabled" : ""}>Update</button>
+    <button type="button" class="store-detail-review">Rate</button>
+</div>
+<section class="store-detail-reviews">
+    <div class="store-detail-section-title">
+        <h3>Ratings & reviews</h3>
+        <span>${reviewCount}</span>
+    </div>${reviews.length ? reviews.map(review => `<article class="store-review"><div class="store-review-head"><strong>${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}</strong><span>${new Date(review.created_at).toLocaleDateString()}</span></div>${review.review_text ? `<div class="store-review-text">${escapeHTML(review.review_text)}</div>` : ""}</article>`).join("") : '<div class="store-empty">No ratings yet.</div>'}</section>
+</div>`;
     document.body.appendChild(overlay);
     const close = () => overlay.remove();
     overlay.querySelector(".lucid-dialog-close").addEventListener("click", close);
@@ -153,7 +208,19 @@ async function showRatingDialog(app, user, parent) {
             user?.app_metadata?.plan || user?.app_metadata?.subscription || "free",
         ).toLowerCase(),
     );
-    dialog.innerHTML = `<div class="store-rating-dialog-inner"><h3>Rate ${escapeHTML(app.name)}</h3><select class="store-review-rating"><option value="5">★★★★★</option><option value="4">★★★★☆</option><option value="3">★★★☆☆</option><option value="2">★★☆☆☆</option><option value="1">★☆☆☆☆</option></select>${plus ? '<textarea class="store-review-input" maxlength="1000" placeholder="Write a comment..."></textarea>' : '<p class="store-comment-note">Written comments are available to Plus members. You can still leave a rating.</p>'}<div class="store-rating-dialog-actions"><button type="button" class="store-rating-cancel">Cancel</button><button type="button" class="store-rating-save">Save rating</button></div></div>`;
+    dialog.innerHTML = `<div class="store-rating-dialog-inner">
+    <h3>Rate ${escapeHTML(app.name)}</h3>
+    <select class="store-review-rating">
+        <option value="5">★★★★★</option>
+        <option value="4">★★★★☆</option>
+        <option value="3">★★★☆☆</option>
+        <option value="2">★★☆☆☆</option>
+        <option value="1">★☆☆☆☆</option>
+    </select>${plus ? '<textarea class="store-review-input" maxlength="1000" placeholder="Write a comment..."></textarea>' : '<p class="store-comment-note">Written comments are available to Plus members. You can still leave a rating.</p>'}<div class="store-rating-dialog-actions">
+    <button type="button" class="store-rating-cancel">Cancel</button>
+    <button type="button" class="store-rating-save">Save rating</button>
+</div>
+</div>`;
     parent.querySelector('.lucid-store-detail').appendChild(dialog);
     dialog.querySelector(".store-rating-cancel").addEventListener("click", () => dialog.remove());
     dialog.querySelector(".store-rating-save").addEventListener("click", async () => {

@@ -12,7 +12,91 @@ function styles() {
     if (ready) return;
     ready = true;
     const style = document.createElement("style");
-    style.textContent = `.studio-studio-tools{position:relative;display:flex;gap:7px;align-items:center}.studio-tools-dropdown{position:absolute;top:calc(100% + 7px);left:0;z-index:9000;display:grid;gap:5px;min-width:170px;padding:6px;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:#14171d;box-shadow:0 14px 40px rgba(0,0,0,.45)}.studio-tools-item{width:100%;min-height:34px;padding:0 10px!important;border-radius:8px!important;text-align:left}.studio-assets-list{display:grid;gap:6px;max-height:52vh;overflow:auto}.studio-asset-row{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid rgba(255,255,255,.06);border-radius:9px;background:rgba(255,255,255,.025)}.studio-asset-row input{accent-color:#8177a7}.studio-asset-info{min-width:0;flex:1}.studio-asset-info strong,.studio-asset-info small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.studio-asset-info strong{font-size:11px}.studio-asset-info small{margin-top:3px;color:var(--muted);font-size:9px}.studio-asset-icon{font-size:15px}.studio-assets-empty{padding:24px;text-align:center;color:var(--muted);font-size:11px}.lucid-publish-notice{margin:10px 0;padding:9px 11px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.025);color:var(--text-soft);font-size:10px}.lucid-publish-notice[data-error=true]{border-color:rgba(180,90,90,.24);color:#d7b0b0}`;
+    style.textContent = `.studio-studio-tools {
+    position:relative;
+    display:flex;
+    gap:7px;
+    align-items:center
+}
+.studio-tools-dropdown {
+    position:absolute;
+    top:calc(100% + 7px);
+    left:0;
+    z-index:9000;
+    display:grid;
+    gap:5px;
+    min-width:170px;
+    padding:6px;
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:10px;
+    background:#14171d;
+    box-shadow:0 14px 40px rgba(0,0,0,.45)
+}
+.studio-tools-item {
+    width:100%;
+    min-height:34px;
+    padding:0 10px!important;
+    border-radius:8px!important;
+    text-align:left
+}
+.studio-assets-list {
+    display:grid;
+    gap:6px;
+    max-height:52vh;
+    overflow:auto
+}
+.studio-asset-row {
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:9px 10px;
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:9px;
+    background:rgba(255,255,255,.025)
+}
+.studio-asset-row input {
+    accent-color:#8177a7
+}
+.studio-asset-info {
+    min-width:0;
+    flex:1
+}
+.studio-asset-info strong,.studio-asset-info small {
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap
+}
+.studio-asset-info strong {
+    font-size:11px
+}
+.studio-asset-info small {
+    margin-top:3px;
+    color:var(--muted);
+    font-size:9px
+}
+.studio-asset-icon {
+    font-size:15px
+}
+.studio-assets-empty {
+    padding:24px;
+    text-align:center;
+    color:var(--muted);
+    font-size:11px
+}
+.lucid-publish-notice {
+    margin:10px 0;
+    padding:9px 11px;
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:10px;
+    background:rgba(255,255,255,.025);
+    color:var(--text-soft);
+    font-size:10px
+}
+.lucid-publish-notice[data-error=true] {
+    border-color:rgba(180,90,90,.24);
+    color:#d7b0b0
+}`;
     document.head.appendChild(style);
 }
 function esc(value) {
@@ -193,7 +277,21 @@ function assetDialog(root) {
         );
     const overlay = document.createElement("div");
     overlay.className = "studio-dialog-overlay lucid-studio-assets-dialog";
-    overlay.innerHTML = `<div class="studio-dialog" role="dialog" aria-modal="true"><div class="studio-dialog-header"><div><h2>Project Assets</h2><p>Select files to bundle with this application.</p></div><button class="studio-dialog-close">×</button></div><div class="studio-assets-list"></div><div class="studio-dialog-actions"><button class="studio-secondary-btn" data-cancel>Cancel</button><button class="studio-primary-btn" data-save>Save assets</button></div></div>`;
+    overlay.innerHTML = `<div class="studio-dialog" role="dialog" aria-modal="true">
+    <div class="studio-dialog-header">
+        <div>
+            <h2>Project Assets</h2>
+            <p>Select files to bundle with this application.</p>
+        </div>
+        <button class="studio-dialog-close">×</button>
+    </div>
+    <div class="studio-assets-list">
+    </div>
+    <div class="studio-dialog-actions">
+        <button class="studio-secondary-btn" data-cancel>Cancel</button>
+        <button class="studio-primary-btn" data-save>Save assets</button>
+    </div>
+</div>`;
     document.body.appendChild(overlay);
     const list = overlay.querySelector(".studio-assets-list");
     if (!available.length)
@@ -203,7 +301,12 @@ function assetDialog(root) {
         for (const asset of available) {
             const row = document.createElement("label");
             row.className = "studio-asset-row";
-            row.innerHTML = `<input type="checkbox" ${selected.has(key(asset.path)) ? "checked" : ""}><span class="studio-asset-icon">${icon(asset)}</span><span class="studio-asset-info"><strong>${esc(asset.name)}</strong><small>Home / ${esc(asset.path.join(" / "))}</small></span>`;
+            row.innerHTML = `<input type="checkbox" ${selected.has(key(asset.path)) ? "checked" : ""}>
+    <span class="studio-asset-icon">${icon(asset)}</span>
+    <span class="studio-asset-info">
+        <strong>${esc(asset.name)}</strong>
+        <small>Home / ${esc(asset.path.join(" / "))}</small>
+    </span>`;
             row.querySelector("input").addEventListener("change", e =>
                 e.target.checked ? selected.add(key(asset.path)) : selected.delete(key(asset.path)),
             );
@@ -241,40 +344,61 @@ function attach(root) {
     wrap.className = "studio-studio-tools";
     const toggle = document.createElement("button");
     toggle.className = "studio-secondary-btn";
+    toggle.type = "button";
     toggle.textContent = "Tools ▾";
+    toggle.setAttribute("aria-expanded", "false");
     const menu = document.createElement("div");
     menu.className = "studio-tools-dropdown";
     menu.hidden = true;
+    menu.style.display = "none";
     const assets = document.createElement("button");
     assets.className = `studio-tools-item ${ASSETS_BUTTON_CLASS}`;
+    assets.type = "button";
     assets.textContent = "Assets";
     const preview = document.createElement("button");
     preview.className = `studio-tools-item ${PREVIEW_BUTTON_CLASS}`;
+    preview.type = "button";
     preview.textContent = "Live Preview";
     const game = document.createElement("button");
     game.className = `studio-tools-item ${GAME_BUTTON_CLASS}`;
+    game.type = "button";
     game.textContent = "Game Starter";
     menu.append(assets, preview, game);
     wrap.append(toggle, menu);
     toolbar.insertBefore(wrap, toolbar.firstChild);
-    toggle.addEventListener("click", e => {
-        e.stopPropagation();
-        menu.hidden = !menu.hidden;
+    function setToolsOpen(open) {
+        menu.hidden = !open;
+        menu.classList.toggle("is-open", open);
+        menu.style.display = open ? "grid" : "none";
+        toggle.setAttribute("aria-expanded", String(open));
+        toggle.textContent = open ? "Tools ▴" : "Tools ▾";
+    }
+    toggle.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        setToolsOpen(menu.hidden);
+    });
+    menu.addEventListener("click", event => {
+        event.stopPropagation();
     });
     assets.addEventListener("click", () => {
-        menu.hidden = true;
+        setToolsOpen(false);
         assetDialog(root);
     });
     preview.addEventListener("click", () => {
-        menu.hidden = true;
+        setToolsOpen(false);
     });
     game.addEventListener("click", () => {
-        menu.hidden = true;
+        setToolsOpen(false);
         gameStarter(root);
     });
-    document.addEventListener("click", () => (menu.hidden = true));
+    document.addEventListener("click", () => setToolsOpen(false));
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") setToolsOpen(false);
+    });
     const publishButton = document.createElement("button");
     publishButton.className = `studio-primary-btn ${PUBLISH_BUTTON_CLASS}`;
+    publishButton.type = "button";
     publishButton.textContent = "Publish";
     publishButton.addEventListener("click", () => publish(root));
     toolbar.appendChild(publishButton);

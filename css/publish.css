@@ -8,9 +8,8 @@
     place-items:center;
     padding:20px;
     background:rgba(4,6,10,.78);
-    backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px)
 }
-
 .lucid-publish-dialog {
     width:min(520px,94vw);
     max-height:90vh;
@@ -19,155 +18,114 @@
     border:1px solid rgba(255,255,255,.1);
     border-radius:17px;
     background:#11151b;
-    color:var(--text,#e7e8ec);
-    box-shadow:0 25px 80px rgba(0,0,0,.55);
+    color:var(--text);
+    box-shadow:0 25px 80px rgba(0,0,0,.55)
 }
-
 .lucid-publish-dialog header {
     display:flex;
     justify-content:space-between;
     gap:14px;
-    margin-bottom:17px;
+    margin-bottom:17px
 }
-
 .lucid-publish-dialog header>div span {
     font-size:8px;
     letter-spacing:2px;
-    color:var(--muted);
+    color:var(--muted)
 }
-
 .lucid-publish-dialog h2 {
     margin:5px 0 4px;
-    font-size:18px;
+    font-size:18px
 }
-
 .lucid-publish-dialog p {
     margin:0;
     color:var(--muted);
-    font-size:10px;
+    font-size:10px
 }
-
 .lucid-publish-dialog header button {
     width:32px;
-    padding:0;
+    padding:0
 }
-
 .lucid-publish-dialog label {
     display:grid;
     gap:6px;
     margin-top:11px;
     color:var(--muted);
-    font-size:10px;
+    font-size:10px
 }
-
-.lucid-publish-dialog input,
-.lucid-publish-dialog textarea,
-.lucid-publish-dialog select {
+.lucid-publish-dialog input,.lucid-publish-dialog textarea,.lucid-publish-dialog select {
     width:100%;
     padding:9px 10px;
-    border:1px solid rgba(255,255,255,.09);
-    border-radius:9px;
     background:#090c11;
-    color:var(--text);
-    font:inherit;
+    color:var(--text)
 }
-
 .lucid-publish-dialog textarea {
     resize:vertical;
-    min-height:92px;
+    min-height:92px
 }
-
 .lucid-publish-grid {
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:10px;
+    gap:10px
 }
-
 .lucid-icon-picker {
     margin-top:15px;
     padding:13px;
     border:1px solid rgba(255,255,255,.07);
     border-radius:13px;
-    background:rgba(255,255,255,.02);
+    background:rgba(255,255,255,.02)
 }
-
 .lucid-icon-picker strong {
     display:block;
-    font-size:12px;
+    font-size:12px
 }
-
 .lucid-icon-picker small {
     display:block;
     margin-top:3px;
     color:var(--muted);
     font-size:9px;
-    line-height:1.45;
+    line-height:1.45
 }
-
 .lucid-icon-options {
     display:grid;
     grid-template-columns:repeat(10,1fr);
     gap:6px;
-    margin-top:11px;
+    margin-top:11px
 }
-
 .lucid-icon-choice {
     aspect-ratio:1;
-    padding:0!important;
+    padding:0;
     min-height:0;
-    border-radius:9px!important;
-    font-size:18px!important;
-    background:#0d1015!important;
+    border-radius:9px;
+    font-size:18px;
+    background:#0d1015
 }
-
 .lucid-icon-choice.active {
-    background:rgba(120,105,180,.2)!important;
-    border-color:rgba(150,130,205,.36)!important;
-    box-shadow:0 0 0 1px rgba(150,130,205,.18);
+    background:rgba(120,105,180,.2);
+    border-color:rgba(150,130,205,.36);
+    box-shadow:0 0 0 1px rgba(150,130,205,.18)
 }
-
 .lucid-custom-icon {
-    margin-top:12px!important;
+    margin-top:12px!important
 }
-
-.lucid-custom-icon small {
-    font-size:8px;
-}
-
 .lucid-publish-actions {
     display:flex;
     justify-content:flex-end;
     gap:8px;
-    margin-top:17px;
+    margin-top:17px
 }
-
 .lucid-publish-actions button {
-    min-width:90px;
+    min-width:90px
 }
-
 .lucid-publish-primary {
-    background:linear-gradient(180deg,#716b97,#5d587f)!important;
-    color:#fff!important;
+    background:linear-gradient(180deg,#716b97,#5d587f);
+    color:#fff
 }
-
 .lucid-publish-message {
     margin-top:9px;
     color:#d2a6a6;
-    font-size:9px;
+    font-size:9px
 }
-
-@media(max-width:540px) {
-    .lucid-publish-grid {
-        grid-template-columns:1fr;
-    }
-
-    .lucid-icon-options {
-        grid-template-columns:repeat(5,1fr);
-    }
-}
-
-.submission-row,
-.reviewer-row {
+.submission-row,.reviewer-row {
     display:flex;
     align-items:flex-start;
     justify-content:space-between;
@@ -175,153 +133,74 @@
     padding:10px 12px;
     border:1px solid rgba(255,255,255,.07);
     border-radius:10px;
-    background:rgba(255,255,255,.022);
+    background:rgba(255,255,255,.022)
 }
-
-.submission-row small,
-.reviewer-row small {
+.submission-row small,.reviewer-row small {
     display:block;
     color:var(--muted);
-    margin-top:3px;
+    margin-top:3px
 }
-
 .submission-row>span {
     max-width:45%;
     color:var(--muted);
     font-size:11px;
-    text-align:right;
+    text-align:right
 }
-
 .reviewer-row p {
     margin:6px 0 0;
     color:var(--text-soft);
-    font-size:12px;
+    font-size:12px
 }
-
 .reviewer-actions {
     display:flex;
     gap:6px;
-    flex-shrink:0;
+    flex-shrink:0
 }
-
-.lucid-studio button,
-.studio-dialog button,
-.reviewer-detail button,
-.reviewer-row button {
-    appearance:none;
-    -webkit-appearance:none;
-    border:1px solid var(--border-soft,#292d35);
-    background:var(--surface-3,#1b1e24);
-    color:var(--text,#e7e8ec);
-    box-shadow:none;
+.reviewer-actions button {
+    min-width:84px
 }
-
-.lucid-studio button:hover:not(:disabled),
-.studio-dialog button:hover:not(:disabled),
-.reviewer-detail button:hover:not(:disabled),
-.reviewer-row button:hover:not(:disabled) {
-    background:var(--surface-4,#20232a);
-    border-color:var(--border,#363a43);
+.reviewer-inspect-toolbar,.reviewer-detail-actions {
+    background:#0f1319
 }
-
-.lucid-studio button:disabled,
-.studio-dialog button:disabled,
-.reviewer-detail button:disabled,
-.reviewer-row button:disabled {
-    background:var(--surface-2,#15171c)!important;
-    color:var(--muted-dark,#5f646e)!important;
-    border-color:var(--border-soft,#22252c)!important;
-    opacity:.48;
-    cursor:not-allowed;
-    transform:none;
+.reviewer-inspect-toolbar {
+    display:flex;
+    gap:7px;
+    padding:8px;
+    border-bottom:1px solid rgba(255,255,255,.06)
 }
-
-.reviewer-inspect-toolbar .reviewer-view-source {
-    background:#20232a;
-    color:#e7e8ec;
+.reviewer-runtime-host,.reviewer-source {
+    background:#090c11
 }
-
-.reviewer-inspect-toolbar .reviewer-run-app {
-    background:#292d35;
-    color:#e7e8ec;
+.reviewer-workspace {
+    background:#252932
 }
-
+.reviewer-detail-actions {
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    padding:10px
+}
 .reviewer-detail-actions .reviewer-approve {
     background:rgba(105,140,121,.16);
     border-color:rgba(130,160,143,.28);
-    color:#d4e0d6;
+    color:#d4e0d6
 }
-
 .reviewer-detail-actions .reviewer-reject {
-    background:rgba(150,70,70,.16)!important;
-    border-color:rgba(180,100,100,.24)!important;
-    color:#dfb3b3;
+    background:rgba(150,70,70,.16);
+    border-color:rgba(180,100,100,.24);
+    color:#dfb3b3
 }
-
-.reviewer-runtime-host {
-    background:#090c11;
-}
-
-.reviewer-source {
-    background:#090c11;
-}
-
-.reviewer-workspace {
-    background:#252932;
-}
-
+@media(max-width:700px) {
+.lucid-publish-grid {
+        grid-template-columns:1fr
+    }
+.lucid-icon-options {
+        grid-template-columns:repeat(5,1fr)
+    }
 .reviewer-detail-actions {
-    background:#0f1319;
-}
-
-.reviewer-row-main p {
-    max-width:760px;
-}
-
-.reviewer-inspect-toolbar {
-    background:#0d1117;
-}
-
-.reviewer-detail button {
-    border-radius:9px;
-}
-
-.reviewer-actions button {
-    min-width:84px;
-}
-
-.reviewer-actions [data-review="approved"] {
-    background:rgba(105,140,121,.12);
-}
-
-.reviewer-actions [data-review="rejected"] {
-    background:rgba(150,70,70,.12);
-}
-
-@media(max-width:760px) {
-    .reviewer-inspect-toolbar {
-        flex-wrap:wrap;
+        flex-wrap:wrap
     }
-
-    .reviewer-detail-status {
-        width:100%;
-        margin-left:0;
-    }
-
-    .reviewer-detail-actions {
-        flex-wrap:wrap;
-    }
-
-    .reviewer-detail-actions button {
-        flex:1;
-    }
-
-    .studio-scene-footer {
-        align-items:flex-start;
-        flex-direction:column;
-    }
-
-    .studio-scene-footer button {
-        width:100%;
+.reviewer-detail-actions button {
+        flex:1
     }
 }

@@ -1,123 +1,93 @@
-/* account, auth*/
-
-.settings-hint,
-.wallpaper-status,
-.storage-status {
+.settings-hint,.wallpaper-status,.storage-status {
     display:block;
     opacity:.7;
-    margin-top:8px;
+    margin-top:8px
 }
-
 .danger-zone {
     margin-top:18px;
     padding:16px;
     border:1px solid rgba(255,80,80,.22);
     border-radius:14px;
-    background:rgba(255,80,80,.05);
+    background:rgba(255,80,80,.05)
 }
-
-/*.erase-everything{background:#912b2b;borer-color:rgba(255,120,120,.3)}*/
 .erase-everything {
-    background:#7e2424;
+    background:#7e2424
 }
-
-.settings-section-card,
-.account-auth-card,
-.account-plan-card {
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:15px;
-    background:rgba(255,255,255,.032);
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
+.settings-section-card,.account-auth-card,.account-plan-card {
+border:1px solid rgba(255,255,255,.08);
+border-radius:15px;
+background:rgba(255,255,255,.032);
+box-shadow:0 10px 30px rgba(0,0,0,.08);
 }
-
-.settings-section-card+.settings-section-card,
-.settings-section-card+.account-plan-card,
-.account-auth-card+.account-plan-card,
-.account-plan-card+.settings-section-card {
-    margin-top:12px;
+.settings-section-card+.settings-section-card,.settings-section-card+.account-plan-card,.account-auth-card+.account-plan-card {
+    margin-top:12px
 }
-
 .account-auth-card {
     display:flex;
     align-items:center;
     gap:14px;
-    padding:16px;
+    padding:16px
 }
-
 .account-card-icon {
     display:grid;
     place-items:center;
-    flex:0 0 42px;
     width:42px;
     height:42px;
     border:1px solid rgba(255,255,255,.08);
     border-radius:13px;
     background:rgba(255,255,255,.05);
     font-size:18px;
+    flex:0 0 42px
 }
-
 .account-card-copy {
     min-width:0;
-    flex:1;
+    flex:1
 }
-
 .account-card-copy strong {
     display:block;
-    font-size:14px;
+    font-size:14px
 }
-
 .account-card-copy small {
     display:block;
     margin-top:4px;
     color:var(--muted);
     font-size:11px;
-    line-height:1.45;
+    line-height:1.45
 }
-
-.account-auth-button,
-.account-plan-button {
-    padding:9px 13px!important;
-    white-space:nowrap;
+.account-auth-button,.account-plan-button {
+    padding:9px 13px;
+    white-space:nowrap
 }
-
 .account-plan-card {
     display:flex;
     align-items:center;
     justify-content:space-between;
     gap:18px;
     padding:18px;
-    background:linear-gradient(135deg,rgba(120,105,180,.13),rgba(255,255,255,.03));
+    background:linear-gradient(135deg,rgba(120,105,180,.13),rgba(255,255,255,.03))
 }
-
 .account-plan-card h3 {
     margin:5px 0 4px;
-    font-size:18px;
+    font-size:18px
 }
-
 .account-plan-card p {
     margin:0;
     color:var(--muted);
     font-size:11px;
-    line-height:1.45;
+    line-height:1.45
 }
-
 .account-plan-label {
     font-size:9px;
     letter-spacing:2px;
-    color:var(--purple-soft);
+    color:var(--purple-soft)
 }
-
 .account-status {
     color:var(--success);
-    font-size:11px;
-    padding-bottom:8px;
+    font-size:11px
 }
-
-.account-submissions-card,
-.reviewer-card {
-    margin-top:12px;
+.account-submissions-card,.reviewer-card {
+    margin-top:12px
 }
-
 .storage-box {
     display:flex;
     align-items:baseline;
@@ -126,39 +96,32 @@
     padding:18px;
     border:1px solid rgba(255,255,255,.08);
     border-radius:15px;
-    background:rgba(255,255,255,.032);
+    background:rgba(255,255,255,.032)
 }
-
 .storage-box strong {
-    font-size:24px;
+    font-size:24px
 }
-
 .storage-box span {
     color:var(--muted);
-    font-size:11px;
+    font-size:11px
 }
-
 .danger-action {
     margin-top:12px;
-    padding:9px 13px;
+    padding:9px 13px
 }
-
 .about-card>div {
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:15px;
+    gap:15px
 }
-
 .about-card>div strong {
-    font-size:15px;
+    font-size:15px
 }
-
 .about-card>div span {
     color:var(--muted);
-    font-size:11px;
+    font-size:11px
 }
-
 .lucid-account-overlay {
     position:fixed;
     inset:0;
@@ -167,11 +130,9 @@
     place-items:center;
     padding:20px;
     background:rgba(4,5,8,.72);
-    backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px)
 }
-
-.lucid-account-dialog,
-.lucid-plans-dialog {
+.lucid-account-dialog,.lucid-plans-dialog {
     width:min(460px,94vw);
     max-height:90vh;
     overflow:auto;
@@ -179,36 +140,27 @@
     border:1px solid rgba(255,255,255,.1);
     border-radius:18px;
     background:linear-gradient(180deg,#15181e,#101217);
-    box-shadow:0 28px 80px rgba(0,0,0,.48);
+    box-shadow:0 28px 80px rgba(0,0,0,.48)
 }
-
-.lucid-account-dialog h2,
-.lucid-plans-dialog h2 {
-    margin:8px 0 16px;
+.lucid-account-dialog h2,.lucid-plans-dialog h2 {
+    margin:8px 0 16px
 }
-
-.lucid-auth-dialog label,
-.lucid-password-reset label {
+.lucid-auth-dialog label,.lucid-password-reset label {
     display:grid;
     gap:6px;
     margin-top:12px;
     color:var(--text-soft);
-    font-size:11px;
+    font-size:11px
 }
-
-.lucid-auth-dialog input,
-.lucid-password-reset input {
+.lucid-auth-dialog input,.lucid-password-reset input {
     width:100%;
-    padding:10px;
+    padding:10px
 }
-
-.lucid-auth-dialog .lucid-account-primary,
-.lucid-password-reset .lucid-account-primary {
+.lucid-auth-dialog .lucid-account-primary,.lucid-password-reset .lucid-account-primary {
     width:100%;
     margin-top:14px;
-    padding:10px 13px;
+    padding:10px 13px
 }
-
 .studio-auth-tabs {
     display:flex;
     gap:5px;
@@ -216,70 +168,55 @@
     margin:8px 0 16px;
     border:1px solid rgba(255,255,255,.07);
     border-radius:11px;
-    background:rgba(255,255,255,.025);
+    background:rgba(255,255,255,.025)
 }
-
 .studio-auth-tab {
     flex:1;
     padding:8px 10px!important;
     background:transparent!important;
-    border-color:transparent!important;
+    border-color:transparent!important
 }
-
 .studio-auth-tab.active {
     background:rgba(255,255,255,.08)!important;
-    border-color:rgba(255,255,255,.08)!important;
+    border-color:rgba(255,255,255,.08)!important
 }
-
 .lucid-account-message {
     margin-top:10px;
     color:var(--muted);
     font-size:11px;
-    line-height:1.45;
+    line-height:1.45
 }
-
 .lucid-plans-dialog {
-    position:relative;
+    position:relative
 }
-
 .lucid-plan-grid {
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:10px;
+    gap:10px
 }
-
 .lucid-plan {
     display:grid;
     gap:7px;
     padding:15px;
     border:1px solid rgba(255,255,255,.08);
     border-radius:14px;
-    background:rgba(255,255,255,.03);
+    background:rgba(255,255,255,.03)
 }
-
 .lucid-plan strong {
-    font-size:22px;
+    font-size:22px
 }
-
 .lucid-plan span {
     color:var(--muted);
-    font-size:11px;
+    font-size:11px
 }
-
 .lucid-plan b {
     color:var(--text-soft);
-    font-size:11px;
+    font-size:11px
 }
-
 .lucid-plan-featured {
     border-color:rgba(120,105,180,.28);
-    background:rgba(120,105,180,.08);
+    background:rgba(120,105,180,.08)
 }
-
-.lucid-plan-featured .account-plan-button {
-    margin-top:4px;
-}
-
 .lucid-billing-status {
     display:flex;
     align-items:center;
@@ -288,50 +225,46 @@
     padding:10px 11px;
     border:1px solid rgba(255,255,255,.07);
     border-radius:12px;
-    background:rgba(255,255,255,.025);
-    transition:border-color .2s ease,background .2s ease;
+    background:rgba(255,255,255,.025)
 }
-
 .lucid-billing-status>span {
     width:8px;
     height:8px;
     border-radius:50%;
-    background:rgba(255,255,255,.28);
-    box-shadow:0 0 0 4px rgba(255,255,255,.03);
+    background:rgba(255,255,255,.28)
 }
-
+.lucid-billing-status strong,.lucid-billing-status small {
+    display:block
+}
 .lucid-billing-status strong {
-    display:block;
-    font-size:11px;
+    font-size:11px
 }
-
 .lucid-billing-status small {
-    display:block;
     margin-top:2px;
     color:var(--muted);
-    font-size:10px;
+    font-size:10px
 }
-
 .lucid-billing-status.active {
     border-color:rgba(150,120,255,.28);
-    background:rgba(120,105,180,.07);
+    background:rgba(120,105,180,.07)
 }
-
 .lucid-billing-status.active>span {
     background:var(--purple-soft);
-    box-shadow:0 0 12px rgba(150,120,255,.5);
+    box-shadow:0 0 12px rgba(150,120,255,.5)
 }
-
 .billing-note {
-    opacity:.65;
+    opacity:.65
 }
-
-.lucid-auth-overlay .lucid-account-dialog {
-    position:relative;
-}
-
-.account-submissions-list,
-.reviewer-list {
+.account-submissions-list,.reviewer-list {
     display:grid;
-    gap:8px;
+    gap:8px
+}
+@media(max-width:600px) {
+.account-auth-card,.account-plan-card {
+        align-items:flex-start;
+        flex-direction:column
+    }
+.lucid-plan-grid {
+        grid-template-columns:1fr
+    }
 }

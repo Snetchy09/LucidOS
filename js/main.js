@@ -395,3 +395,29 @@ if (startButton) {
 document.addEventListener("keydown", event => {
     if (event.key === "Escape") { if (launcherOpen) { closeLucidLauncher(); } }
 });
+const launcherDesktop = document.getElementById("desktop");
+const launcherButton = document.getElementById("start-button");
+if (launcherDesktop && launcherButton) {
+    launcherDesktop.addEventListener("pointermove", event => {
+        if (!launcherDesktop.classList.contains("lucid-launcher-open")) return;
+        const rect = launcherButton.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const dx = event.clientX - centerX;
+        const dy = event.clientY - centerY;
+        const distance = Math.max(1, Math.hypot(dx, dy));
+        const amount = Math.min(3.5, distance / 80);
+        launcherButton.style.setProperty(
+            "--eye-x",
+            `${(dx / distance) * amount}px`
+        );
+        launcherButton.style.setProperty(
+            "--eye-y",
+            `${(dy / distance) * amount}px`
+        );
+    });
+    launcherDesktop.addEventListener("pointerleave", () => {
+        launcherButton.style.setProperty("--eye-x", "0px");
+        launcherButton.style.setProperty("--eye-y", "0px");
+    });
+}

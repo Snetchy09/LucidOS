@@ -1,256 +1,132 @@
+:root[data-theme="dark"] {
+    --bg:#0b0d11;
+    --surface:#111318;
+    --surface-2:#15171c;
+    --surface-3:#1b1e24;
+    --surface-4:#20232a;
+    --surface-5:#292d35;
+    --border:#292d35;
+    --border-soft:#22252c;
+    --text:#e7e8ec;
+    --text-soft:#b8bbc4;
+    --muted:#777c87;
+    --muted-dark:#5f646e;
+    --purple:#69628f;
+    --purple-soft:#8980b8;
+    --danger:#c98484;
+    --success:#b8c9ba;
+}
+:root[data-theme="dark"] #desktop {
+    background:
+        radial-gradient(circle at 50% 42%,rgba(92,72,135,.16),transparent 32%),
+        radial-gradient(circle at 10% 90%,rgba(40,30,65,.13),transparent 30%),
+        linear-gradient(180deg,#0b0d11,#080a0f);
+}
+:root[data-theme="dark"] #taskbar {
+    background:rgba(12,14,19,.9);
+    border-top-color:rgba(255,255,255,.06);
+}
+:root[data-theme="liminal"] {
+    --bg:#070b12;
+    --surface:#0d131c;
+    --surface-2:#111923;
+    --surface-3:#16212d;
+    --surface-4:#1c2937;
+    --surface-5:#263646;
+    --border:#263746;
+    --border-soft:#1d2b38;
+    --text:#dbe8ef;
+    --text-soft:#9db2c0;
+    --muted:#647886;
+    --muted-dark:#4b606e;
+    --purple:#637a9d;
+    --purple-soft:#91a7cb;
+    --danger:#c97d88;
+    --success:#8eb6a1;
+}
+:root[data-theme="liminal"] #desktop {
+    background:
+        radial-gradient(circle at 50% 35%,rgba(75,112,150,.17),transparent 30%),
+        radial-gradient(circle at 80% 90%,rgba(36,69,94,.14),transparent 35%),
+        linear-gradient(180deg,#070b12,#04070c);
+}
+:root[data-theme="liminal"] #taskbar {
+    background:rgba(6,10,16,.92);
+    border-top-color:rgba(150,190,220,.07);
+}
 :root[data-theme="light"] {
-    --bg: #eef0f4;
-    --surface: #f8f9fb;
-    --surface-2: #f1f3f6;
-    --surface-3: #e8ebf0;
-    --surface-4: #dde1e8;
-    --surface-5: #d3d7df;
-    --border: #c8cdd6;
-    --border-soft: #d9dde4;
-    --text: #1d2027;
-
-    --text-soft: #4e5561;
-    --muted: #707783;
-    --muted-dark: #8b919b;
+    --bg:#edf0f5;
+    --surface:#f8f9fb;
+    --surface-2:#f1f3f7;
+    --surface-3:#e7eaf0;
+    --surface-4:#dde1e8;
+    --surface-5:#d2d7e0;
+    --border:#c7cdd6;
+    --border-soft:#d8dde5;
+    --text:#20242b;
+    --text-soft:#525965;
+    --muted:#747b87;
+    --muted-dark:#9299a4;
+    --purple:#655d87;
+    --purple-soft:#776fa2;
+    --danger:#a65d64;
+    --success:#5f806b;
 }
-
-:root[data-theme="light"] body {
-    background: var(--bg);
-    color: var(--text);
-}
-
 :root[data-theme="light"] #desktop {
-    background: radial-gradient(circle at 50% 48%, rgba(112, 99, 150, 0.12), transparent 36%), linear-gradient(180deg, #f7f8fa, #e7eaf0);
+    background:
+        radial-gradient(circle at 50% 35%,rgba(118,101,165,.12),transparent 32%),
+        linear-gradient(180deg,#f8f9fb,#e5e9ef);
 }
-
 :root[data-theme="light"] #taskbar {
-    background: rgba(248, 249, 251, 0.92);
-    border-top-color: rgba(0, 0, 0, 0.08);
+    background:rgba(248,249,251,.9);
+    border-top-color:rgba(0,0,0,.08);
 }
-
-:root[data-theme="light"] .window {
-    border-color: #c8cdd6;
-    background: var(--surface);
-    box-shadow: 0 18px 45px rgba(38, 42, 50, 0.16);
+:root[data-theme="paper"] {
+    --bg:#eee9df;
+    --surface:#faf7f0;
+    --surface-2:#f2ede4;
+    --surface-3:#e8e1d6;
+    --surface-4:#ddd4c7;
+    --surface-5:#d1c5b6;
+    --border:#cfc4b6;
+    --border-soft:#ddd4c8;
+    --text:#292723;
+    --text-soft:#5f5a52;
+    --muted:#81786d;
+    --muted-dark:#9a9186;
+    --purple:#75677e;
+    --purple-soft:#897995;
+    --danger:#a55d59;
+    --success:#67806c;
+}
+:root[data-theme="paper"] #desktop {
+    background:
+        radial-gradient(circle at 50% 38%,rgba(120,100,135,.10),transparent 30%),
+        linear-gradient(180deg,#f8f4ec,#e9e1d5);
+}
+:root[data-theme="paper"] #taskbar {
+    background:rgba(248,244,236,.93);
+    border-top-color:rgba(70,60,50,.12);
+}
+:root[data-theme="light"] .window,
+:root[data-theme="paper"] .window {
+    box-shadow:0 18px 45px rgba(35,32,28,.14);
 }
 :root[data-theme="light"] .title-bar {
-    background: #e5e8ed;
-    color: var(--text);
-    border-bottom-color: #d2d6dd;
+    background:#e4e7ec;
 }
-
-:root[data-theme="light"] .window-control {
-    color: #4e5561;
+:root[data-theme="paper"] .title-bar {
+    background:#e5ddd1;
 }
-
-:root[data-theme="light"] .window-control:hover {
-    background: #d9dde4;
+:root[data-theme="liminal"] .lucid-orb {
+    background:
+        radial-gradient(circle at 32% 25%,#687d98,#35465d 38%,#141d29 68%,#06090e);
+    border-color:rgba(180,210,235,.2);
 }
-
-:root[data-theme="light"] .desktop-app {
-    color: #252a32;
-}
-
-:root[data-theme="light"] .desktop-app-name {
-    color: #252a32;
-    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.8);
-}
-
-:root[data-theme="light"] .desktop-app-icon {
-    background: linear-gradient(145deg, #ffffff, #e1e4ea);
-    border-color: #cbd0d8;
-    box-shadow: 0 6px 15px rgba(36, 40, 48, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-:root[data-theme="light"] .file-item.selected,
-:root[data-theme="light"] .taskbar-app:hover,
-:root[data-theme="light"] .file-item:hover {
-    background: var(--surface-4);
-}
-
-:root[data-theme="light"] .taskbar-app,
-:root[data-theme="light"] .file-tool,
-:root[data-theme="light"] .editor-save {
-    background: var(--surface-3);
-    border-color: var(--border);
-    color: var(--text-soft);
-}
-
-:root[data-theme="light"] .text-editor .editor {
-    background: #ffffff;
-    color: #252a32;
-    border-color: var(--border);
-}
-
-:root[data-theme="light"] .terminal {
-    background: #f4f5f7;
-    color: #252a32;
-}
-
-.lucid-account-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    background: rgba(8, 10, 14, 0.55);
-}
-
-.lucid-account-dialog,
-.lucid-plans-dialog {
-    width: min(440px, 100%);
-    padding: 24px;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: var(--surface);
-    color: var(--text);
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
-}
-
-.lucid-account-dialog h2,
-.lucid-plans-dialog h2 {
-    margin: 0 0 8px;
-}
-
-.lucid-account-dialog p {
-    margin: 0 0 20px;
-    color: var(--text-soft);
-}
-
-.lucid-account-dialog label {
-    display: grid;
-    gap: 6px;
-    margin: 12px 0;
-    color: var(--text-soft);
-    font-size: 13px;
-}
-
-.lucid-account-dialog input {
-    width: 100%;
-    padding: 10px 11px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface-2);
-    color: var(--text);
-}
-
-.lucid-account-message {
-    min-height: 20px;
-    margin: 12px 0;
-    color: var(--text-soft);
-    font-size: 12px;
-}
-
-.lucid-account-primary,
-.account-plan-button {
-    padding: 9px 13px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface-3);
-    color: var(--text);
-    cursor: pointer;
-}
-
-.studio-forgot-password {
-    display: block;
-    margin: 9px auto 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--purple-soft);
-    cursor: pointer;
-    font-size: 12px;
-}
-
-.account-plan-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-top: 18px;
-    padding: 16px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface-2);
-}
-
-.account-plan-label {
-    color: var(--purple-soft);
-    font-size: 10px;
-    letter-spacing: 0.12em;
-}
-
-.account-plan-card h3 {
-    margin: 4px 0;
-}
-
-.account-plan-card p {
-    margin: 0;
-    color: var(--text-soft);
-    font-size: 12px;
-}
-
-.lucid-plans-dialog {
-    position: relative;
-    width: min(650px, 100%);
-}
-
-.lucid-dialog-close {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 32px;
-    height: 32px;
-    border: 0;
-    border-radius: 7px;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 20px;
-}
-
-.lucid-plan-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 20px;
-}
-
-.lucid-plan {
-    display: grid;
-    gap: 8px;
-    padding: 18px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface-2);
-}
-
-.lucid-plan strong {
-    font-size: 20px;
-}
-
-.lucid-plan span {
-    color: var(--text-soft);
-    font-size: 12px;
-}
-
-.lucid-plan b {
-    font-size: 12px;
-}
-
-.lucid-plan-featured {
-    border-color: var(--purple);
-}
-
-@media (max-width: 560px) {
-    .lucid-plan-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .account-plan-card {
-        align-items: flex-start;
-        flex-direction: column;
+@media(prefers-reduced-motion:reduce) {
+    .studio-tools-dropdown,
+    .lucid-orb,
+    .desktop-app-icon {
+        transition:none !important;
     }
 }

@@ -14,7 +14,223 @@ const activeReviewRuntimes = new WeakMap();
 // let debug =
 function createSettingsApp(createWindow = defaultCreateWindow) {
     return loadSettings().then(async settings => {
-        const content = `<div class="settings-app"><aside class="settings-sidebar"><div class="settings-brand"><span>◈</span><div><strong>LucidOS</strong><small>System settings</small></div></div><button class="settings-tab active" data-page="appearance">🖥️ <span>Appearance</span></button><button class="settings-tab" data-page="account">👤 <span>Account</span></button><button class="settings-tab" data-page="notifications">🔔 <span>Notifications</span></button><button class="settings-tab" data-page="storage">💾 <span>Storage</span></button><button class="settings-tab" data-page="system">⚙️ <span>System</span></button><button class="settings-tab" data-page="about">ℹ️ <span>About</span></button></aside><main class="settings-content"><section class="settings-page" data-page-content="appearance"><div class="settings-page-header"><div><span class="settings-eyebrow">PERSONALIZATION</span><h2>Appearance</h2><p>Customize how LucidOS looks and feels.</p></div></div><div class="settings-section-card"><div class="settings-section-heading"><div><strong>Theme</strong><small>Choose the appearance used across LucidOS.</small></div><select class="theme-select"><option value="dark">Dark</option><option value="light">Light</option></select></div></div><div <div class=\"settings-section-card\"><div class=\"settings-section-heading\"><div><strong>Fullscreen</strong><small>Fill the entire screen with LucidOS.</small></div><button type=\"button\" class=\"toggle-fullscreen\">Enter fullscreen</button></div></div><div class=\"settings-section-card\"><div class="settings-section-heading"><div><strong>Online wallpaper</strong><small>Use an image URL as your desktop background.</small></div></div><input class="wallpaper-input settings-wide" type="url" placeholder="https://example.com/wallpaper.jpg"><p class="settings-hint">Leave the wallpaper empty to use LucidOS's default dark space background.</p><div class="settings-actions"><button class="save-wallpaper">Save wallpaper</button><button class="clear-wallpaper">Use default</button><span class="wallpaper-status"></span></div></div></section><section class="settings-page" data-page-content="account" hidden><div class="settings-page-header"><div><span class="settings-eyebrow">LUCID IDENTITY</span><h2>Account</h2><p class="account-page-description">Your Lucid account works across Settings, Store, Studio, reviews, and subscriptions.</p></div><div class="settings-page-mark">◉</div></div><section class="account-auth-card"><div class="account-card-icon">◉</div><div class="account-card-copy"><strong>Lucid Account</strong><small class="account-auth-detail">Sign in or create an account to use LucidOS services.</small></div><button type="button" class="account-auth-button">Sign in / Create account</button></section><section class="account-plan-card"><div><span class="account-plan-label">LUCID PLUS</span><h3>Free plan</h3><p>100 MB publishing limit and access to the Lucid Store.</p></div><button type="button" class="account-plan-button">Upgrade to Plus</button></section><section class="settings-section-card"><div class="settings-section-heading"><div><strong>Local profile</strong><small>Your display name on this device.</small></div></div><div class="settings-profile-grid"><label><span>User name</span><input class="username-input" type="text"></label><button class="save-account">Save changes</button><span class="account-status"></span></div></section><section class="settings-section-card account-submissions-card"><div class="settings-section-heading"><div><strong>My submissions</strong><small>Track apps you have sent to the Lucid Store.</small></div><button type="button" class="submissions-refresh">Refresh</button></div><div class="account-submissions-list"><div class="settings-empty">Open this section to load submissions.</div></div></section><section class="settings-section-card reviewer-card" hidden><div class="settings-section-heading"><div><strong>Store review queue</strong><small>Inspect, run, approve or reject pending developer submissions.</small></div><button type="button" class="reviewer-refresh">Refresh</button></div><div class="reviewer-list"><div class="settings-empty">Open this section to load the queue.</div></div></section></section><section class="settings-page" data-page-content="notifications" hidden><div class="settings-page-header"><div><span class="settings-eyebrow">SYSTEM BEHAVIOR</span><h2>Notifications</h2><p>Control how LucidOS handles notifications.</p></div></div><section class="settings-section-card"><div class="settings-section-heading"><div><strong>Allow notifications</strong><small>Let Lucid apps display notifications.</small></div><input class="notifications-toggle" type="checkbox"></div></section></section><section class="settings-page" data-page-content="storage" hidden><div class="settings-page-header"><div><span class="settings-eyebrow">LOCAL DATA</span><h2>Storage</h2><p>Manage files and data stored by LucidOS in this browser.</p></div></div><div class="storage-box"><strong class="storage-size">Calculating...</strong><span>Used by Lucid Files</span></div><section class="settings-section-card"><strong>Folders</strong><p>Documents · Downloads · Pictures · Music · Videos · Desktop</p></section><button class="storage-reset danger-action">Reset user files</button><span class="storage-status"></span></section><section class="settings-page" data-page-content="system" hidden><div class="settings-page-header"><div><span class="settings-eyebrow">SYSTEM</span><h2>System</h2><p>Manage installed Lucid applications and reset the OS.</p></div></div><div class="installed-apps"></div><div class="danger-zone"><h3>Reset LucidOS</h3><p>Erase local files, settings, installed apps, and cached data from this browser.</p><button class="erase-everything">Erase everything</button></div></section><section class="settings-page" data-page-content="about" hidden><div class="settings-page-header"><div><span class="settings-eyebrow">ABOUT</span><h2>About LucidOS</h2><p>LucidOS is a simulated operating system running inside your browser.</p></div></div><section class="settings-section-card about-card"><div><strong>LucidOS</strong><span>Version 0.2</span></div><p>Built as a browser-based desktop environment for Lucid applications.</p></section></section></main></div>`;
+        const content = `<div class="settings-app">
+    <aside class="settings-sidebar">
+        <div class="settings-brand">
+            <span>◈</span>
+            <div>
+                <strong>LucidOS</strong>
+                <small>System settings</small>
+            </div>
+        </div>
+        <button class="settings-tab active" data-page="appearance">🖥️
+            <span>Appearance</span>
+        </button>
+        <button class="settings-tab" data-page="account">👤
+            <span>Account</span>
+        </button>
+        <button class="settings-tab" data-page="notifications">🔔
+            <span>Notifications</span>
+        </button>
+        <button class="settings-tab" data-page="storage">💾
+            <span>Storage</span>
+        </button>
+        <button class="settings-tab" data-page="system">⚙️
+            <span>System</span>
+        </button>
+        <button class="settings-tab" data-page="about">ℹ️
+            <span>About</span>
+        </button>
+    </aside>
+    <main class="settings-content">
+        <section class="settings-page" data-page-content="appearance">
+            <div class="settings-page-header">
+                <div>
+                    <span class="settings-eyebrow">PERSONALIZATION</span>
+                    <h2>Appearance</h2>
+                    <p>Customize how LucidOS looks and feels.</p>
+                </div>
+            </div>
+            <div class="settings-section-card">
+                <div class="settings-section-heading">
+                    <div>
+                        <strong>Theme</strong>
+                        <small>Choose the appearance used across LucidOS.</small>
+                    </div>
+                    <select class="theme-select">
+                      <option value="dark">Dark</option>
+                      <option value="liminal">Liminal</option>
+                      <option value="light">Light</option>
+                      <option value="paper">Paper</option>
+                    </select>
+                </div>
+            </div>
+            <div
+            <div class=\"settings-section-card\">
+                <div class=\"settings-section-heading\">
+                    <div>
+                        <strong>Fullscreen</strong>
+                        <small>Fill the entire screen with LucidOS.</small>
+                    </div>
+                    <button type=\"button\" class=\"toggle-fullscreen\">Enter fullscreen</button>
+                </div>
+            </div>
+            <div class=\"settings-section-card\">
+                <div class="settings-section-heading">
+                    <div>
+                        <strong>Online wallpaper</strong>
+                        <small>Use an image URL as your desktop background.</small>
+                    </div>
+                </div>
+                <input class="wallpaper-input settings-wide" type="url" placeholder="https://example.com/wallpaper.jpg">
+                    <p class="settings-hint">Leave the wallpaper empty to use LucidOS's default dark space background.</p>
+                    <div class="settings-actions">
+                        <button class="save-wallpaper">Save wallpaper</button>
+                        <button class="clear-wallpaper">Use default</button>
+                        <span class="wallpaper-status">
+                        </span>
+                    </div>
+                </div>
+            </section>
+            <section class="settings-page" data-page-content="account" hidden>
+                <div class="settings-page-header">
+                    <div>
+                        <span class="settings-eyebrow">LUCID IDENTITY</span>
+                        <h2>Account</h2>
+                        <p class="account-page-description">Your Lucid account works across Settings, Store, Studio, reviews, and subscriptions.</p>
+                    </div>
+                    <div class="settings-page-mark">◉</div>
+                </div>
+                <section class="account-auth-card">
+                    <div class="account-card-icon">◉</div>
+                    <div class="account-card-copy">
+                        <strong>Lucid Account</strong>
+                        <small class="account-auth-detail">Sign in or create an account to use LucidOS services.</small>
+                    </div>
+                    <button type="button" class="account-auth-button">Sign in / Create account</button>
+                </section>
+                <section class="account-plan-card">
+                    <div>
+                        <span class="account-plan-label">LUCID PLUS</span>
+                        <h3>Free plan</h3>
+                        <p>100 MB publishing limit and access to the Lucid Store.</p>
+                    </div>
+                    <button type="button" class="account-plan-button">Upgrade to Plus</button>
+                </section>
+                <section class="settings-section-card">
+                    <div class="settings-section-heading">
+                        <div>
+                            <strong>Local profile</strong>
+                            <small>Your display name on this device.</small>
+                        </div>
+                    </div>
+                    <div class="settings-profile-grid">
+                        <label>
+                            <span>User name</span>
+                            <input class="username-input" type="text">
+                            </label>
+                            <button class="save-account">Save changes</button>
+                            <span class="account-status">
+                            </span>
+                        </div>
+                    </section>
+                    <section class="settings-section-card account-submissions-card">
+                        <div class="settings-section-heading">
+                            <div>
+                                <strong>My submissions</strong>
+                                <small>Track apps you have sent to the Lucid Store.</small>
+                            </div>
+                            <button type="button" class="submissions-refresh">Refresh</button>
+                        </div>
+                        <div class="account-submissions-list">
+                            <div class="settings-empty">Open this section to load submissions.</div>
+                        </div>
+                    </section>
+                    <section class="settings-section-card reviewer-card" hidden>
+                        <div class="settings-section-heading">
+                            <div>
+                                <strong>Store review queue</strong>
+                                <small>Inspect, run, approve or reject pending developer submissions.</small>
+                            </div>
+                            <button type="button" class="reviewer-refresh">Refresh</button>
+                        </div>
+                        <div class="reviewer-list">
+                            <div class="settings-empty">Open this section to load the queue.</div>
+                        </div>
+                    </section>
+                </section>
+                <section class="settings-page" data-page-content="notifications" hidden>
+                    <div class="settings-page-header">
+                        <div>
+                            <span class="settings-eyebrow">SYSTEM BEHAVIOR</span>
+                            <h2>Notifications</h2>
+                            <p>Control how LucidOS handles notifications.</p>
+                        </div>
+                    </div>
+                    <section class="settings-section-card">
+                        <div class="settings-section-heading">
+                            <div>
+                                <strong>Allow notifications</strong>
+                                <small>Let Lucid apps display notifications.</small>
+                            </div>
+                            <input class="notifications-toggle" type="checkbox">
+                            </div>
+                        </section>
+                    </section>
+                    <section class="settings-page" data-page-content="storage" hidden>
+                        <div class="settings-page-header">
+                            <div>
+                                <span class="settings-eyebrow">LOCAL DATA</span>
+                                <h2>Storage</h2>
+                                <p>Manage files and data stored by LucidOS in this browser.</p>
+                            </div>
+                        </div>
+                        <div class="storage-box">
+                            <strong class="storage-size">Calculating...</strong>
+                            <span>Used by Lucid Files</span>
+                        </div>
+                        <section class="settings-section-card">
+                            <strong>Folders</strong>
+                            <p>Documents · Downloads · Pictures · Music · Videos · Desktop</p>
+                        </section>
+                        <button class="storage-reset danger-action">Reset user files</button>
+                        <span class="storage-status">
+                        </span>
+                    </section>
+                    <section class="settings-page" data-page-content="system" hidden>
+                        <div class="settings-page-header">
+                            <div>
+                                <span class="settings-eyebrow">SYSTEM</span>
+                                <h2>System</h2>
+                                <p>Manage installed Lucid applications and reset the OS.</p>
+                            </div>
+                        </div>
+                        <div class="installed-apps">
+                        </div>
+                        <div class="danger-zone">
+                            <h3>Reset LucidOS</h3>
+                            <p>Erase local files, settings, installed apps, and cached data from this browser.</p>
+                            <button class="erase-everything">Erase everything</button>
+                        </div>
+                    </section>
+                    <section class="settings-page" data-page-content="about" hidden>
+                        <div class="settings-page-header">
+                            <div>
+                                <span class="settings-eyebrow">ABOUT</span>
+                                <h2>About LucidOS</h2>
+                                <p>LucidOS is a simulated operating system running inside your browser.</p>
+                            </div>
+                        </div>
+                        <section class="settings-section-card about-card">
+                            <div>
+                                <strong>LucidOS</strong>
+                                <span>Version 0.2</span>
+                            </div>
+                            <p>Built as a browser-based desktop environment for Lucid applications.</p>
+                        </section>
+                    </section>
+                </main>
+            </div>`;
         const windowElement = createWindow("⚙️ Settings", content);
         ensureReviewStyles();
         const themeSelect = windowElement.querySelector('.theme-select');
@@ -51,7 +267,7 @@ function createSettingsApp(createWindow = defaultCreateWindow) {
         );
         themeSelect.addEventListener('change', async () => {
             settings.theme = themeSelect.value;
-            applytheme(settings.theme);
+            applyTheme(settings.theme);
             await saveSettings(settings);
             window.dispatchEvent(
                 new CustomEvent("lucid-settings-changed", {
@@ -148,7 +364,13 @@ async function renderOwnSubmissions(windowElement, force = false) {
             ? submissions
                   .map(
                       item =>
-                          `<div class="submission-row"><div><strong>${escapeHTML(item.name)}</strong><small>v${escapeHTML(item.version)} · ${escapeHTML(item.status)}</small></div><span>${item.status === "rejected" ? escapeHTML(item.rejection_reason || "No reason given") : escapeHTML(new Date(item.submitted_at).toLocaleDateString())}</span></div>`,
+                          `<div class="submission-row">
+    <div>
+        <strong>${escapeHTML(item.name)}</strong>
+        <small>v${escapeHTML(item.version)} · ${escapeHTML(item.status)}</small>
+    </div>
+    <span>${item.status === "rejected" ? escapeHTML(item.rejection_reason || "No reason given") : escapeHTML(new Date(item.submitted_at).toLocaleDateString())}</span>
+</div>`,
                   )
                   .join("")
             : '<div class="settings-empty">No submissions yet.</div>';
@@ -167,7 +389,21 @@ async function renderReviewQueue(windowElement, force = false) {
             ? submissions
                   .map(
                       item =>
-                          `<article class="reviewer-row"><div class="reviewer-row-main"><div class="reviewer-row-head"><strong>${escapeHTML(item.name)}</strong><small>v${escapeHTML(item.version)} · ${escapeHTML(item.category)} · ${formatBytes(item.package_size)}</small></div><p>${escapeHTML(item.description || "No description provided.")}</p><span>${item.submitted_at ? `Submitted ${escapeHTML(new Date(item.submitted_at).toLocaleDateString())}` : ""}</span></div><div class="reviewer-actions"><button data-review-open="${item.id}">Inspect</button><button data-review="rejected" data-id="${item.id}">Reject</button><button data-review="approved" data-id="${item.id}">Approve</button></div></article>`,
+                          `<article class="reviewer-row">
+    <div class="reviewer-row-main">
+        <div class="reviewer-row-head">
+            <strong>${escapeHTML(item.name)}</strong>
+            <small>v${escapeHTML(item.version)} · ${escapeHTML(item.category)} · ${formatBytes(item.package_size)}</small>
+        </div>
+        <p>${escapeHTML(item.description || "No description provided.")}</p>
+        <span>${item.submitted_at ? `Submitted ${escapeHTML(new Date(item.submitted_at).toLocaleDateString())}`: ""}</span>
+</div>
+<div class="reviewer-actions">
+    <button data-review-open="${item.id}">Inspect</button>
+    <button data-review="rejected" data-id="${item.id}">Reject</button>
+    <button data-review="approved" data-id="${item.id}">Approve</button>
+</div>
+</article>`,
                   )
                   .join("")
             : '<div class="settings-empty">Nothing waiting for review.</div>';
@@ -212,7 +448,25 @@ async function openReviewDetails(windowElement, submission) {
     closeReviewDetails();
     const overlay = document.createElement("div");
     overlay.className = "reviewer-detail-overlay";
-    overlay.innerHTML = `<div class="reviewer-detail" role="dialog" aria-modal="true"><header class="reviewer-detail-header"><div><span>STORE REVIEW</span><h2>${escapeHTML(submission.name)}</h2><p>v${escapeHTML(submission.version)} · ${escapeHTML(submission.category)} · ${formatBytes(submission.package_size)}</p></div><button class="reviewer-detail-close">×</button></header><div class="reviewer-detail-meta"><div><strong>Description</strong><p>${escapeHTML(submission.description || "No description provided.")}</p></div><div><strong>Submitted</strong><p>${submission.submitted_at ? escapeHTML(new Date(submission.submitted_at).toLocaleString()) : "Unknown"}</p></div></div>${
+    overlay.innerHTML = `<div class="reviewer-detail" role="dialog" aria-modal="true">
+    <header class="reviewer-detail-header">
+        <div>
+            <span>STORE REVIEW</span>
+            <h2>${escapeHTML(submission.name)}</h2>
+            <p>v${escapeHTML(submission.version)} · ${escapeHTML(submission.category)} · ${formatBytes(submission.package_size)}</p>
+        </div>
+        <button class="reviewer-detail-close">×</button>
+    </header>
+    <div class="reviewer-detail-meta">
+        <div>
+            <strong>Description</strong>
+            <p>${escapeHTML(submission.description || "No description provided.")}</p>
+        </div>
+        <div>
+            <strong>Submitted</strong>
+            <p>${submission.submitted_at ? escapeHTML(new Date(submission.submitted_at).toLocaleString()) : "Unknown"}</p>
+        </div>
+    </div>${
         Array.isArray(submission.store_images) && submission.store_images.length
             ? `<div class="reviewer-screenshots">${submission.store_images
                   .slice(0, 6)
@@ -220,9 +474,31 @@ async function openReviewDetails(windowElement, submission) {
                       url =>
                           `<img src="${escapeHTML(url)}" alt="${escapeHTML(submission.name)} screenshot">`,
                   )
-                  .join("")}</div>`
-            : ''
-    }<div class="reviewer-inspect-toolbar"><button class="reviewer-view-source">View source</button><button class="reviewer-run-app">Run app</button><span class="reviewer-detail-status"></span></div><div class="reviewer-workspace"><pre class="reviewer-source"><code>Source will appear here.</code></pre><div class="reviewer-runtime" hidden><div class="reviewer-runtime-head"><span>Live app</span><button class="reviewer-runtime-stop">Stop</button></div><div class="reviewer-runtime-host"></div></div></div><footer class="reviewer-detail-actions"><button class="reviewer-reject">Reject</button><button class="reviewer-approve">Approve</button></footer></div>`;
+                  .join("")}</div>`: ''
+}<div class="reviewer-inspect-toolbar">
+<button class="reviewer-view-source">View source</button>
+<button class="reviewer-run-app">Run app</button>
+<span class="reviewer-detail-status">
+</span>
+</div>
+<div class="reviewer-workspace">
+    <pre class="reviewer-source">
+        <code>Source will appear here.</code>
+    </pre>
+    <div class="reviewer-runtime" hidden>
+        <div class="reviewer-runtime-head">
+            <span>Live app</span>
+            <button class="reviewer-runtime-stop">Stop</button>
+        </div>
+        <div class="reviewer-runtime-host">
+        </div>
+    </div>
+</div>
+<footer class="reviewer-detail-actions">
+    <button class="reviewer-reject">Reject</button>
+    <button class="reviewer-approve">Approve</button>
+</footer>
+</div>`;
     document.body.appendChild(overlay);
     const detail = overlay.querySelector(".reviewer-detail");
     const status = detail.querySelector(".reviewer-detail-status");
@@ -332,7 +608,218 @@ function ensureReviewStyles() {
     if (document.getElementById("lucid-review-styles")) return;
     const style = document.createElement("style");
     style.id = "lucid-review-styles";
-    style.textContent = `.reviewer-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;padding:14px;border:1px solid var(--border-soft,#22252c);border-radius:12px;background:rgba(255,255,255,.025);margin-top:9px}.reviewer-row-main{min-width:0}.reviewer-row-head{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.reviewer-row-head strong{font-size:12px}.reviewer-row-head small,.reviewer-row-main>span{color:var(--muted);font-size:9px}.reviewer-row-main p{margin:7px 0;color:var(--text-soft);font-size:10px;line-height:1.45}.reviewer-actions{display:flex;align-items:center;gap:6px}.reviewer-actions button{min-height:32px;padding:0 10px}.reviewer-detail-overlay{position:fixed;inset:0;z-index:12000;display:grid;place-items:center;padding:20px;background:rgba(4,6,10,.8);backdrop-filter:blur(10px)}.reviewer-detail{width:min(1050px,96vw);height:min(820px,92vh);display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:#0d1117;box-shadow:0 30px 100px rgba(0,0,0,.55)}.reviewer-detail-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.07)}.reviewer-detail-header span{font-size:9px;letter-spacing:2px;color:var(--muted)}.reviewer-detail-header h2{margin:5px 0 4px;font-size:20px}.reviewer-detail-header p{margin:0;color:var(--muted);font-size:10px}.reviewer-detail-close{width:34px;height:34px;padding:0}.reviewer-detail-meta{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:16px;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.06)}.reviewer-detail-meta strong{font-size:10px}.reviewer-detail-meta p{margin:5px 0 0;color:var(--text-soft);font-size:10px;line-height:1.5}.reviewer-screenshots{display:flex;gap:8px;overflow:auto;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.06)}.reviewer-screenshots img{width:110px;height:70px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.08)}.reviewer-inspect-toolbar{display:flex;align-items:center;gap:8px;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.06)}.reviewer-inspect-toolbar button{min-height:32px;padding:0 11px}.reviewer-detail-status{color:var(--muted);font-size:10px;margin-left:auto}.reviewer-workspace{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1px;background:#272b33}.reviewer-source,.reviewer-runtime{min-width:0;min-height:0;margin:0;background:#090c11}.reviewer-source{overflow:auto;padding:14px;font:11px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:#d8dbe2;white-space:pre-wrap}.reviewer-runtime{display:flex;flex-direction:column}.reviewer-runtime-head{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.06);color:var(--muted);font-size:10px}.reviewer-runtime-host{flex:1;min-height:0;overflow:auto;padding:14px;display:flex;justify-content:center;align-items:flex-start}.reviewer-detail-actions{display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid rgba(255,255,255,.07)}.reviewer-detail-actions button{min-height:34px;padding:0 14px}.reviewer-detail-actions .reviewer-reject{background:rgba(150,70,70,.18)}@media(max-width:760px){.reviewer-row{grid-template-columns:1fr}.reviewer-actions{justify-content:flex-end}.reviewer-detail{height:96vh}.reviewer-detail-meta{grid-template-columns:1fr}.reviewer-workspace{grid-template-columns:1fr}.reviewer-runtime{min-height:360px}}`;
+    style.textContent = `.reviewer-row {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:14px;
+    padding:14px;
+    border:1px solid var(--border-soft,#22252c);
+    border-radius:12px;
+    background:rgba(255,255,255,.025);
+    margin-top:9px
+}
+.reviewer-row-main {
+    min-width:0
+}
+.reviewer-row-head {
+    display:flex;
+    gap:9px;
+    align-items:center;
+    flex-wrap:wrap
+}
+.reviewer-row-head strong {
+    font-size:12px
+}
+.reviewer-row-head small,.reviewer-row-main>span {
+    color:var(--muted);
+    font-size:9px
+}
+.reviewer-row-main p {
+    margin:7px 0;
+    color:var(--text-soft);
+    font-size:10px;
+    line-height:1.45
+}
+.reviewer-actions {
+    display:flex;
+    align-items:center;
+    gap:6px
+}
+.reviewer-actions button {
+    min-height:32px;
+    padding:0 10px
+}
+.reviewer-detail-overlay {
+    position:fixed;
+    inset:0;
+    z-index:12000;
+    display:grid;
+    place-items:center;
+    padding:20px;
+    background:rgba(4,6,10,.8);
+    backdrop-filter:blur(10px)
+}
+.reviewer-detail {
+    width:min(1050px,96vw);
+    height:min(820px,92vh);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:16px;
+    background:#0d1117;
+    box-shadow:0 30px 100px rgba(0,0,0,.55)
+}
+.reviewer-detail-header {
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    padding:18px 20px;
+    border-bottom:1px solid rgba(255,255,255,.07)
+}
+.reviewer-detail-header span {
+    font-size:9px;
+    letter-spacing:2px;
+    color:var(--muted)
+}
+.reviewer-detail-header h2 {
+    margin:5px 0 4px;
+    font-size:20px
+}
+.reviewer-detail-header p {
+    margin:0;
+    color:var(--muted);
+    font-size:10px
+}
+.reviewer-detail-close {
+    width:34px;
+    height:34px;
+    padding:0
+}
+.reviewer-detail-meta {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 220px;
+    gap:16px;
+    padding:14px 20px;
+    border-bottom:1px solid rgba(255,255,255,.06)
+}
+.reviewer-detail-meta strong {
+    font-size:10px
+}
+.reviewer-detail-meta p {
+    margin:5px 0 0;
+    color:var(--text-soft);
+    font-size:10px;
+    line-height:1.5
+}
+.reviewer-screenshots {
+    display:flex;
+    gap:8px;
+    overflow:auto;
+    padding:12px 20px;
+    border-bottom:1px solid rgba(255,255,255,.06)
+}
+.reviewer-screenshots img {
+    width:110px;
+    height:70px;
+    object-fit:cover;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,.08)
+}
+.reviewer-inspect-toolbar {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 20px;
+    border-bottom:1px solid rgba(255,255,255,.06)
+}
+.reviewer-inspect-toolbar button {
+    min-height:32px;
+    padding:0 11px
+}
+.reviewer-detail-status {
+    color:var(--muted);
+    font-size:10px;
+    margin-left:auto
+}
+.reviewer-workspace {
+    flex:1;
+    min-height:0;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:1px;
+    background:#272b33
+}
+.reviewer-source,.reviewer-runtime {
+    min-width:0;
+    min-height:0;
+    margin:0;
+    background:#090c11
+}
+.reviewer-source {
+    overflow:auto;
+    padding:14px;
+    font:11px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;
+    color:#d8dbe2;
+    white-space:pre-wrap
+}
+.reviewer-runtime {
+    display:flex;
+    flex-direction:column
+}
+.reviewer-runtime-head {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:8px 10px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    color:var(--muted);
+    font-size:10px
+}
+.reviewer-runtime-host {
+    flex:1;
+    min-height:0;
+    overflow:auto;
+    padding:14px;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start
+}
+.reviewer-detail-actions {
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    padding:12px 20px;
+    border-top:1px solid rgba(255,255,255,.07)
+}
+.reviewer-detail-actions button {
+    min-height:34px;
+    padding:0 14px
+}
+.reviewer-detail-actions .reviewer-reject {
+    background:rgba(150,70,70,.18)
+}
+@media(max-width:760px) {
+    .reviewer-row {
+        grid-template-columns:1fr
+    }
+    .reviewer-actions {
+        justify-content:flex-end
+    }
+    .reviewer-detail {
+        height:96vh
+    }
+    .reviewer-detail-meta {
+        grid-template-columns:1fr
+    }
+    .reviewer-workspace {
+        grid-template-columns:1fr
+    }
+    .reviewer-runtime {
+        min-height:360px
+    }
+}`;
     document.head.appendChild(style);
 }
 function renderInstalledApps(windowElement) {
@@ -343,7 +830,14 @@ function renderInstalledApps(windowElement) {
         ? optional
               .map(
                   app =>
-                      `<div class="installed-app-row"><span class="installed-app-icon">${escapeHTML(app.icon)}</span><div><strong>${escapeHTML(app.name)}</strong><small>v${escapeHTML(app.version || "1.0.0")}</small></div><button class="uninstall-app" data-app-id="${escapeHTML(app.id)}">Uninstall</button></div>`,
+                      `<div class="installed-app-row">
+    <span class="installed-app-icon">${escapeHTML(app.icon)}</span>
+    <div>
+        <strong>${escapeHTML(app.name)}</strong>
+        <small>v${escapeHTML(app.version || "1.0.0")}</small>
+    </div>
+    <button class="uninstall-app" data-app-id="${escapeHTML(app.id)}">Uninstall</button>
+</div>`,
               )
               .join("")
         : '<div class="settings-empty">No optional apps installed.</div>';
