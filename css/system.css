@@ -1244,6 +1244,31 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
     animation:click-pulse 3.5s ease-in-out infinite;
     text-shadow:0 0 7px rgba(255,255,255,.5)
 }
+
+.intro-skip {
+    position:absolute;
+    right:24px;
+    bottom:22px;
+    z-index:10;
+    min-height:32px;
+    padding:0 12px;
+    border:1px solid rgba(255,255,255,.24);
+    border-radius:7px;
+    background:rgba(0,0,0,.38);
+    color:#fff;
+    font:12px monospace;
+    letter-spacing:1px;
+    opacity:.65
+}
+.intro-skip:hover {
+    opacity:1;
+    background:rgba(255,255,255,.08);
+    border-color:rgba(255,255,255,.4)
+}
+.lucid-intro-screen.intro-skipped {
+    opacity:0;
+    transition:opacity .35s ease
+}
 @keyframes intro-flicker {
     0% {
         opacity:.1;

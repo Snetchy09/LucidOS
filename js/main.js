@@ -21,7 +21,7 @@ import {
 } from "./app-registry.js";
 import { createLucidStudio } from "../apps/lucid-studio.js";
 import { createIntroScreen } from "./intro-screen.js"
-import { startLucidAudio } from "./lucid-audio.js"
+import { startLucidAudio, stopLucidAudio } from "./lucid-audio.js"
 console.log("Lucid level:", getLucidLevel());
 await loadFileSystem();
 initializeAppRegistry();
@@ -42,6 +42,10 @@ createIntroScreen()
 
 window.addEventListener("lucid-intro-started", () => {
     startLucidAudio()
+})
+
+window.addEventListener("lucid-intro-skipped", () => {
+    stopLucidAudio()
 })
 document.addEventListener("click", () => {
     startLucidAudio()

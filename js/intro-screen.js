@@ -1,4 +1,45 @@
 let introFinished = false
+let introSkipped = false
+let introAnimation = null
+let introTimers = []
+
+function rememberTimer(callback, delay) {
+    const timer = setTimeout(() => {
+        introTimers = introTimers.filter(item => item !== timer)
+        callback()
+    }, delay)
+    introTimers.push(timer)
+    return timer
+}
+
+function clearIntroTimers() {
+    for (let timer of introTimers) {
+        clearTimeout(timer)
+    }
+    introTimers = []
+}
+
+function skipIntro(screen) {
+    if (introFinished) return
+
+    introSkipped = true
+    introFinished = true
+    clearIntroTimers()
+
+    if (introAnimation) {
+        cancelAnimationFrame(introAnimation)
+        introAnimation = null
+    }
+
+    screen.classList.add("intro-skipped")
+    window.dispatchEvent(new Event("lucid-intro-skipped"))
+
+    const finishTimer = setTimeout(() => {
+        screen.remove()
+        window.dispatchEvent(new Event("lucid-intro-finished"))
+    }, 350)
+    introTimers.push(finishTimer)
+}
 
 const closedEye = "M40,90 Q160,90 280,90 Q160,90 40,90 Z"
 const openEye = "M40,90 Q160,18 280,90 Q160,162 40,90 Z"
@@ -26,6 +67,8 @@ function animateEye(eye, softEye, clip, message, screen) {
     const totalTime = 8200
 
     function frame(now) {
+        if (introSkipped || introFinished) return
+
         let progress = (now - start) / totalTime
 
         if (progress > 1) progress = 1
@@ -62,14 +105,14 @@ function animateEye(eye, softEye, clip, message, screen) {
         clip.setAttribute("d", shape)
 
         if (progress < 1) {
-            requestAnimationFrame(frame)
+            introAnimation = requestAnimationFrame(frame)
         } else {
             eye.setAttribute("d", openEye)
             softEye.setAttribute("d", openEye)
             clip.setAttribute("d", openEye)
 
-            setTimeout(() => {
-                showWelcome(message, screen)
+            rememberTimer(() => {
+                if (!introSkipped && !introFinished) showWelcome(message, screen)
             }, 1000)
         }
     }
@@ -120,11 +163,13 @@ function createIntroScreen() {
         </div>
 
         <div class="intro-message"></div>
+        <button class="intro-skip" type="button">Skip intro</button>
     `
 
     document.body.appendChild(screen)
 
     const clickStart = screen.querySelector(".click-start")
+    const skipButton = screen.querySelector(".intro-skip")
     const wrap = screen.querySelector(".intro-eye-wrap")
     const eye = screen.querySelector("#eyeShape")
     const softEye = screen.querySelector("#softEye")
@@ -132,34 +177,55 @@ function createIntroScreen() {
     const message = screen.querySelector(".intro-message")
 
     clickStart.addEventListener("click", () => {
+        if (introSkipped || introFinished) return
+
         clickStart.classList.add("click-hidden")
 
-        setTimeout(() => {
-            window.dispatchEvent(new Event("lucid-intro-started"))
+        rememberTimer(() => {
+            if (!introSkipped && !introFinished) {
+                window.dispatchEvent(new Event("lucid-intro-started"))
+            }
         }, 3000)
 
-        setTimeout(() => {
-            wrap.classList.add("visible")
+        rememberTimer(() => {
+            if (!introSkipped && !introFinished) {
+                wrap.classList.add("visible")
+            }
         }, 900)
 
-        setTimeout(() => {
-            animateEye(eye, softEye, clip, message, screen)
+        rememberTimer(() => {
+            if (!introSkipped && !introFinished) {
+                animateEye(eye, softEye, clip, message, screen)
+            }
         }, 1800)
     }, { once: true })
+
+    skipButton.addEventListener("click", event => {
+        event.stopPropagation()
+        skipIntro(screen)
+    })
 }
 
 function showWelcome(message, screen) {
+    if (introSkipped || introFinished) return
+
     message.classList.add("message-visible")
 
     const text = "Welcome"
     let i = 0
 
     function addLetter() {
+        if (introSkipped || introFinished) return
+
         if (i >= text.length) {
-            setTimeout(() => {
+            rememberTimer(() => {
+                if (introSkipped || introFinished) return
+
                 screen.classList.add("intro-ending")
 
-                setTimeout(() => {
+                rememberTimer(() => {
+                    if (introSkipped) return
+
                     screen.remove()
                     introFinished = true
                     window.dispatchEvent(new Event("lucid-intro-finished"))
@@ -173,8 +239,10 @@ function showWelcome(message, screen) {
         span.textContent = text[i]
         message.appendChild(span)
 
-        setTimeout(() => {
-            span.classList.add("letter-show")
+        rememberTimer(() => {
+            if (!introSkipped && !introFinished) {
+                span.classList.add("letter-show")
+            }
         }, 40)
 
         if (Math.random() > 0.65) {
@@ -183,7 +251,7 @@ function showWelcome(message, screen) {
 
         i++
 
-        setTimeout(addLetter, 250 + Math.random() * 180)
+        rememberTimer(addLetter, 250 + Math.random() * 180)
     }
 
     addLetter()
