@@ -35,14 +35,14 @@ async function waitForLemon() {
     for (let i = 0; i < 30; i++) { if (setupLemonEvents()) return true; await new Promise(resolve => setTimeout(resolve, 200)); }
     return false;
 }
-async function showAuthDialog(mode = "signin") {
+function showAuthDialog(mode = "signin") {
     if (document.querySelector(".lucid-auth-overlay")) return;
 
     const overlay = document.createElement("div");
     overlay.className = "lucid-account-overlay lucid-auth-overlay";
     overlay.innerHTML = `
         <div class="lucid-account-dialog lucid-auth-dialog">
-            <button class="lucid-dialog-close" type="button" data-auth-action="close">×</button>
+            <button class="lucid-dialog-close" type="button" data-auth-action="close" aria-label="Close">×</button>
             <div class="account-plan-label">LUCID ACCOUNT</div>
             <div class="studio-auth-tabs">
                 <button type="button" class="studio-auth-tab" data-auth-mode="signup">Create account</button>
@@ -53,12 +53,13 @@ async function showAuthDialog(mode = "signin") {
     document.body.appendChild(overlay);
 
     const form = overlay.querySelector(".lucid-auth-form");
+    let selectedMode = mode === "signup" ? "signup" : "signin";
 
-    function render(currentMode) {
-        const signup = currentMode === "signup";
+    function render() {
+        const signup = selectedMode === "signup";
 
         overlay.querySelectorAll(".studio-auth-tab").forEach(button => {
-            button.classList.toggle("active", button.dataset.authMode === currentMode);
+            button.classList.toggle("active", button.dataset.authMode === selectedMode);
         });
 
         const fields = signup
@@ -87,36 +88,32 @@ async function showAuthDialog(mode = "signin") {
         const button = event.target.closest("button");
         if (!button || !overlay.contains(button)) return;
 
-        const action = button.dataset.authAction;
-        const authMode = button.dataset.authMode;
-
-        if (authMode) {
-            render(authMode);
+        if (button.dataset.authMode) {
+            selectedMode = button.dataset.authMode;
+            render();
             return;
         }
+
+        const action = button.dataset.authAction;
 
         if (action === "close") {
             overlay.remove();
-            return;
-        }
-
-        if (action === "reset") {
+        } else if (action === "reset") {
             sendReset(overlay);
         }
     });
 
     form.addEventListener("submit", event => {
         event.preventDefault();
-        const signup = overlay.querySelector(".studio-auth-tab.active")?.dataset.authMode === "signup";
-        submitAuth(signup, overlay);
+        submitAuth(selectedMode === "signup", overlay);
     });
 
     overlay.addEventListener("click", event => {
         if (event.target === overlay) overlay.remove();
     });
 
-    console.info("[Lucid Account] auth dialog opened:", mode);
-    render(mode);
+    console.info("[Lucid Account] auth dialog opened:", selectedMode);
+    render();
 }
 
 async function submitAuth(signup, overlay) {
