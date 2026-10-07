@@ -43,11 +43,27 @@ async function showAuthDialog(mode = "signin") {
     document.body.appendChild(overlay);
     const render = currentMode => {
         const signup = currentMode === "signup";
-        overlay.querySelectorAll(".studio-auth-tab").forEach(button => button.classList.toggle("active", button.dataset.mode === currentMode));
-        overlay.querySelector(".lucid-auth-form").innerHTML = `<h2>${signup ? "Create your Lucid account" : "Welcome back"}</h2>${signup ? '<label>Username<input id="lucid-auth-username" type="text" maxlength="32" autocomplete="username"></label><label>Display name<input id="lucid-auth-display-name" type="text" maxlength="48"></label>' : ""}<label>Email<input id="lucid-auth-email" type="email" autocomplete="email"></label><label>Password<input id="lucid-auth-password" type="password" autocomplete="${signup ? "new-password" : "current-password"}"></label>${signup ? '<div class="studio-security-warning"><strong>Security notice</strong><span>Use a unique password that you do not use on other websites.</span></div>' : '<button type="button" class="studio-forgot-password">Forgot password?</button>'}<button type="button" class="lucid-account-primary" id="lucid-auth-submit">${signup ? "Create account" : "Sign in"}</button><div class="lucid-account-message" id="lucid-auth-message"></div>`;
-        overlay.querySelector("#lucid-auth-submit").addEventListener("click", () => submitAuth(signup, overlay));
-        overlay.querySelector(".studio-forgot-password")?.addEventListener("click", () => sendReset(overlay));
+        overlay.querySelectorAll(".studio-auth-tab").forEach(button => {
+            button.classList.toggle("active", button.dataset.mode === currentMode);
+        });
+        const form = overlay.querySelector(".lucid-auth-form");
+        const fields = signup ?
+            '<label>Username<input id="lucid-auth-username" type="text" maxlength="32" autocomplete="username"></label><label>Display name<input id="lucid-auth-display-name" type="text" maxlength="48"></label>' : "";
+        const extra = signup ?
+            '<div class="studio-security-warning"><strong>Security notice</strong><span>Use a unique password that you do not use on other websites.</span></div>' :
+            '<button type="button" class="studio-forgot-password">Forgot password?</button>';
+        form.innerHTML = '<h2>' + (signup ? "Create your Lucid account" : "Welcome back") +
+            "</h2>" + fields +
+            '<label>Email<input id="lucid-auth-email" type="email" autocomplete="email"></label>' +
+            '<label>Password<input id="lucid-auth-password" type="password" autocomplete="' +
+            (signup ? "new-password" : "current-password") + '"></label>' + extra +
+            '<button type="button" class="lucid-account-primary" id="lucid-auth-submit">' +
+            (signup ? "Create account" : "Sign in") +
+            '</button><div class="lucid-account-message" id="lucid-auth-message"></div>';
+        form.querySelector("#lucid-auth-submit").addEventListener("click", () => submitAuth(signup, overlay));
+        form.querySelector(".studio-forgot-password")?.addEventListener("click", () => sendReset(overlay));
     };
+    overlay.querySelectorAll(".studio-auth-tab").forEach(button => button.classList.toggle("active", button.dataset.mode === currentMode));
     overlay.querySelectorAll(".studio-auth-tab").forEach(button => button.addEventListener("click", () => render(button.dataset.mode)));
     const close = () => overlay.remove();
     overlay.querySelector(".lucid-dialog-close").addEventListener("click", close);
@@ -63,7 +79,21 @@ async function submitAuth(signup, overlay) {
     if (signup && (!overlay.querySelector("#lucid-auth-username").value.trim() || !overlay.querySelector("#lucid-auth-display-name").value.trim())) { message.textContent = "Enter a username and display name."; return; }
     try {
         message.textContent = signup ? "Creating account..." : "Signing in...";
-        const result = signup ? await supabase.auth.signUp({ email, password, options: { data: { username: overlay.querySelector("#lucid-auth-username").value.trim(), display_name: overlay.querySelector("#lucid-auth-display-name").value.trim() } } }) : await supabase.auth.signInWithPassword({ email, password });
+        let result;
+        if (signup) {
+            result = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        username: overlay.querySelector("#lucid-auth-username").value.trim(),
+                        display_name: overlay.querySelector("#lucid-auth-display-name").value.trim()
+                    }
+                }
+            });
+        } else {
+            result = await supabase.auth.signInWithPassword({ email, password });
+        }
         if (result.error) throw result.error;
         if (signup && !result.data.session) { message.textContent = "Account created. Check your email to confirm your account."; return; }
         overlay.remove();

@@ -127,7 +127,14 @@ function renderStudioProjects(root) {
     `;
     root.querySelector("#studio-new-project")?.addEventListener("click", () => showNewProjectDialog(root));
     root.querySelector("#studio-empty-new-project")?.addEventListener("click", () => showNewProjectDialog(root));
-    root.querySelectorAll(".studio-project-open").forEach(button => button.addEventListener("click", () => { const project = getProject(button.dataset.projectId); if (!project) return; setActiveProject(project.id); openLucidScriptEditor(root, project); }));
+    root.querySelectorAll(".studio-project-open").forEach(button => {
+        button.addEventListener("click", () => {
+            const project = getProject(button.dataset.projectId);
+            if (!project) return;
+            setActiveProject(project.id);
+            openLucidScriptEditor(root, project);
+        });
+    });
     root.querySelectorAll(".studio-project-more").forEach(button => button.addEventListener("click", () => { const project = getProject(button.dataset.projectId); if (!project) return; showProjectMenu(root, project); }));
 }
 function showProjectMenu(root, project) {

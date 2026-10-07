@@ -27,13 +27,13 @@
 }
 .studio-tool {
     padding:7px 12px;
-    border:1px solid #30343d;
-    border-radius:7px;
+    border:1px solid #33425f;
+    border-radius:6px;
     background:var(--surface-3);
     color:var(--text-soft)
 }
 .studio-tool.active {
-    background:#292d35;
+    background:#2f3c57;
     color:var(--text)
 }
 .studio-section {
@@ -65,7 +65,7 @@
     width:24px;
     height:28px;
     padding:0;
-    border:1px solid #30343d;
+    border:1px solid #33425f;
     border-radius:4px;
     background:#15181d
 }
@@ -99,7 +99,7 @@
 .melody-cell {
     width:24px;
     height:22px;
-    border:1px solid #30343d;
+    border:1px solid #33425f;
     border-radius:3px;
     background:#15181d;
     padding:0
@@ -117,8 +117,8 @@
     flex-direction:column;
     gap:8px;
     padding:12px;
-    border:1px solid #292d35;
-    border-radius:8px;
+    border:1px solid #2f3c57;
+    border-radius:11px;
     background:#15181d
 }
 .mixer-channel span {

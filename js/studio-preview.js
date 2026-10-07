@@ -2,7 +2,6 @@ import { getFiles } from "./filesystem.js";
 import { getActiveProject, updateProject } from "../apps/lucid-projects.js";
 import { runLucidScript } from "../apps/lucid-script-runtime.js";
 
-// scene preview
 function findAsset(path) {
     const names = (Array.isArray(path) ? path : String(path || "").split("/").filter(Boolean)).slice();
     if (names[0] === "Home") names.shift();
@@ -95,7 +94,6 @@ window.addEventListener("lucid-window-created", event => {
 });
 
 
-// live preview
 const state = { runtime: null, urls: [] };
 
 function collect(files, path = []) {

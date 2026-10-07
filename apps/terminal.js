@@ -161,7 +161,7 @@ function createTerminal() {
         if (commandName === "help" || commandName === "man") {
             const target = tokens[0];
             if (target) print(helpText(target) || `No manual entry for ${target}.`);
-            else { print("LucidOS Terminal"); print("Type 'help <command>' for details."); Object.keys({help: 1, ls: 1, cd: 1, pwd: 1, tree: 1, cat: 1, head: 1, tail: 1, touch: 1, mkdir: 1, rm: 1, rmdir: 1, write: 1, append: 1, echo: 1, find: 1, grep: 1, history: 1, clear: 1, open: 1, apps: 1, storage: 1, whoami: 1, hostname: 1, uname: 1, date: 1, time: 1, uptime: 1, neofetch: 1, about: 1}).forEach(name => print("  " + helpText(name))); }
+            else { print("LucidOS Terminal"); print("Type 'help <command>' for details."); ["help","ls","cd","pwd","tree","cat","head","tail","touch","mkdir","rm","rmdir","write","append","echo","find","grep","history","clear","open","apps","storage","whoami","hostname","uname","date","time","uptime","neofetch","about"].forEach(name => print("  " + helpText(name))); }
             return;
         }
 

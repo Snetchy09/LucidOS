@@ -58,7 +58,7 @@
     gap:12px;
     padding:14px;
     border:1px solid rgba(255,255,255,.07);
-    border-radius:14px;
+    border-radius:16px;
     background:rgba(255,255,255,.025);
     transition:transform .15s ease,border-color .15s ease,background .15s ease
 }
@@ -72,7 +72,7 @@
     place-items:center;
     width:44px;
     height:44px;
-    border-radius:12px;
+    border-radius:16px;
     background:rgba(110,100,150,.1);
     color:#bdb5e6;
     font-size:21px
@@ -101,8 +101,8 @@
 }
 .studio-project-open,.studio-project-more {
     border:1px solid #30333c;
-    border-radius:7px;
-    background:#20232a;
+    border-radius:6px;
+    background:#223049;
     color:#cfd1d7;
     cursor:pointer
 }
@@ -275,7 +275,7 @@
     margin:10px;
     overflow:auto;
     border:1px solid rgba(255,255,255,.07);
-    border-radius:14px;
+    border-radius:16px;
     background:radial-gradient(circle at 50% 0%,rgba(95,79,140,.09),transparent 45%),#080b10
 }
 .lucid-preview>.lucid-preview-app {
@@ -287,8 +287,8 @@
 .lucid-preview-window {
     width:min(620px,100%);
     overflow:auto;
-    border:1px solid rgba(255,255,255,.09);
-    border-radius:12px;
+    border:1px solid rgba(150,170,205,.16);
+    border-radius:16px;
     background:#11151b;
     box-shadow:0 20px 60px rgba(0,0,0,.35)
 }
@@ -338,7 +338,7 @@
 .lucid-preview-game {
     max-width:100%;
     height:auto;
-    border-radius:10px;
+    border-radius:11px;
     background:#10131a
 }
 .studio-editor-footer {
@@ -367,7 +367,7 @@
     padding:18px;
     text-align:left;
     border:1px solid rgba(255,255,255,.07);
-    border-radius:14px;
+    border-radius:16px;
     background:rgba(255,255,255,.028)
 }
 .studio-dashboard-card:hover {
@@ -393,7 +393,7 @@
     max-height:90vh;
     overflow:auto;
     padding:18px;
-    border:1px solid rgba(255,255,255,.09);
+    border:1px solid rgba(150,170,205,.16);
     border-radius:16px;
     background:#11151b;
     box-shadow:0 24px 80px rgba(0,0,0,.5)
@@ -433,7 +433,7 @@
     margin-top:12px;
     padding:10px;
     border:1px solid rgba(255,255,255,.06);
-    border-radius:10px;
+    border-radius:11px;
     background:rgba(255,255,255,.025);
     color:var(--muted);
     font-size:10px
@@ -503,7 +503,7 @@
 .live-preview-asset {
     padding:9px;
     border:1px solid rgba(255,255,255,.07);
-    border-radius:10px;
+    border-radius:11px;
     background:rgba(255,255,255,.025)
 }
 .live-preview-asset-actions {
@@ -520,7 +520,7 @@
     margin-top:12px;
     padding:9px;
     border:1px solid rgba(255,255,255,.06);
-    border-radius:9px;
+    border-radius:11px;
     color:var(--muted);
     font-size:8px
 }
@@ -574,7 +574,7 @@
     gap:4px;
     padding:10px;
     border:1px solid rgba(210,100,100,.25);
-    border-radius:9px;
+    border-radius:11px;
     background:rgba(180,70,70,.07);
     color:var(--text-soft);
     font-size:10px
@@ -589,7 +589,7 @@
     background:var(--surface-3);
     color:var(--text-soft);
     border:1px solid var(--border-soft);
-    border-radius:9px;
+    border-radius:11px;
     font-size:11px
 }
 .studio-scene-palette-assets,.studio-game-snippets {
@@ -649,7 +649,7 @@
     padding:14px;
     overflow:auto;
     border:1px solid rgba(255,255,255,.07);
-    border-radius:9px;
+    border-radius:11px;
     background:#0c0f14;
     color:#cfd1d7;
     font:11px/1.6 ui-monospace,Consolas,monospace
@@ -667,13 +667,13 @@
     justify-content:space-between;
     gap:15px;
     padding:16px;
-    border:1px solid #292d35;
+    border:1px solid #2f3c57;
     border-radius:11px;
     background:#171a20
 }
 .submission-status {
     padding:6px 9px;
-    border-radius:7px;
+    border-radius:6px;
     background:#242830;
     font-size:10px;
     text-transform:capitalize

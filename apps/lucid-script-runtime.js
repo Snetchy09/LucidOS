@@ -37,7 +37,6 @@ function tokenize(source) {
     const tokens = [];
     let i = 0,
         line = 1;
-    // console.log('tokenizing', source.length, 'chars')
     const add = (type, value, l = line) => tokens.push({ type, value, line: l });
     while (i < source.length) {
         const c = source[i];
@@ -1333,6 +1332,7 @@ function beep(f = 440, d = 0.08) {
     } catch {}
 }
 function showRuntimeError(container, error) {
+    console.error("[Lucid Script] runtime error:", error);
     const e = document.createElement("div");
     e.className = "lucid-runtime-error";
     e.innerHTML = `<strong>Runtime error</strong><span>${escapeHTML(error.message || "Lucid runtime error.")}</span>`;
@@ -1366,8 +1366,9 @@ function buildManifest({
     };
 }
 function runLucidScript(source, mount, options = {}) {
-	const runtime = new LucidRuntime(source, mount, options);
-	//
-	return runtime.run();
+    const runtime = new LucidRuntime(source, mount, options);
+    const result = runtime.run();
+    console.info("[Lucid Script] started:", result.appName || "Untitled app");
+    return result;
 }
 export { runLucidScript, buildManifest, readLucidFile, writeLucidFile };

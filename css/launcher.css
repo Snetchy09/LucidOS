@@ -32,9 +32,9 @@ left:50%;
 top:50%;
 width:1px;
 height:1px;
-background:rgba(175,200,235,.28);
+background:rgba(175,196,230,.2);
 box-shadow:34px -76px rgba(150,180,220,.14),-72px 42px rgba(170,195,230,.12),92px 58px rgba(190,210,235,.11),-88px -55px rgba(135,165,210,.1),8px 101px rgba(160,190,225,.08),-20px -108px rgba(180,205,235,.08);
-animation:lucid-dust 6.8s ease-in-out infinite;
+animation:lucid-dust 7.2s ease-in-out infinite;
 pointer-events:none;
 }
 #desktop.lucid-launcher-open #desktop-apps::after {
@@ -104,7 +104,7 @@ background:rgba(250,253,255,.8);
     top:50%;
     width:78px;
     height:78px;
-    border:1px solid rgba(150,135,190,.12);
+    border:1px solid rgba(145,128,220,.16);
     border-radius:50%;
     transform:translate(-50%,-50%) scale(.75);
     opacity:0;

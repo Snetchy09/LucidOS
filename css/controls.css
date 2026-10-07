@@ -1,64 +1,11 @@
-button {
-font:inherit;
-appearance:none;
-border:1px solid rgba(255,255,255,.09);
-border-radius:9px;
-background:rgba(255,255,255,.055);
-color:var(--text);
-min-height:32px;
-padding:0 11px;
-cursor:pointer;
-transition:background .15s ease,border-color .15s ease,transform .12s ease,color .15s ease;
-}
-button:hover:not(:disabled) {
-background:rgba(255,255,255,.09);
-border-color:rgba(255,255,255,.14);
-}
-button:active:not(:disabled) {
-    transform:translateY(1px)
-}
-button:focus-visible {
-    outline:2px solid rgba(155,140,205,.6);
-    outline-offset:1px
-}
-button:disabled {
-    opacity:.45;
-    cursor:not-allowed
-}
-input,textarea,select {
-font:inherit;
-border:1px solid rgba(255,255,255,.09);
-border-radius:9px;
-background:rgba(5,7,11,.55);
-color:var(--text);
-}
-input::placeholder,textarea::placeholder {
-    color:var(--muted)
-}
-select option {
-    background:#15171c;
-    color:#e7e8ec
-}
-.window button {
-    border-radius:9px
-}
-.window input,.window textarea,.window select {
-    width:100%
-}
-.lucid-dialog-close {
-position:absolute;
-top:12px;
-right:12px;
-width:30px;
-height:30px;
-padding:0;
-}
-input[type=button],input[type=submit] {
-font:inherit;
-appearance:none;
-border:1px solid rgba(255,255,255,.09);
-border-radius:9px;
-background:rgba(255,255,255,.055);
-color:var(--text);
-min-height:32px;
-}
+button{appearance:none;min-height:34px;padding:0 12px;border:1px solid #33435f;border-radius:10px;background:#1a2639;color:var(--text);cursor:pointer;transition:background .16s ease,border-color .16s ease,transform .12s ease}
+button:hover:not(:disabled){background:#223049;border-color:#4a5d7e}
+button:active:not(:disabled){transform:translateY(1px)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid rgba(149,136,223,.55);outline-offset:2px}
+button:disabled{opacity:.42;cursor:not-allowed}
+input,textarea,select{font:inherit;border:1px solid #33435f;border-radius:10px;background:#0d1522;color:var(--text)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+select option{background:#141e30;color:#eef3fa}
+.window input,.window textarea,.window select{width:100%}
+.lucid-dialog-close{position:absolute;top:12px;right:12px;width:30px;height:30px;padding:0}
+input[type=button],input[type=submit]{min-height:34px;padding:0 12px;border:1px solid #33435f;border-radius:10px;background:#1a2639;color:var(--text)}

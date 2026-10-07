@@ -1,4 +1,4 @@
-/* app review and submissions */
+
 
 .lucid-publish-dialog-overlay {
     position:fixed;
@@ -71,7 +71,7 @@
     margin-top:15px;
     padding:13px;
     border:1px solid rgba(255,255,255,.07);
-    border-radius:13px;
+    border-radius:16px;
     background:rgba(255,255,255,.02)
 }
 .lucid-icon-picker strong {
@@ -95,7 +95,7 @@
     aspect-ratio:1;
     padding:0;
     min-height:0;
-    border-radius:9px;
+    border-radius:11px;
     font-size:18px;
     background:#0d1015
 }
@@ -132,7 +132,7 @@
     gap:12px;
     padding:10px 12px;
     border:1px solid rgba(255,255,255,.07);
-    border-radius:10px;
+    border-radius:11px;
     background:rgba(255,255,255,.022)
 }
 .submission-row small,.reviewer-row small {

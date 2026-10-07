@@ -1,26 +1,25 @@
 :root[data-theme="dark"] {
-    --bg:#0b0d11;
-    --surface:#111318;
-    --surface-2:#15171c;
-    --surface-3:#1b1e24;
-    --surface-4:#20232a;
-    --surface-5:#292d35;
-    --border:#292d35;
-    --border-soft:#22252c;
-    --text:#e7e8ec;
-    --text-soft:#b8bbc4;
-    --muted:#777c87;
-    --muted-dark:#5f646e;
-    --purple:#69628f;
-    --purple-soft:#8980b8;
-    --danger:#c98484;
-    --success:#b8c9ba;
+    --bg:#080d17;
+    --surface:#101827;
+    --surface-2:#141e30;
+    --surface-3:#1a2639;
+    --surface-4:#223049;
+    --surface-5:#2f3c57;
+    --border:#2f3c57;
+    --border-soft:#25324a;
+    --text:#eef3fa;
+    --text-soft:#b7c2d3;
+    --muted:#7b89a0;
+    --muted-dark:#5c6b83;
+    --purple:#7565c8;
+    --purple-soft:#a091e5;
+    --danger:#cf7485;
+    --success:#82c09e;
 }
 :root[data-theme="dark"] #desktop {
-    background:
-        radial-gradient(circle at 50% 42%,rgba(92,72,135,.16),transparent 32%),
+    background:radial-gradient(circle at 50% 38%,rgba(105,86,181,.12),transparent 34%),
         radial-gradient(circle at 10% 90%,rgba(40,30,65,.13),transparent 30%),
-        linear-gradient(180deg,#0b0d11,#080a0f);
+        linear-gradient(180deg,#080d17,#050a12);
 }
 :root[data-theme="dark"] #taskbar {
     background:rgba(12,14,19,.9);

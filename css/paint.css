@@ -33,7 +33,7 @@
 .paint-main-mode,.paint-submode {
     height:30px;
     padding:0 11px;
-    border-radius:8px;
+    border-radius:11px;
     background:rgba(255,255,255,.025);
     border:1px solid rgba(255,255,255,.07);
     color:var(--muted);
@@ -67,7 +67,7 @@
     width:30px;
     height:24px;
     padding:2px;
-    border-radius:7px;
+    border-radius:6px;
     background:#11151b
 }
 .paint-controls input[type=range] {
@@ -126,7 +126,7 @@
     object-fit:contain;
     background:#fff;
     border:1px solid rgba(255,255,255,.13);
-    border-radius:7px;
+    border-radius:6px;
     box-shadow:0 20px 70px rgba(0,0,0,.45);
     touch-action:none;
     cursor:crosshair
@@ -237,7 +237,7 @@
     width:100%;
     aspect-ratio:1;
     padding:0;
-    border-radius:7px;
+    border-radius:6px;
     border:1px solid rgba(255,255,255,.14)
 }
 .paint-swatch.active {
@@ -246,7 +246,7 @@
 .paint-shortcuts {
     padding:10px;
     border:1px solid rgba(255,255,255,.06);
-    border-radius:10px;
+    border-radius:11px;
     background:rgba(255,255,255,.02);
     color:var(--muted);
     font-size:8px;
@@ -256,7 +256,7 @@
     display:inline-block;
     min-width:18px;
     padding:1px 4px;
-    border:1px solid rgba(255,255,255,.08);
+    border:1px solid rgba(150,170,205,.11);
     border-radius:4px;
     background:#0c0f14;
     color:var(--text-soft);
