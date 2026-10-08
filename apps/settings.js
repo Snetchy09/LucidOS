@@ -861,7 +861,9 @@ function formatBytes(bytes) {
     return `${(bytes / Math.pow(1024, index)).toFixed(index ? 1 : 0)} ${units[index]}`;
 }
 function applyTheme(theme) {
-	document.documentElement.dataset.theme = theme || "dark";
+    const selected = theme || "dark";
+    document.documentElement.dataset.theme = selected;
+    console.info("[Lucid Settings] theme applied:", selected);
 }
 function escapeHTML(text) {
     return String(text ?? "")
