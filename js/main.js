@@ -75,7 +75,7 @@ function enterFullscreen() {
 
     if (el.requestFullscreen) {
         el.requestFullscreen().catch(err => console.warn("Fullscreen failed:", err));
-    } else if (el.webkitRequestFullscreen) { //for safari
+    } else if (el.webkitRequestFullscreen) {
         el.webkitRequestFullscreen();
     }
 }
@@ -144,16 +144,16 @@ async function launchLucidApp(app) {
     console.warn(`Lucid: app ${app.id} has no launcher`);
 }
 const defaultPositions = [
-    { x: 50, y: 20 },
-    { x: 30, y: 26 },
-    { x: 70, y: 26 },
-    { x: 23, y: 45 },
-    { x: 77, y: 45 },
-    { x: 28, y: 67 },
-    { x: 72, y: 67 },
-    { x: 50, y: 76 },
-    { x: 38, y: 38 },
-    { x: 62, y: 38 },
+    { x: 50, y: 17 },
+    { x: 28, y: 25 },
+    { x: 72, y: 25 },
+    { x: 19, y: 47 },
+    { x: 81, y: 47 },
+    { x: 29, y: 71 },
+    { x: 71, y: 71 },
+    { x: 50, y: 84 },
+    { x: 39, y: 43 },
+    { x: 61, y: 43 },
 ];
 function buildDesktopApps() {
     const container = document.getElementById("desktop-apps");
@@ -264,9 +264,9 @@ function moveAppsToOrb() {
                 },
             ],
             {
-                duration: 620,
-                delay: index * 22,
-                easing: "cubic-bezier(.7,0,.84,0)",
+                duration: 520,
+                delay: index * 18,
+                easing: "cubic-bezier(.72,.02,.9,.18)",
                 fill: "forwards",
             },
         );
@@ -287,6 +287,7 @@ function openLucidLauncher() {
     desktop.classList.add("lucid-launcher-open");
     moveAppsToSavedPositions();
     desktop.dispatchEvent(new CustomEvent("lucid-launcher-toggle", { detail: { open: true } }));
+    console.info("[Lucid Launcher] opened with", document.querySelectorAll(".desktop-app").length, "apps");
 }
 function closeLucidLauncher() {
     if (!launcherOpen) return;
@@ -296,7 +297,8 @@ function closeLucidLauncher() {
     desktop.dispatchEvent(new CustomEvent("lucid-launcher-toggle", { detail: { open: false } }));
     setTimeout(() => {
         if (!launcherOpen) desktop.classList.remove("lucid-launcher-open");
-    }, 700);
+    }, 560);
+    console.info("[Lucid Launcher] closed");
 }
 function setupDesktopApp(element, app) {
     let dragging = false,

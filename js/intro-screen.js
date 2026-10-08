@@ -13,10 +13,21 @@ function rememberTimer(callback, delay) {
 }
 
 function clearIntroTimers() {
-    for (let timer of introTimers) {
-        clearTimeout(timer)
-    }
+    introTimers.forEach(timer => clearTimeout(timer))
     introTimers = []
+}
+
+function finishIntro(screen) {
+    if (introFinished || introSkipped) return
+
+    screen.classList.add("intro-ending")
+    rememberTimer(() => {
+        if (introSkipped) return
+        screen.remove()
+        introFinished = true
+        console.info("[Lucid Intro] finished")
+        window.dispatchEvent(new Event("lucid-intro-finished"))
+    }, 900)
 }
 
 function skipIntro(screen) {
@@ -32,25 +43,23 @@ function skipIntro(screen) {
     }
 
     screen.classList.add("intro-skipped")
+    console.info("[Lucid Intro] skipped by user")
     window.dispatchEvent(new Event("lucid-intro-skipped"))
 
     const finishTimer = setTimeout(() => {
         screen.remove()
         window.dispatchEvent(new Event("lucid-intro-finished"))
-    }, 350)
+    }, 320)
     introTimers.push(finishTimer)
 }
 
 const closedEye = "M40,90 Q160,90 280,90 Q160,90 40,90 Z"
-const openEye = "M40,90 Q160,18 280,90 Q160,162 40,90 Z"
+const openEye = "M40,90 Q160,20 280,90 Q160,160 40,90 Z"
 
 function lidShape(open) {
-    if (open < 0) open = 0
-    if (open > 1) open = 1
-
-    let top = 90 - 72 * open
-    let bottom = 90 + 72 * open
-
+    const amount = Math.max(0, Math.min(1, open))
+    const top = 90 - 70 * amount
+    const bottom = 90 + 70 * amount
     return `M40,90 Q160,${top} 280,90 Q160,${bottom} 40,90 Z`
 }
 
@@ -64,60 +73,52 @@ function easeOut(value) {
 
 function animateEye(eye, softEye, clip, message, screen) {
     const start = performance.now()
-    const totalTime = 8200
+    const totalTime = 3400
 
     function frame(now) {
         if (introSkipped || introFinished) return
 
         let progress = (now - start) / totalTime
-
         if (progress > 1) progress = 1
 
         let openAmount = 0
 
-        if (progress < 0.10) {
+        if (progress < 0.22) {
             openAmount = 0
-        } else if (progress < 0.56) {
-            let t = (progress - 0.10) / 0.46
-            openAmount = easeOut(t)
-        } else if (progress < 0.66) {
+        } else if (progress < 0.48) {
+            openAmount = easeOut((progress - 0.22) / 0.26)
+        } else if (progress < 0.62) {
             openAmount = 1
-        } else if (progress < 0.73) {
-            let t = (progress - 0.66) / 0.07
-            openAmount = 1 - smoothStep(t)
-        } else if (progress < 0.81) {
-            let t = (progress - 0.73) / 0.08
-            openAmount = smoothStep(t)
-        } else if (progress < 0.89) {
+        } else if (progress < 0.70) {
+            openAmount = 1 - smoothStep((progress - 0.62) / 0.08)
+        } else if (progress < 0.77) {
+            openAmount = smoothStep((progress - 0.70) / 0.07)
+        } else if (progress < 0.90) {
             openAmount = 1
-        } else if (progress < 0.94) {
-            let t = (progress - 0.89) / 0.05
-            openAmount = 1 - smoothStep(t)
         } else {
-            let t = (progress - 0.94) / 0.06
-            openAmount = smoothStep(t)
+            openAmount = smoothStep((progress - 0.90) / 0.10)
         }
 
-        let shape = lidShape(openAmount)
-
+        const shape = lidShape(openAmount)
         eye.setAttribute("d", shape)
         softEye.setAttribute("d", shape)
         clip.setAttribute("d", shape)
 
         if (progress < 1) {
             introAnimation = requestAnimationFrame(frame)
-        } else {
-            eye.setAttribute("d", openEye)
-            softEye.setAttribute("d", openEye)
-            clip.setAttribute("d", openEye)
-
-            rememberTimer(() => {
-                if (!introSkipped && !introFinished) showWelcome(message, screen)
-            }, 1000)
+            return
         }
+
+        eye.setAttribute("d", openEye)
+        softEye.setAttribute("d", openEye)
+        clip.setAttribute("d", openEye)
+
+        rememberTimer(() => {
+            if (!introSkipped && !introFinished) showWelcome(message, screen)
+        }, 260)
     }
 
-    requestAnimationFrame(frame)
+    introAnimation = requestAnimationFrame(frame)
 }
 
 function createIntroScreen() {
@@ -127,49 +128,53 @@ function createIntroScreen() {
     screen.className = "lucid-intro-screen"
 
     screen.innerHTML = `
+        <div class="intro-noise"></div>
+        <div class="intro-corner intro-corner-top">LUCID / BOOT</div>
+        <div class="intro-corner intro-corner-bottom">SYSTEM 0.2</div>
+
         <div class="click-start">
-            <div class="click-text">click here dude</div>
+            <div class="click-text">click to wake it</div>
         </div>
 
-        <div class="intro-eye-wrap">
-            <svg class="intro-eye" viewBox="0 0 320 180">
-                <defs>
-                    <filter id="eyeGlow">
-                        <feGaussianBlur stdDeviation="0.9" result="blur"/>
-                        <feMerge>
-                            <feMergeNode in="blur"/>
-                            <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
-                    </filter>
+        <div class="intro-core">
+            <div class="intro-orbit intro-orbit-wide"></div>
+            <div class="intro-orbit intro-orbit-tight"></div>
+            <div class="intro-tick-ring"></div>
 
-                    <filter id="bigEyeGlow">
-                        <feGaussianBlur stdDeviation="2.8"/>
-                    </filter>
-
-                    <clipPath id="eyeClip">
-                        <path id="clipShape" d="${closedEye}"/>
-                    </clipPath>
-                </defs>
-
-                <path id="softEye" d="${closedEye}" class="soft-eye"/>
-                <path id="eyeShape" d="${closedEye}" class="main-eye"/>
-
-                <g clip-path="url(#eyeClip)">
-                    <circle class="eye-light" cx="160" cy="90" r="39"/>
-                    <circle class="eye-pupil" cx="160" cy="90" r="13"/>
-                    <circle class="eye-reflection" cx="151" cy="80" r="5"/>
-                </g>
-            </svg>
+            <div class="intro-eye-wrap">
+                <svg class="intro-eye" viewBox="0 0 320 180" aria-hidden="true">
+                    <defs>
+                        <filter id="eyeGlow">
+                            <feGaussianBlur stdDeviation="1.2" result="blur"/>
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                        <clipPath id="eyeClip">
+                            <path id="clipShape" d="${closedEye}"/>
+                        </clipPath>
+                    </defs>
+                    <path id="softEye" d="${closedEye}" class="soft-eye"/>
+                    <path id="eyeShape" d="${closedEye}" class="main-eye"/>
+                    <g clip-path="url(#eyeClip)">
+                        <circle class="eye-light" cx="160" cy="90" r="39"/>
+                        <circle class="eye-pupil" cx="160" cy="90" r="13"/>
+                        <circle class="eye-reflection" cx="150" cy="80" r="4"/>
+                    </g>
+                </svg>
+            </div>
         </div>
 
         <div class="intro-message"></div>
-        <button class="intro-skip" type="button">Skip intro</button>
+        <button class="intro-skip" type="button">skip intro</button>
     `
 
     document.body.appendChild(screen)
 
     const clickStart = screen.querySelector(".click-start")
     const skipButton = screen.querySelector(".intro-skip")
+    const core = screen.querySelector(".intro-core")
     const wrap = screen.querySelector(".intro-eye-wrap")
     const eye = screen.querySelector("#eyeShape")
     const softEye = screen.querySelector("#softEye")
@@ -180,24 +185,27 @@ function createIntroScreen() {
         if (introSkipped || introFinished) return
 
         clickStart.classList.add("click-hidden")
+        screen.classList.add("intro-awake")
+        core.classList.add("core-awake")
+        console.info("[Lucid Intro] wake sequence started")
 
         rememberTimer(() => {
             if (!introSkipped && !introFinished) {
                 window.dispatchEvent(new Event("lucid-intro-started"))
             }
-        }, 3000)
+        }, 650)
 
         rememberTimer(() => {
             if (!introSkipped && !introFinished) {
                 wrap.classList.add("visible")
             }
-        }, 900)
+        }, 360)
 
         rememberTimer(() => {
             if (!introSkipped && !introFinished) {
                 animateEye(eye, softEye, clip, message, screen)
             }
-        }, 1800)
+        }, 720)
     }, { once: true })
 
     skipButton.addEventListener("click", event => {
@@ -211,27 +219,14 @@ function showWelcome(message, screen) {
 
     message.classList.add("message-visible")
 
-    const text = "Welcome"
+    const text = "LUCID OS"
     let i = 0
 
     function addLetter() {
         if (introSkipped || introFinished) return
 
         if (i >= text.length) {
-            rememberTimer(() => {
-                if (introSkipped || introFinished) return
-
-                screen.classList.add("intro-ending")
-
-                rememberTimer(() => {
-                    if (introSkipped) return
-
-                    screen.remove()
-                    introFinished = true
-                    window.dispatchEvent(new Event("lucid-intro-finished"))
-                }, 2300)
-            }, 2500)
-
+            rememberTimer(() => finishIntro(screen), 700)
             return
         }
 
@@ -243,15 +238,14 @@ function showWelcome(message, screen) {
             if (!introSkipped && !introFinished) {
                 span.classList.add("letter-show")
             }
-        }, 40)
+        }, 30)
 
-        if (Math.random() > 0.65) {
+        if (Math.random() > 0.78) {
             span.classList.add("letter-flicker")
         }
 
         i++
-
-        rememberTimer(addLetter, 250 + Math.random() * 180)
+        rememberTimer(addLetter, 120 + Math.random() * 80)
     }
 
     addLetter()
