@@ -180,3 +180,8 @@ button{cursor:pointer}
 #start-button:focus-visible{outline:1px solid #fff!important;outline-offset:5px}
 @keyframes lucid-dot-pulse{0%,100%{opacity:.72}50%{opacity:1}}
 @media(prefers-reduced-motion:reduce){.background-particle,#start-button{animation:none!important;transition:none!important}}
+
+.window{border:1px solid #aaa!important}
+.title-bar{border-bottom:1px solid #444!important}
+.background-particle{width:var(--size,1px);height:var(--size,1px);background:#fff!important;opacity:var(--bright,.2);animation:lucid-star-drift 18s linear infinite}
+@keyframes lucid-star-drift{0%{transform:translate(0,0);opacity:.08}40%{opacity:var(--bright,.2)}75%{opacity:.65}100%{transform:translate(var(--drift),-28px);opacity:.08}}
