@@ -12,7 +12,6 @@ import { loadFileSystem } from "./filesystem.js";
 import { loadSettings } from "./settings.js";
 import { createSettingsApp } from "../apps/settings.js";
 import { createBrowser } from "../apps/browser.js";
-import { getLucidLevel } from "./lucid-state.js";
 import {
     initializeAppRegistry,
     getInstalledApps,
@@ -20,7 +19,7 @@ import {
     getAppLauncher,
 } from "./app-registry.js";
 import { createLucidStudio } from "../apps/lucid-studio.js";
-console.log("Lucid level:", getLucidLevel());
+console.log("LucidOS is up.");
 await loadFileSystem();
 initializeAppRegistry();
 registerAppLauncher("lucid-studio", createLucidStudio);

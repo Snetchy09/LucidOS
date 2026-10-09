@@ -170,3 +170,13 @@ button{cursor:pointer}
 .lucid-center,.lucid-orb,.lucid-orb-eye{display:none!important}
 .lucid-intro-screen{display:none!important}
 #desktop::before,#desktop::after,.lucid-orb::before,.lucid-orb::after,.lucid-orb-eye::before,.lucid-orb-eye::after{display:none!important}
+
+#background-particles{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.background-particle{position:absolute;width:2px;height:2px;border-radius:50%;background:#aaa!important;opacity:.22;animation:lucid-particle-drift 14s linear infinite}
+@keyframes lucid-particle-drift{0%{transform:translate(0,0);opacity:.08}50%{opacity:.3}100%{transform:translate(var(--drift),-22px);opacity:.08}}
+#start-button{animation:lucid-dot-pulse 3s ease-in-out infinite!important;transition:transform .2s ease,filter .2s ease,opacity .2s ease!important}
+#start-button:hover{transform:translate(-50%,-50%) scale(1.65)!important;filter:drop-shadow(0 0 5px rgba(255,255,255,.6))}
+#start-button:active{transform:translate(-50%,-50%) scale(.75)!important}
+#start-button:focus-visible{outline:1px solid #fff!important;outline-offset:5px}
+@keyframes lucid-dot-pulse{0%,100%{opacity:.72}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.background-particle,#start-button{animation:none!important;transition:none!important}}

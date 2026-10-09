@@ -11,7 +11,6 @@ import {
 } from "../js/lucid-store-api.js";
 import { runLucidScript } from "./lucid-script-runtime.js";
 const activeReviewRuntimes = new WeakMap();
-// let debug =
 function createSettingsApp(createWindow = defaultCreateWindow) {
     return loadSettings().then(async settings => {
         const content = `<div class="settings-app">
@@ -51,21 +50,6 @@ function createSettingsApp(createWindow = defaultCreateWindow) {
                     <p>Customize how LucidOS looks and feels.</p>
                 </div>
             </div>
-            <div class="settings-section-card">
-                <div class="settings-section-heading">
-                    <div>
-                        <strong>Theme</strong>
-                        <small>Choose the appearance used across LucidOS.</small>
-                    </div>
-                    <select class="theme-select">
-                      <option value="dark">Dark</option>
-                      <option value="liminal">Liminal</option>
-                      <option value="light">Light</option>
-                      <option value="paper">Paper</option>
-                    </select>
-                </div>
-            </div>
-            <div
             <div class=\"settings-section-card\">
                 <div class=\"settings-section-heading\">
                     <div>
@@ -233,16 +217,13 @@ function createSettingsApp(createWindow = defaultCreateWindow) {
             </div>`;
         const windowElement = createWindow("⚙️ Settings", content);
         ensureReviewStyles();
-        const themeSelect = windowElement.querySelector('.theme-select');
         const usernameInput = windowElement.querySelector('.username-input');
         const notificationsToggle = windowElement.querySelector(".notifications-toggle");
         const wallpaperInput = windowElement.querySelector(".wallpaper-input");
         const user = await getCurrentUser();
-        themeSelect.value = settings.theme;
         usernameInput.value = settings.userName;
         notificationsToggle.checked = settings.notifications;
         wallpaperInput.value = settings.wallpaper || ""
-        applyTheme(settings.theme)
         if (user?.email)
             windowElement.querySelector(".account-page-description").textContent = user.email;
         const role = String(user?.app_metadata?.role || "").toLowerCase();
@@ -265,16 +246,6 @@ function createSettingsApp(createWindow = defaultCreateWindow) {
                 }
             }),
         );
-        themeSelect.addEventListener('change', async () => {
-            settings.theme = themeSelect.value;
-            applyTheme(settings.theme);
-            await saveSettings(settings);
-            window.dispatchEvent(
-                new CustomEvent("lucid-settings-changed", {
-                    detail: { theme: settings.theme, wallpaper: settings.wallpaper },
-                }),
-            );
-        });
         windowElement.querySelector(".toggle-fullscreen").addEventListener("click", () => {
             window.lucidToggleFullscreen();
         });
@@ -852,18 +823,12 @@ function renderInstalledApps(windowElement) {
 }
 function updateStorage(windowElement) {
 	windowElement.querySelector(".storage-size").textContent = formatBytes(getStorageUsage());
-	// console.log('storage', getStorageUsage())
 }
 function formatBytes(bytes) {
     if (!bytes) return "0 KB";
     const units = ["B", "KB", "MB", "GB"];
     const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
     return `${(bytes / Math.pow(1024, index)).toFixed(index ? 1 : 0)} ${units[index]}`;
-}
-function applyTheme(theme) {
-    const selected = theme || "dark";
-    document.documentElement.dataset.theme = selected;
-    console.info("[Lucid Settings] theme applied:", selected);
 }
 function escapeHTML(text) {
     return String(text ?? "")

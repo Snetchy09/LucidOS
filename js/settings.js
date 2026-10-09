@@ -3,7 +3,6 @@ const SETTINGS_VERSION = 2;
 const SETTINGS_STORE = "preferences";
 
 const defaultSettings = {
-    theme: "dark",
     userName: "Lucid User",
     notifications: true,
     wallpaper: ""
