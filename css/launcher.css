@@ -1,188 +1,79 @@
 #start-button {
     z-index:50;
-    touch-action:manipulation
 }
 #desktop.lucid-launcher-open .desktop-app {
     pointer-events:auto;
     opacity:1;
-    transform:translate3d(-50%,-50%,0) scale(1)
+    transform:translate3d(-50%,-50%,0) scale(1);
 }
 #desktop.lucid-launcher-open #lucid-atmosphere {
     opacity:1;
-    background:
-        radial-gradient(circle at 50% 50%,rgba(101,83,151,.18),rgba(4,7,13,.72) 34%,rgba(1,3,7,.96) 78%),
-        linear-gradient(120deg,rgba(98,124,166,.05),transparent 40%),
-        #02050a
 }
 #desktop.lucid-launcher-open #desktop-apps::before,
 #desktop.lucid-launcher-open #desktop-apps::after {
-    content:"";
     position:fixed;
     left:50%;
     top:50%;
     width:1px;
     height:1px;
-    background:rgba(225,232,245,.35);
-    box-shadow:
-        42px -91px rgba(180,194,221,.15),
-        -74px -28px rgba(154,171,201,.12),
-        96px 36px rgba(190,203,226,.13),
-        -112px 73px rgba(143,161,190,.11),
-        6px 120px rgba(193,207,231,.09),
-        72px 92px rgba(154,176,209,.1),
-        -43px 104px rgba(181,195,220,.08);
-    animation:lucid-dust 6.5s ease-in-out infinite;
-    pointer-events:none
+    pointer-events:none;
 }
 #desktop.lucid-launcher-open #desktop-apps::after {
-    animation-delay:-3.1s;
-    transform:scale(.7)
+    transform:scale(.7);
 }
 #desktop.lucid-launcher-open .lucid-orb {
     transform:scale(1.08);
-    border-color:rgba(223,231,244,.35);
-    box-shadow:
-        0 0 0 7px rgba(117,101,200,.08),
-        0 0 0 19px rgba(141,154,182,.035),
-        0 0 52px rgba(92,78,142,.22),
-        0 24px 56px rgba(0,0,0,.62),
-        inset 0 2px 10px rgba(255,255,255,.13),
-        inset 0 -12px 24px rgba(0,0,0,.45)
-}
-#desktop.lucid-launcher-open .lucid-orb::before {
-    animation:lucid-orb-ring 3s linear infinite
 }
 #desktop.lucid-launcher-open .lucid-orb-eye {
-    transform:translate(var(--eye-rest-x,0px),var(--eye-rest-y,0px)) scale(1.05)
-}
-#desktop.lucid-launcher-open .lucid-orb-eye::before {
-    animation:lucid-pupil-breathe 2.2s ease-in-out infinite
+    transform:translate(var(--eye-rest-x,0px),var(--eye-rest-y,0px)) scale(1.05);
 }
 #desktop.lucid-launcher-open #start-button::before,
 #desktop.lucid-launcher-open #start-button::after {
-    content:"";
     position:absolute;
     left:50%;
     top:50%;
-    border-radius:50%;
-    pointer-events:none
+    pointer-events:none;
 }
 #start-button::before {
     width:104px;
     height:104px;
-    border:1px solid rgba(141,122,205,.2);
     transform:translate(-50%,-50%) scale(.72);
-    opacity:0
+    opacity:0;
 }
 #start-button::after {
     width:144px;
     height:144px;
-    border:1px solid rgba(146,163,191,.08);
     transform:translate(-50%,-50%) scale(.68);
-    opacity:0
-}
-#desktop.lucid-launcher-open #start-button::before {
-    animation:lucid-launch-ring 2.1s ease-out infinite
-}
-#desktop.lucid-launcher-open #start-button::after {
-    animation:lucid-launch-ring 3.1s ease-out infinite .45s
-}
-#desktop.lucid-launcher-open .lucid-orb-eye::after {
-    transition:transform .12s ease-out
-}
-.desktop-app {
-    transition:opacity .24s ease,filter .24s ease
-}
-.desktop-app:hover {
-    filter:brightness(1.16) translateY(-2px)
-}
-.desktop-app:hover .desktop-app-icon {
-    border-color:rgba(184,173,222,.3);
-    box-shadow:0 9px 22px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.08)
-}
-@keyframes lucid-orb-ring {
-    from {
-        transform:rotate(0deg)
-    }
-    to {
-        transform:rotate(360deg)
-    }
-}
-@keyframes lucid-pupil-breathe {
-    0%,100% {
-        transform:translate(-50%,-50%) scaleY(.88)
-    }
-    50% {
-        transform:translate(-50%,-50%) scaleY(1.12)
-    }
-}
-@keyframes lucid-dust {
-    0%,100% {
-        opacity:.12
-    }
-    50% {
-        opacity:.42
-    }
-}
-@keyframes lucid-launch-ring {
-    0% {
-        opacity:0;
-        transform:translate(-50%,-50%) scale(.68)
-    }
-    18% {
-        opacity:.48
-    }
-    100% {
-        opacity:0;
-        transform:translate(-50%,-50%) scale(1.45)
-    }
+    opacity:0;
 }
 .store-app-icon img,.store-detail-icon img,.desktop-app-icon img {
     width:100%;
     height:100%;
     object-fit:contain;
-    display:block
+    display:block;
 }
 .desktop-app-icon img {
     width:30px;
-    height:30px
+    height:30px;
 }
 #lucid-atmosphere .lucid-watch-eye {
     position:absolute;
     width:12px;
     height:6px;
     margin:-3px 0 0 -6px;
-    border:1px solid rgba(238,244,255,.7);
-    border-radius:50%;
     opacity:0;
     transform:scale(.45);
-    animation:lucid-watch-blink var(--blink,2.4s) ease-in-out infinite;
-    pointer-events:none
+    pointer-events:none;
 }
 #lucid-atmosphere .lucid-watch-eye::after {
-    content:"";
     position:absolute;
     left:50%;
     top:50%;
     width:3px;
     height:3px;
     margin:-1.5px 0 0 -1.5px;
-    border-radius:50%;
-    background:rgba(250,253,255,.8)
 }
 #lucid-atmosphere .lucid-watch-eye-visible {
     opacity:.72;
-    transform:scale(1)
-}
-@keyframes lucid-watch-blink {
-    0%,87%,100% { transform:scaleY(1) }
-    91%,95% { transform:scaleY(.08) }
-}
-@media(prefers-reduced-motion:reduce) {
-    #desktop.lucid-launcher-open .lucid-orb::before,
-    #desktop.lucid-launcher-open .lucid-orb-eye::before,
-    #desktop.lucid-launcher-open #start-button::before,
-    #desktop.lucid-launcher-open #start-button::after {
-        animation:none
-    }
+    transform:scale(1);
 }
