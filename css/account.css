@@ -1,191 +1,33 @@
-.settings-hint,.wallpaper-status,.storage-status {
-    display:block;
-    opacity:.7;
-}
-.danger-zone {
-    padding:16px;
-}
-.account-auth-card {
-    display:flex;
-    align-items:center;
-    gap:14px;
-    padding:16px;
-}
-.account-card-icon {
-    display:grid;
-    place-items:center;
-    width:42px;
-    height:42px;
-    font-size:18px;
-    flex:0 0 42px;
-}
-.account-card-copy {
-    min-width:0;
-    flex:1;
-}
-.account-card-copy strong {
-    display:block;
-    font-size:14px;
-}
-.account-card-copy small {
-    display:block;
-    font-size:11px;
-    line-height:1.45;
-}
-.account-auth-button,.account-plan-button {
-    padding:9px 13px;
-    white-space:nowrap;
-}
-.account-plan-card {
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:18px;
-    padding:18px;
-}
-.account-plan-card h3 {
-    margin:5px 0 4px;
-    font-size:18px;
-}
-.account-plan-card p {
-    margin:0;
-    font-size:11px;
-    line-height:1.45;
-}
-.account-plan-label {
-    font-size:9px;
-    letter-spacing:2px;
-}
-.account-status {
-    font-size:11px;
-}
-.storage-box {
-    display:flex;
-    align-items:baseline;
-    justify-content:space-between;
-    gap:14px;
-    padding:18px;
-}
-.storage-box strong {
-    font-size:24px;
-}
-.storage-box span {
-    font-size:11px;
-}
-.danger-action {
-    padding:9px 13px;
-}
-.about-card>div {
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:15px;
-}
-.about-card>div strong {
-    font-size:15px;
-}
-.about-card>div span {
-    font-size:11px;
-}
-.lucid-account-overlay {
-    position:fixed;
-    inset:0;
-    z-index:7000;
-    pointer-events:auto;
-    display:grid;
-    place-items:center;
-    padding:20px;
-}
-.lucid-account-dialog,.lucid-plans-dialog {
-    width:min(460px,94vw);
-    max-height:90vh;
-    overflow:auto;
-    padding:22px;
-}
-.lucid-account-dialog h2,.lucid-plans-dialog h2 {
-    margin:8px 0 16px;
-}
-.lucid-auth-dialog label,.lucid-password-reset label {
-    display:grid;
-    gap:6px;
-    font-size:11px;
-}
-.lucid-auth-dialog input,.lucid-password-reset input {
-    width:100%;
-    padding:10px;
-}
-.lucid-auth-dialog .lucid-account-primary,.lucid-password-reset .lucid-account-primary {
-    width:100%;
-    padding:10px 13px;
-}
-.studio-auth-tabs {
-    display:flex;
-    gap:5px;
-    padding:4px;
-    margin:8px 0 16px;
-}
-.studio-auth-tab {
-    flex:1;
-    padding:8px 10px!important;
-}
-.lucid-account-message {
-    font-size:11px;
-    line-height:1.45;
-}
-.lucid-plans-dialog {
-    position:relative;
-}
-.lucid-plan-grid {
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-}
-.lucid-plan {
-    display:grid;
-    gap:7px;
-    padding:15px;
-}
-.lucid-plan strong {
-    font-size:22px;
-}
-.lucid-plan span {
-    font-size:11px;
-}
-.lucid-plan b {
-    font-size:11px;
-}
-.lucid-billing-status {
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:10px 11px;
-}
-.lucid-billing-status>span {
-    width:8px;
-    height:8px;
-}
-.lucid-billing-status strong,.lucid-billing-status small {
-    display:block;
-}
-.lucid-billing-status strong {
-    font-size:11px;
-}
-.lucid-billing-status small {
-    font-size:10px;
-}
-.billing-note {
-    opacity:.65;
-}
-.account-submissions-list,.reviewer-list {
-    display:grid;
-    gap:8px;
-}
-@media(max-width:600px) {
-.account-auth-card,.account-plan-card {
-    align-items:flex-start;
-    flex-direction:column;
-}
-.lucid-plan-grid {
-    grid-template-columns:1fr;
-}
+.settings-hint,.wallpaper-status,.storage-status{display:block;opacity:.7}
+.danger-zone{padding:16px}
+.account-auth-card{display:flex;align-items:center;gap:14px;padding:16px}
+.account-card-icon{display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px}
+.account-card-copy{min-width:0;flex:1}
+.account-card-copy strong{display:block}
+.account-card-copy small{display:block}
+.account-auth-button,.account-plan-button{padding:9px 13px;white-space:nowrap}
+.account-plan-card{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px}
+.account-plan-card h3{margin:5px 0 4px}
+.account-plan-card p{margin:0}
+.storage-box{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:18px}
+.danger-action{padding:9px 13px}
+.about-card>div{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.lucid-account-overlay{position:fixed;inset:0;z-index:7000;pointer-events:auto;display:grid;place-items:center;padding:20px}
+.lucid-account-dialog,.lucid-plans-dialog{width:min(460px,94vw);max-height:90vh;overflow:auto;padding:22px}
+.lucid-account-dialog h2,.lucid-plans-dialog h2{margin:8px 0 16px}
+.lucid-auth-dialog label,.lucid-password-reset label{display:grid;gap:6px}
+.lucid-auth-dialog input,.lucid-password-reset input{width:100%;padding:10px}
+.lucid-auth-dialog .lucid-account-primary,.lucid-password-reset .lucid-account-primary{width:100%;padding:10px 13px}
+.studio-auth-tabs{display:flex;gap:5px;padding:4px;margin:8px 0 16px}
+.studio-auth-tab{flex:1;padding:8px 10px!important}
+.lucid-plans-dialog{position:relative}
+.lucid-plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lucid-plan{display:grid;gap:7px;padding:15px}
+.lucid-billing-status{display:flex;align-items:center;gap:10px;padding:10px 11px}
+.lucid-billing-status>span{width:8px;height:8px}
+.lucid-billing-status strong,.lucid-billing-status small{display:block}
+.billing-note{opacity:.65}
+.account-submissions-list,.reviewer-list{display:grid;gap:8px}
+@media(max-width:600px){.account-auth-card,.account-plan-card{align-items:flex-start;flex-direction:column}
+.lucid-plan-grid{grid-template-columns:1fr}
 }

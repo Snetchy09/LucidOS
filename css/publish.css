@@ -1,139 +1,30 @@
-.lucid-publish-dialog-overlay {
-    position:fixed;
-    inset:0;
-    z-index:20000;
-    display:grid;
-    place-items:center;
-    padding:20px;
-}
-.lucid-publish-dialog {
-    width:min(520px,94vw);
-    max-height:90vh;
-    overflow:auto;
-    padding:20px;
-}
-.lucid-publish-dialog header {
-    display:flex;
-    justify-content:space-between;
-    gap:14px;
-}
-.lucid-publish-dialog header>div span {
-    font-size:8px;
-    letter-spacing:2px;
-}
-.lucid-publish-dialog h2 {
-    margin:5px 0 4px;
-    font-size:18px;
-}
-.lucid-publish-dialog p {
-    margin:0;
-    font-size:10px;
-}
-.lucid-publish-dialog header button {
-    width:32px;
-    padding:0;
-}
-.lucid-publish-dialog label {
-    display:grid;
-    gap:6px;
-    font-size:10px;
-}
-.lucid-publish-dialog input,.lucid-publish-dialog textarea,.lucid-publish-dialog select {
-    width:100%;
-    padding:9px 10px;
-}
-.lucid-publish-dialog textarea {
-    resize:vertical;
-    min-height:92px;
-}
-.lucid-publish-grid {
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-}
-.lucid-icon-picker {
-    padding:13px;
-}
-.lucid-icon-picker strong {
-    display:block;
-    font-size:12px;
-}
-.lucid-icon-picker small {
-    display:block;
-    font-size:9px;
-    line-height:1.45;
-}
-.lucid-icon-options {
-    display:grid;
-    grid-template-columns:repeat(10,1fr);
-    gap:6px;
-}
-.lucid-icon-choice {
-    aspect-ratio:1;
-    padding:0;
-    min-height:0;
-    font-size:18px;
-}
-.lucid-publish-actions {
-    display:flex;
-    justify-content:flex-end;
-    gap:8px;
-}
-.lucid-publish-actions button {
-    min-width:90px;
-}
-.lucid-publish-message {
-    font-size:9px;
-}
-.submission-row,.reviewer-row {
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:12px;
-    padding:10px 12px;
-}
-.submission-row small,.reviewer-row small {
-    display:block;
-}
-.submission-row>span {
-    max-width:45%;
-    font-size:11px;
-    text-align:right;
-}
-.reviewer-row p {
-    margin:6px 0 0;
-    font-size:12px;
-}
-.reviewer-actions {
-    display:flex;
-    gap:6px;
-    flex-shrink:0;
-}
-.reviewer-actions button {
-    min-width:84px;
-}
-.reviewer-inspect-toolbar {
-    display:flex;
-    gap:7px;
-    padding:8px;
-}
-.reviewer-detail-actions {
-    display:flex;
-    justify-content:flex-end;
-    gap:8px;
-    padding:10px;
-}
-@media(max-width:700px) {
-.lucid-publish-grid {
-    grid-template-columns:1fr;
-}
-.lucid-icon-options {
-    grid-template-columns:repeat(5,1fr);
-}
-.reviewer-detail-actions {
-    flex-wrap:wrap;
-}
-.reviewer-detail-actions button {
-    flex:1;
-}
+.lucid-publish-dialog-overlay{position:fixed;inset:0;z-index:20000;display:grid;place-items:center;padding:20px}
+.lucid-publish-dialog{width:min(520px,94vw);max-height:90vh;overflow:auto;padding:20px}
+.lucid-publish-dialog header{display:flex;justify-content:space-between;gap:14px}
+.lucid-publish-dialog h2{margin:5px 0 4px}
+.lucid-publish-dialog p{margin:0}
+.lucid-publish-dialog header button{width:32px;padding:0}
+.lucid-publish-dialog label{display:grid;gap:6px}
+.lucid-publish-dialog input,.lucid-publish-dialog textarea,.lucid-publish-dialog select{width:100%;padding:9px 10px}
+.lucid-publish-dialog textarea{resize:vertical;min-height:92px}
+.lucid-publish-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lucid-icon-picker{padding:13px}
+.lucid-icon-picker strong{display:block}
+.lucid-icon-picker small{display:block}
+.lucid-icon-options{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+.lucid-icon-choice{aspect-ratio:1;padding:0;min-height:0}
+.lucid-publish-actions{display:flex;justify-content:flex-end;gap:8px}
+.lucid-publish-actions button{min-width:90px}
+.submission-row,.reviewer-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 12px}
+.submission-row small,.reviewer-row small{display:block}
+.submission-row>span{max-width:45%;text-align:right}
+.reviewer-row p{margin:6px 0 0}
+.reviewer-actions{display:flex;gap:6px;flex-shrink:0}
+.reviewer-actions button{min-width:84px}
+.reviewer-inspect-toolbar{display:flex;gap:7px;padding:8px}
+.reviewer-detail-actions{display:flex;justify-content:flex-end;gap:8px;padding:10px}
+@media(max-width:700px){.lucid-publish-grid{grid-template-columns:1fr}
+.lucid-icon-options{grid-template-columns:repeat(5,1fr)}
+.reviewer-detail-actions{flex-wrap:wrap}
+.reviewer-detail-actions button{flex:1}
 }
